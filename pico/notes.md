@@ -17,4 +17,8 @@ See [heise article](https://www.heise.de/tests/Ausprobiert-Pimoroni-Picodisplay-
 
 ## HW
 
-1. Solder pin heads onto the board...
+1. re-solder board B
+
+## Issues
+
+1. tkinter not available on micropython. Maybe [this](https://github.com/MatthiasLienhard/micropython_mqtt_controller) helps? But has other dependencies again from outside of micropython.
