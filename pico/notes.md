@@ -4,7 +4,8 @@
 
 ## Example
 
-See [heise article](https://www.heise.de/tests/Ausprobiert-Pimoroni-Picodisplay-fuer-Raspi-Pico-5055596.html?seite=all&hg=1&hgi=8&hgf=false)
+* See [heise article](https://www.heise.de/tests/Ausprobiert-Pimoroni-Picodisplay-fuer-Raspi-Pico-5055596.html?seite=all&hg=1&hgi=8&hgf=false) for micropython
+* For the C/C++ Example see [this heise article](https://www.heise.de/developer/artikel/Raspberry-Pi-Pico-und-C-C-eine-gute-Kombination-5991042.html)
 
 ## Toolchain
 
