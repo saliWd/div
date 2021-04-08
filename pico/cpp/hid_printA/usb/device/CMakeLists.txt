@@ -1,1 +1,0 @@
-add_subdirectory(dev_hid_composite)
