@@ -1,0 +1,13 @@
+pico-examples/blink
+pico-examples/build
+pico-examples/cmake
+pico-examples/gpio
+pico-examples/hello_world
+pico-examples/ide
+pico-examples/picoboard
+pico-examples/pio
+pico-examples/reset
+pico-examples/system
+pico-examples/timer
+pico-examples/uart
+pico-examples/usb
