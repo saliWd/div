@@ -33,6 +33,7 @@
 #include "usb_descriptors.hpp"
 
 #include "pico_display.hpp"
+#include "font8_data.hpp"
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
@@ -57,7 +58,7 @@ uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
 PicoDisplay pico_display(buffer);
 
 void led_blinking_task(void);
-void hid_task(int move_mouse, int type_character);
+void hid_task(bool move_mouse, bool type_character, uint32_t counter);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -70,37 +71,45 @@ int main(void) {
     pico_display.set_backlight(100);
     // set the colour of the pen
     // parameters are red, green, blue all between 0 and 255
-    pico_display.set_pen(30, 40, 50);
+    pico_display.set_pen(255, 165, 0); // orange
 
     // fill the screen with the current pen colour
     pico_display.clear();
 
     // draw a box to put some text in
     pico_display.set_pen(10, 20, 30);
-    Rect text_rect(10, 10, 190, 150);
+    Rect text_rect(10, 10, 220, 115);
     pico_display.rectangle(text_rect);
 
     // write some text inside the box with 10 pixels of margin
     // automatically word wrapping
     text_rect.deflate(10);
-    pico_display.set_pen(200, 200, 130);
-    pico_display.text("Press Button A", Point(text_rect.x, text_rect.y), text_rect.w);
+    pico_display.set_pen(200, 200, 200);
+    pico_display.set_font(&font8);
+    pico_display.text("Press Button A to start                                                                         Button B to stop", Point(text_rect.x, text_rect.y), text_rect.w);
 
     // now we've done our drawing let's update the screen
     pico_display.update();
 
-    int move_mouse = 0;
-    int type_character = 0;
+    bool move_mouse = false;
+    bool type_character = false;
+    uint32_t counter = 0;
 
     while (1) {
         if (pico_display.is_pressed(pico_display.A)) {
-            move_mouse = 1;
-            type_character = 1;
+            move_mouse = true;
+            type_character = true;
+        }
+         if (pico_display.is_pressed(pico_display.B)) {
+            move_mouse = false;
+            type_character = false;
         }
         tud_task(); // tinyusb device task
         led_blinking_task();
 
-        hid_task(move_mouse, type_character);
+        hid_task(move_mouse, type_character, counter);
+        counter++;
+        if (counter > 1023) counter = 0;
     }
 
     return 0;
@@ -137,7 +146,7 @@ void tud_resume_cb(void) {
 // USB HID
 //--------------------------------------------------------------------+
 
-void hid_task(int move_mouse, int type_character) {
+void hid_task(bool move_mouse, bool type_character, uint32_t counter) {
     // Poll every 10ms
     const uint32_t interval_ms = 100;
     static uint32_t start_ms = 0;
@@ -145,7 +154,7 @@ void hid_task(int move_mouse, int type_character) {
     if (board_millis() - start_ms < interval_ms) return; // not enough time
     start_ms += interval_ms;
 
-    uint32_t btn = move_mouse;
+    uint32_t const btn = 1;
 
     // Remote wakeup
     if (tud_suspended() && btn) {
@@ -157,13 +166,23 @@ void hid_task(int move_mouse, int type_character) {
     /*------------- Mouse -------------*/
     if (tud_hid_ready()) {
         if (btn) {
-            int8_t const delta = 5;
+            if (move_mouse) {
+                if (counter % 10 == 0) {
+                    int8_t const delta = 5;
+                    int8_t deltax = delta;
+                    int8_t deltay = delta;
 
-            // no button, right + down, no scroll pan
-            tud_hid_mouse_report(REPORT_ID_MOUSE, 0x00, delta, delta, 0, 0);
+                    if (counter % 30 == 0) deltay = -delta;
+                    if (counter % 40 == 0) deltax = -delta;
+                    
 
-            // delay a bit before attempt to send keyboard report
-            board_delay(10);
+                    // no button, right + down, no scroll pan
+                    tud_hid_mouse_report(REPORT_ID_MOUSE, 0x00, deltax, deltay, 0, 0);
+
+                    // delay a bit before attempt to send keyboard report
+                    board_delay(10);
+                }
+            }
         }
     }
 
@@ -173,20 +192,24 @@ void hid_task(int move_mouse, int type_character) {
         static bool has_key = false;
 
         static bool toggle = false;
-        if (type_character) {
+
+        if ((counter % 30 == 0) || has_key) {
+
             if (toggle = !toggle) {
-                uint8_t keycode[6] = {0};
-                keycode[0] = HID_KEY_A;
+                if (type_character) {
+                    uint8_t keycode[6] = {0};
+                    keycode[0] = HID_KEY_A;
 
-                tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
-
-                has_key = true;
+                    tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
+                    has_key = true;    
+                }
             } else {
                 // send empty key report if previously has key pressed
                 if (has_key) tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
                 has_key = false;
             }
         }
+        
     }
 }
 
