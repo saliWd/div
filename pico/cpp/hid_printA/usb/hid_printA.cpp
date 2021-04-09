@@ -30,7 +30,9 @@
 #include "bsp/board.h"
 #include "tusb.h"
 
-#include "usb_descriptors.h"
+#include "usb_descriptors.hpp"
+
+#include "pico_display.hpp" // does not yet work 
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES

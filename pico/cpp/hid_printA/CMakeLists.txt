@@ -12,4 +12,6 @@ set(PICO_EXAMPLES_PATH ${PROJECT_SOURCE_DIR})
 # Initialize the SDK
 pico_sdk_init()
 
+add_subdirectory(drivers)
+add_subdirectory(libraries)
 add_subdirectory(usb)

@@ -21,7 +21,7 @@
 
 ## HW
 
-1. re-solder board B
+1. two working boards, one pimoroni display with buttons. Some more picos and easy to connect buttons might help? Next order.
 
 ## Issues
 
