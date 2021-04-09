@@ -32,7 +32,7 @@
 
 #include "usb_descriptors.hpp"
 
-#include "pico_display.hpp" // does not yet work 
+#include "pico_display.hpp"
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
@@ -51,6 +51,11 @@ enum {
 
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
+using namespace pimoroni;
+
+uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
+PicoDisplay pico_display(buffer);
+
 void led_blinking_task(void);
 void hid_task(void);
 
@@ -58,6 +63,36 @@ void hid_task(void);
 int main(void) {
     board_init();
     tusb_init();
+
+    // setup the display
+    pico_display.init();
+
+    pico_display.set_backlight(100);
+    // set the colour of the pen
+    // parameters are red, green, blue all between 0 and 255
+    pico_display.set_pen(30, 40, 50);
+
+    // fill the screen with the current pen colour
+    pico_display.clear();
+
+    // draw a box to put some text in
+    pico_display.set_pen(10, 20, 30);
+    Rect text_rect(10, 10, 150, 150);
+    pico_display.rectangle(text_rect);
+
+    // write some text inside the box with 10 pixels of margin
+    // automatically word wrapping
+    text_rect.deflate(10);
+    pico_display.set_pen(110, 120, 130);
+    pico_display.text("Press Button A", Point(text_rect.x, text_rect.y), text_rect.w);
+
+    // now we've done our drawing let's update the screen
+    pico_display.update();
+
+    // wait on button A to be pressed
+    while (! pico_display.is_pressed(pico_display.A)) {
+        // do nothing
+    }
 
     while (1) {
         tud_task(); // tinyusb device task

@@ -1,11 +1,12 @@
 @echo off
 setlocal
 
-if exist "build/CMakeFiles" del /S /Q "build/CMakeFiles" >nul 2>&1
-if exist "build/CMakeFiles" rmdir /S /Q "build/CMakeFiles" >nul 2>&1
+:: Holzhammermethode, delete some dirs
+:: if exist "build/CMakeFiles" del /S /Q "build/CMakeFiles" >nul 2>&1
+:: if exist "build/CMakeFiles" rmdir /S /Q "build/CMakeFiles" >nul 2>&1
 
-if exist "build/usb" del /S /Q "build/usb" >nul 2>&1
-if exist "build/usb" rmdir /S /Q "build/usb" >nul 2>&1
+:: if exist "build/usb" del /S /Q "build/usb" >nul 2>&1
+:: if exist "build/usb" rmdir /S /Q "build/usb" >nul 2>&1
 
 cd build
 cmake -G "NMake Makefiles" .. 
