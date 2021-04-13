@@ -66,9 +66,9 @@ int main(void) {
     tusb_init();
 
     // setup the display
-    pico_display.init();
+    pico_display.init(); // 240 x 135 pixel
 
-    pico_display.set_backlight(100);
+    pico_display.set_backlight(150);
     // set the colour of the pen
     // parameters are red, green, blue all between 0 and 255
     pico_display.set_pen(255, 165, 0); // orange
@@ -77,16 +77,22 @@ int main(void) {
     pico_display.clear();
 
     // draw a box to put some text in
+    const int outer_margin = 10;
     pico_display.set_pen(10, 20, 30);
-    Rect text_rect(10, 10, 220, 115);
-    pico_display.rectangle(text_rect);
-
+    Rect text_rect_inner_box(outer_margin, outer_margin, PicoDisplay::WIDTH-2*outer_margin, PicoDisplay::HEIGHT-2*outer_margin);
+    Rect text_rectBtnA(outer_margin, outer_margin, PicoDisplay::WIDTH-2*outer_margin, 30);
+    Rect text_rectBtnB(outer_margin, 94, PicoDisplay::WIDTH-2*outer_margin, 30);
+    pico_display.rectangle(text_rect_inner_box); // generates an orange 10px border around the full box
+    
     // write some text inside the box with 10 pixels of margin
-    // automatically word wrapping
-    text_rect.deflate(10);
+    text_rectBtnA.deflate(10);
+    text_rectBtnB.deflate(10);
     pico_display.set_pen(200, 200, 200);
     pico_display.set_font(&font8);
-    pico_display.text("Press Button A to start                                                                         Button B to stop", Point(text_rect.x, text_rect.y), text_rect.w);
+    pico_display.text("Button A to start", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
+    pico_display.text("Button B to stop", Point(text_rectBtnB.x, text_rectBtnB.y), text_rectBtnB.w);
+
+    pico_display.set_led(15,15,150); // blueish
 
     // now we've done our drawing let's update the screen
     pico_display.update();
@@ -99,13 +105,14 @@ int main(void) {
         if (pico_display.is_pressed(pico_display.A)) {
             move_mouse = true;
             type_character = true;
+            pico_display.set_led(20,200,20); // green, constant
         }
          if (pico_display.is_pressed(pico_display.B)) {
             move_mouse = false;
             type_character = false;
+            pico_display.set_led(200,20,20); //reddish, not as bright
         }
-        tud_task(); // tinyusb device task
-        led_blinking_task();
+        tud_task(); // tinyusb device task        
 
         hid_task(move_mouse, type_character, counter);
         counter++;
