@@ -58,7 +58,7 @@ uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
 PicoDisplay pico_display(buffer);
 
 void led_blinking_task(void);
-void hid_task(bool move_mouse, bool type_character, uint32_t counter);
+void hid_task(bool move_mouse, bool type_character);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -98,27 +98,23 @@ int main(void) {
     pico_display.update();
 
     bool move_mouse = false;
-    bool type_character = false;
-    uint32_t counter = 0;
+    bool type_character = false;    
 
     while (1) {
         if (pico_display.is_pressed(pico_display.A)) {
             move_mouse = true;
             type_character = true;
-            pico_display.set_led(20,200,20); // green, constant
+            pico_display.set_led(15,150,15); // green, constant
         }
          if (pico_display.is_pressed(pico_display.B)) {
             move_mouse = false;
             type_character = false;
-            pico_display.set_led(200,20,20); //reddish, not as bright
+            pico_display.set_led(150,15,15); //reddish
         }
         tud_task(); // tinyusb device task        
 
-        hid_task(move_mouse, type_character, counter);
-        counter++;
-        if (counter > 1023) counter = 0;
+        hid_task(move_mouse, type_character);        
     }
-
     return 0;
 }
 
@@ -153,70 +149,77 @@ void tud_resume_cb(void) {
 // USB HID
 //--------------------------------------------------------------------+
 
-void hid_task(bool move_mouse, bool type_character, uint32_t counter) {
+void hid_task(bool move_mouse, bool type_character) {
     // Poll every 10ms
-    const uint32_t interval_ms = 100;
+    const uint32_t interval_ms = 10;
     static uint32_t start_ms = 0;
-
+    
     if (board_millis() - start_ms < interval_ms) return; // not enough time
     start_ms += interval_ms;
-
-    uint32_t const btn = 1;
-
+    
     // Remote wakeup
-    if (tud_suspended() && btn) {
+    if (tud_suspended()) {
         // Wake up host if we are in suspend mode
         // and REMOTE_WAKEUP feature is enabled by host
         tud_remote_wakeup();
     }
 
     /*------------- Mouse -------------*/
+    static uint32_t mouse_move_every_x_counter = 0;
+    uint32_t const  mouse_move_every_x = 99;
+    static uint32_t mouse_sequence = 0;
+    int8_t const delta = 30;
+    int8_t const xseq[16] = {delta, delta, delta, delta, delta, delta, delta, delta, -delta, -delta, -delta, -delta, -delta, -delta, -delta, -delta};
+    int8_t const yseq[16] = {delta, 0, 0, -delta, -delta, 0, 0, delta, delta, 0, 0, -delta, -delta, 0, 0, delta};
+    
+
     if (tud_hid_ready()) {
-        if (btn) {
-            if (move_mouse) {
-                if (counter % 10 == 0) {
-                    int8_t const delta = 5;
-                    int8_t deltax = delta;
-                    int8_t deltay = delta;
-
-                    if (counter % 30 == 0) deltay = -delta;
-                    if (counter % 40 == 0) deltax = -delta;
-                    
-
-                    // no button, right + down, no scroll pan
-                    tud_hid_mouse_report(REPORT_ID_MOUSE, 0x00, deltax, deltay, 0, 0);
-
-                    // delay a bit before attempt to send keyboard report
-                    board_delay(10);
+        if (move_mouse) {
+            if (mouse_move_every_x_counter < mouse_move_every_x) {
+                mouse_move_every_x_counter++;
+            } else {
+                mouse_move_every_x_counter = 0;            
+                int8_t deltax = xseq[mouse_sequence];
+                int8_t deltay = yseq[mouse_sequence];
+                if (mouse_sequence < 15) {
+                    mouse_sequence++;
+                } else {
+                    mouse_sequence = 0;
                 }
+
+                // no button, right + down, no scroll pan
+                tud_hid_mouse_report(REPORT_ID_MOUSE, 0x00, deltax, deltay, 0, 0);
+
+                // delay a bit before attempt to send keyboard report
+                board_delay(10);
             }
         }
     }
 
     /*------------- Keyboard -------------*/
     if (tud_hid_ready()) {
+        static uint32_t kbd_print_every_x_counter = 0;
+        uint32_t const  kbd_print_every_x = 499;
+
         // use to avoid send multiple consecutive zero report for keyboard
-        static bool has_key = false;
+        static bool has_key = false;        
 
-        static bool toggle = false;
-
-        if ((counter % 30 == 0) || has_key) {
-
-            if (toggle = !toggle) {
-                if (type_character) {
-                    uint8_t keycode[6] = {0};
-                    keycode[0] = HID_KEY_A;
-
-                    tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
-                    has_key = true;    
-                }
-            } else {
+        if (type_character) {
+            if (kbd_print_every_x_counter < kbd_print_every_x) {
+                kbd_print_every_x_counter++;
                 // send empty key report if previously has key pressed
                 if (has_key) tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
                 has_key = false;
-            }
+            } else {
+                kbd_print_every_x_counter = 0;            
+                
+                uint8_t keycode[6] = {0};
+                keycode[0] = HID_KEY_A; // 0x04 to 0x27 are valid characters (a to 0)
+
+                tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
+                has_key = true;                        
+            }            
         }
-        
     }
 }
 
