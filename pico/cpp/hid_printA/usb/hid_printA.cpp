@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "bsp/board.h"
 #include "tusb.h"
@@ -64,6 +65,7 @@ void hid_task(bool move_mouse, bool type_character);
 int main(void) {
     board_init();
     tusb_init();
+    srand(time(0));
 
     // setup the display
     pico_display.init(); // 240 x 135 pixel
@@ -78,10 +80,12 @@ int main(void) {
 
     // draw a box to put some text in
     const int outer_margin = 10;
-    pico_display.set_pen(10, 20, 30);
+    pico_display.set_pen(10, 20, 30); // some dark, slightly blue color
     Rect text_rect_inner_box(outer_margin, outer_margin, PicoDisplay::WIDTH-2*outer_margin, PicoDisplay::HEIGHT-2*outer_margin);
-    Rect text_rectBtnA(outer_margin, outer_margin, PicoDisplay::WIDTH-2*outer_margin, 30);
-    Rect text_rectBtnB(outer_margin, 94, PicoDisplay::WIDTH-2*outer_margin, 30);
+    Rect text_rectBtnA(outer_margin, outer_margin, 140, 30); // on/off
+    Rect text_rectBtnB(outer_margin, 94, 140, 30); // character select
+    Rect text_rectBtnX(171, outer_margin, 80, 30); // mouse
+    Rect text_rectBtnY(171, 94, 80, 30); // keyboard
     pico_display.rectangle(text_rect_inner_box); // generates an orange 10px border around the full box
     
     // write some text inside the box with 10 pixels of margin
@@ -90,26 +94,58 @@ int main(void) {
     pico_display.set_pen(200, 200, 200);
     pico_display.set_font(&font8);
     pico_display.text("Button A to start", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
-    pico_display.text("Button B to stop", Point(text_rectBtnB.x, text_rectBtnB.y), text_rectBtnB.w);
+    // TODO: need symbols for those three items below
+    pico_display.text("abc...", Point(text_rectBtnB.x, text_rectBtnB.y), text_rectBtnB.w);
+    pico_display.text("mouse", Point(text_rectBtnX.x, text_rectBtnX.y), text_rectBtnX.w);
+    pico_display.text("keyboard", Point(text_rectBtnY.x, text_rectBtnY.y), text_rectBtnY.w);
+    pico_display.set_led(15,15,150); // blueish, only at the beginning it's blue
 
-    pico_display.set_led(15,15,150); // blueish
+    pico_display.update(); // now we've done our drawing let's update the screen
 
-    // now we've done our drawing let's update the screen
-    pico_display.update();
-
+    bool running = false;
     bool move_mouse = false;
-    bool type_character = false;    
+    bool type_character = false;
+    bool mouse_enabled = true;
+    bool keyboard_enabled = true;
+
 
     while (1) {
-        if (pico_display.is_pressed(pico_display.A)) {
-            move_mouse = true;
-            type_character = true;
-            pico_display.set_led(15,150,15); // green, constant
+        if (pico_display.is_pressed(pico_display.A)) { // button A switches between active and waiting.
+            if (running) {
+                move_mouse = mouse_enabled; // true & mouse_enabled
+                type_character = keyboard_enabled;
+                if (! (mouse_enabled || keyboard_enabled)) {
+                    pico_display.text("Error: nothing enabled", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
+                    pico_display.set_led(15,15,150);
+                } else {
+                    pico_display.text("Button A to stop", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
+                    pico_display.set_led(15,150,15); // green, constant
+                }
+            } else {
+                move_mouse = false;
+                type_character = false;
+                pico_display.text("Button A to start", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
+                pico_display.set_led(150,15,15); //reddish
+            }                        
+            pico_display.update();
+            running = !running;
         }
-         if (pico_display.is_pressed(pico_display.B)) {
-            move_mouse = false;
-            type_character = false;
-            pico_display.set_led(150,15,15); //reddish
+        // TODO: button B
+        if (pico_display.is_pressed(pico_display.X)) {
+            if (mouse_enabled) {
+                pico_display.text("no mouse", Point(text_rectBtnX.x, text_rectBtnX.y), text_rectBtnX.w);
+            } else {
+                pico_display.text("mouse", Point(text_rectBtnX.x, text_rectBtnX.y), text_rectBtnX.w);            }                        
+            pico_display.update();
+            mouse_enabled = !mouse_enabled;
+        } 
+        if (pico_display.is_pressed(pico_display.Y)) {
+            if (keyboard_enabled) {
+                pico_display.text("no keyboard", Point(text_rectBtnY.x, text_rectBtnY.y), text_rectBtnY.w);
+            } else {
+                pico_display.text("keyboard", Point(text_rectBtnY.x, text_rectBtnY.y), text_rectBtnY.w);            }                        
+            pico_display.update();
+            keyboard_enabled = !keyboard_enabled;
         }
         tud_task(); // tinyusb device task        
 
@@ -166,11 +202,14 @@ void hid_task(bool move_mouse, bool type_character) {
 
     /*------------- Mouse -------------*/
     static uint32_t mouse_move_every_x_counter = 0;
-    uint32_t const  mouse_move_every_x = 99;
+    uint32_t const  mouse_move_every_x = 9;
     static uint32_t mouse_sequence = 0;
-    int8_t const delta = 30;
-    int8_t const xseq[16] = {delta, delta, delta, delta, delta, delta, delta, delta, -delta, -delta, -delta, -delta, -delta, -delta, -delta, -delta};
-    int8_t const yseq[16] = {delta, 0, 0, -delta, -delta, 0, 0, delta, delta, 0, 0, -delta, -delta, 0, 0, delta};
+    static uint32_t substepCounter = 0;    
+    int8_t const substep = 40 / 10; // 40 px in total for every arc of the lying-8
+
+    // define a 'lying-8 type' of structure
+    int8_t const xseq[16] = {1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1};
+    int8_t const yseq[16] = {1, 0, 0, -1, -1, 0, 0, 1, 1, 0, 0, -1, -1, 0, 0, 1};
     
 
     if (tud_hid_ready()) {
@@ -178,13 +217,20 @@ void hid_task(bool move_mouse, bool type_character) {
             if (mouse_move_every_x_counter < mouse_move_every_x) {
                 mouse_move_every_x_counter++;
             } else {
-                mouse_move_every_x_counter = 0;            
-                int8_t deltax = xseq[mouse_sequence];
-                int8_t deltay = yseq[mouse_sequence];
-                if (mouse_sequence < 15) {
-                    mouse_sequence++;
+                mouse_move_every_x_counter = 0;
+                int plus_minus_onex = rand() % 3 - 1;    // in the range -1 to 1
+                int plus_minus_oney = rand() % 3 - 1;
+                int8_t deltax = xseq[mouse_sequence] * substep + plus_minus_onex;
+                int8_t deltay = yseq[mouse_sequence] * substep + plus_minus_oney;
+                if (substepCounter < 9) {
+                    substepCounter++;
                 } else {
-                    mouse_sequence = 0;
+                    substepCounter = 0;                
+                    if (mouse_sequence < 15) {
+                        mouse_sequence++;
+                    } else {
+                        mouse_sequence = 0;
+                    }
                 }
 
                 // no button, right + down, no scroll pan
