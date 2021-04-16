@@ -60,6 +60,7 @@ PicoDisplay pico_display(buffer);
 
 void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
+void clearRect(PicoDisplay pico_display, Rect rectangle);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -108,48 +109,76 @@ int main(void) {
     bool mouse_enabled = true;
     bool keyboard_enabled = true;
 
+    uint8_t which_button = 0;
+    Rect text_rect(10, 10, 10, 10); // values here are arbitrary
+
+    uint8_t debounce_cnt = 0;
 
     while (1) {
-        if (pico_display.is_pressed(pico_display.A)) { // button A switches between active and waiting.
-            if (running) {
-                move_mouse = mouse_enabled; // true & mouse_enabled
-                type_character = keyboard_enabled;
-                if (! (mouse_enabled || keyboard_enabled)) {
-                    pico_display.text("Error: nothing enabled", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
-                    pico_display.set_led(15,15,150);
-                } else {
-                    pico_display.text("Button A to stop", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
-                    pico_display.set_led(15,150,15); // green, constant
-                }
-            } else {
-                move_mouse = false;
-                type_character = false;
-                pico_display.text("Button A to start", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
-                pico_display.set_led(150,15,15); //reddish
-            }                        
-            pico_display.update();
-            running = !running;
-        }
-        // TODO: button B
-        if (pico_display.is_pressed(pico_display.X)) {
-            if (mouse_enabled) {
-                pico_display.text("no mouse", Point(text_rectBtnX.x, text_rectBtnX.y), text_rectBtnX.w);
-            } else {
-                pico_display.text("mouse", Point(text_rectBtnX.x, text_rectBtnX.y), text_rectBtnX.w);            }                        
-            pico_display.update();
-            mouse_enabled = !mouse_enabled;
-        } 
-        if (pico_display.is_pressed(pico_display.Y)) {
-            if (keyboard_enabled) {
-                pico_display.text("no keyboard", Point(text_rectBtnY.x, text_rectBtnY.y), text_rectBtnY.w);
-            } else {
-                pico_display.text("keyboard", Point(text_rectBtnY.x, text_rectBtnY.y), text_rectBtnY.w);            }                        
-            pico_display.update();
-            keyboard_enabled = !keyboard_enabled;
-        }
-        tud_task(); // tinyusb device task        
+        if (
+            pico_display.is_pressed(pico_display.A) || 
+            pico_display.is_pressed(pico_display.B) || 
+            pico_display.is_pressed(pico_display.X) || 
+            pico_display.is_pressed(pico_display.Y)
+        ) { 
+            if (debounce_cnt == 0) { // do something. If not 0, just ignore the pressed button                
+                
+                if (pico_display.is_pressed(pico_display.A)) { // make sure I react only onto one button
+                    which_button = 1;
+                    text_rect = text_rectBtnA;
+                } else if (pico_display.is_pressed(pico_display.B)) {
+                    which_button = 2;
+                    text_rect = text_rectBtnB;
+                } else if (pico_display.is_pressed(pico_display.X)) {
+                    which_button = 3;
+                    text_rect = text_rectBtnX;
+                } else if (pico_display.is_pressed(pico_display.Y)) {
+                    which_button = 4;
+                    text_rect = text_rectBtnY;
+                } else which_button = 0;
 
-        hid_task(move_mouse, type_character);        
+                if(which_button > 0) clearRect(pico_display, text_rect);
+
+                if (which_button == 1) { // button A switches between active and waiting.
+                    if (running) {                        
+                        if (! (mouse_enabled || keyboard_enabled)) {
+                            pico_display.text("Error: nothing enabled", Point(text_rect.x, text_rect.y), text_rect.w);
+                            pico_display.set_led(15,15,150);
+                        } else {                    
+                            pico_display.text("Button A to stop", Point(text_rect.x, text_rect.y), text_rect.w);
+                            pico_display.set_led(15,150,15); // green, constant
+                        }
+                    } else { // not running
+                        pico_display.text("Button A to start", Point(text_rect.x, text_rect.y), text_rect.w);
+                        pico_display.set_led(150,15,15); //reddish
+                    }                        
+                    running = !running;
+                } // button a
+                if (which_button == 2) { // TODO: functionality button B
+                    pico_display.text("abc...", Point(text_rect.x, text_rect.y), text_rect.w);
+                }
+                if (which_button == 3) {
+                    if (mouse_enabled) pico_display.text("no mouse", Point(text_rect.x, text_rect.y), text_rect.w);
+                    else pico_display.text("mouse", Point(text_rect.x, text_rect.y), text_rect.w);            
+                                      
+                    mouse_enabled = !mouse_enabled;
+                } // button X
+                if (which_button == 4) {
+                    if (keyboard_enabled) pico_display.text("no keybrd", Point(text_rect.x, text_rect.y), text_rect.w);
+                    else pico_display.text("keyboard", Point(text_rect.x, text_rect.y), text_rect.w);            
+                    
+                    keyboard_enabled = !keyboard_enabled;
+                } // button Y
+            pico_display.update();
+            move_mouse = running && mouse_enabled;
+            type_character = running && keyboard_enabled;
+
+            debounce_cnt = 10; // TODO: check the value of this one. Maybe I need something more sophisticated
+            } else debounce_cnt--; // just ignore the button
+        } // at least one button is pressed
+
+        tud_task(); // tinyusb device task
+        hid_task(move_mouse, type_character);
     }
     return 0;
 }
@@ -180,6 +209,17 @@ void tud_suspend_cb(bool remote_wakeup_en) {
 void tud_resume_cb(void) {
     blink_interval_ms = BLINK_MOUNTED;
 }
+
+//--------------------------------------------------------------------+
+// various helper functions
+//--------------------------------------------------------------------+
+// clear previous content in a certain rectangle
+void clearRect(PicoDisplay pico_display, Rect rectangle) {
+    pico_display.set_pen(10, 20, 30); // dark blueish
+    pico_display.rectangle(rectangle); // fill it with that
+    pico_display.set_pen(200, 200, 200); // back to white color
+}
+
 
 //--------------------------------------------------------------------+
 // USB HID
