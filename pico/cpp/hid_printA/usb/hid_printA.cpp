@@ -99,10 +99,10 @@ int main(void) {
     const int outer_margin = 10;
     pico_display.set_pen(color_bg); 
     Rect text_rect_inner_box(outer_margin, outer_margin, PicoDisplay::WIDTH-2*outer_margin, PicoDisplay::HEIGHT-2*outer_margin);
-    Rect text_rectBtnA(outer_margin, outer_margin, 140, 30); // on/off
+    Rect text_rectBtnA(outer_margin, outer_margin, 180, 30); // on/off
     Rect text_rectBtnB(outer_margin, 94, 140, 30); // character select
-    Rect text_rectBtnX(171, outer_margin, 80, 30); // mouse
-    Rect text_rectBtnY(171, 94, 80, 30); // keyboard
+    Rect text_rectBtnX(191, outer_margin, 39, 30); // mouse
+    Rect text_rectBtnY(151, 94, 80, 30); // keyboard
     pico_display.rectangle(text_rect_inner_box); // generates an orange 10px border around the full box
     
     // write some text inside the box with 10 pixels of margin
@@ -123,7 +123,7 @@ int main(void) {
     bool move_mouse = false;
     bool type_character = false;
     bool mouse_enabled = true;
-    bool keyboard_enabled = true;
+    bool keyboard_enabled = false;
 
     uint8_t which_button = 0;
     Rect text_rect(10, 10, 10, 10); // values here are arbitrary
@@ -131,71 +131,66 @@ int main(void) {
     uint8_t debounce_cnt = 0;
 
     // TODO: trial
-    sprite(arrow, 80, 40, true, color_font, pico_display);
+    sprite(arrow, 40, 60, true, color_font, pico_display);
 
     while (1) {
-        if (
-            pico_display.is_pressed(pico_display.A) || 
-            pico_display.is_pressed(pico_display.B) || 
-            pico_display.is_pressed(pico_display.X) || 
-            pico_display.is_pressed(pico_display.Y)
-        ) { 
-            if (debounce_cnt == 0) { // do something. If not 0, just ignore the pressed button                
+        if (pico_display.is_pressed(pico_display.A)) { // make sure I react only onto one button
+                which_button = 1;
+                text_rect = text_rectBtnA;
+            } else if (pico_display.is_pressed(pico_display.B)) {
+                which_button = 2;
+                text_rect = text_rectBtnB;
+            } else if (pico_display.is_pressed(pico_display.X)) {
+                which_button = 3;
+                text_rect = text_rectBtnX;
+            } else if (pico_display.is_pressed(pico_display.Y)) {
+                which_button = 4;
+                text_rect = text_rectBtnY;
+            } else which_button = 0;
+
+        if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If not 0, just ignore the pressed button                
+            clearRect(pico_display, text_rect);
+
+            if (which_button == 1) { // button A switches between active and waiting.
+                if (running) { // currently running, afterwards not anymore                        
+                    pico_display.text("Button A to start", Point(text_rect.x, text_rect.y), text_rect.w);
+                    pico_display.set_led(150,15,15); //reddish
+                } else { // currently not running, afterwards it is
+                    if (! (mouse_enabled || keyboard_enabled)) {
+                        pico_display.text("Error: nothing enabled", Point(text_rect.x, text_rect.y), text_rect.w);
+                        pico_display.set_led(15,15,150);
+                    } else {
+                        pico_display.text("Button A to stop", Point(text_rect.x, text_rect.y), text_rect.w);
+                        pico_display.set_led(15,150,15); // green
+                    }
+                }                        
+                running = !running;
+            } // button a
+            if (which_button == 2) { // TODO: functionality button B
+                pico_display.text("abc...", Point(text_rect.x, text_rect.y), text_rect.w);
+            }
+            if (which_button == 3) {
+                if (mouse_enabled) pico_display.text("no mouse", Point(text_rect.x, text_rect.y), text_rect.w);
+                else pico_display.text("mouse", Point(text_rect.x, text_rect.y), text_rect.w);            
+                                    
+                mouse_enabled = !mouse_enabled;
+            } // button X
+            if (which_button == 4) {
+                if (keyboard_enabled) pico_display.text("no keybrd", Point(text_rect.x, text_rect.y), text_rect.w);
+                else pico_display.text("keyboard", Point(text_rect.x, text_rect.y), text_rect.w);            
                 
-                if (pico_display.is_pressed(pico_display.A)) { // make sure I react only onto one button
-                    which_button = 1;
-                    text_rect = text_rectBtnA;
-                } else if (pico_display.is_pressed(pico_display.B)) {
-                    which_button = 2;
-                    text_rect = text_rectBtnB;
-                } else if (pico_display.is_pressed(pico_display.X)) {
-                    which_button = 3;
-                    text_rect = text_rectBtnX;
-                } else if (pico_display.is_pressed(pico_display.Y)) {
-                    which_button = 4;
-                    text_rect = text_rectBtnY;
-                } else which_button = 0;
+                keyboard_enabled = !keyboard_enabled;
+            } // button Y
+            pico_display.update();
+            move_mouse = running && mouse_enabled;
+            type_character = running && keyboard_enabled;
 
-                if(which_button > 0) clearRect(pico_display, text_rect);
-
-                if (which_button == 1) { // button A switches between active and waiting.
-                    if (running) {                        
-                        if (! (mouse_enabled || keyboard_enabled)) {
-                            pico_display.text("Error: nothing enabled", Point(text_rect.x, text_rect.y), text_rect.w);
-                            pico_display.set_led(15,15,150);
-                        } else {                    
-                            pico_display.text("Button A to stop", Point(text_rect.x, text_rect.y), text_rect.w);
-                            pico_display.set_led(15,150,15); // green, constant
-                        }
-                    } else { // not running
-                        pico_display.text("Button A to start", Point(text_rect.x, text_rect.y), text_rect.w);
-                        pico_display.set_led(150,15,15); //reddish
-                    }                        
-                    running = !running;
-                } // button a
-                if (which_button == 2) { // TODO: functionality button B
-                    pico_display.text("abc...", Point(text_rect.x, text_rect.y), text_rect.w);
-                }
-                if (which_button == 3) {
-                    if (mouse_enabled) pico_display.text("no mouse", Point(text_rect.x, text_rect.y), text_rect.w);
-                    else pico_display.text("mouse", Point(text_rect.x, text_rect.y), text_rect.w);            
-                                      
-                    mouse_enabled = !mouse_enabled;
-                } // button X
-                if (which_button == 4) {
-                    if (keyboard_enabled) pico_display.text("no keybrd", Point(text_rect.x, text_rect.y), text_rect.w);
-                    else pico_display.text("keyboard", Point(text_rect.x, text_rect.y), text_rect.w);            
-                    
-                    keyboard_enabled = !keyboard_enabled;
-                } // button Y
-                pico_display.update();
-                move_mouse = running && mouse_enabled;
-                type_character = running && keyboard_enabled;
-
-                debounce_cnt = 100; // TODO: check the value of this one. Maybe I need something more sophisticated like a var for each button
-            } 
-        } else debounce_cnt = 0; // no button is pressed. Can reset the debouncer
-        if (debounce_cnt > 0) debounce_cnt--;
+            debounce_cnt = 1000;
+        }
+        if (debounce_cnt > 0) {
+            debounce_cnt--;
+            busy_wait_us_32(1000);
+        }
         tud_task(); // tinyusb device task
         hid_task(move_mouse, type_character);
     }
