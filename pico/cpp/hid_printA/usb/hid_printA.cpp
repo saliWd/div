@@ -51,17 +51,29 @@ enum {
     BLINK_SUSPENDED = 2500,
 };
 
-uint8_t arrow[] = {
-    0b00010000,
-    0b00110000,
-    0b01110000,
-    0b11111111,
-    0b11111111,
-    0b01110000,
-    0b00110000,
-    0b00010000
+// icons, 32 x 20px, flipped along vertical axis
+uint32_t icon_keyboard[] = {
+    0b00000110000000000000000000000000,
+    0b00000011000000000000000000000000,
+    0b00000001110000000000000000000000,
+    0b00000000001100000000000000000000,
+    0b00000000000110000000000000000000,
+    0b00000000000011000000000000000000,
+    0b11111111111111111111111111111111,
+    0b10000000000000000000000000000001,
+    0b10011001100110011001100110011001,
+    0b10011001100110011001100110011001,
+    0b10000000000000000000000000000001,
+    0b10000000000000000000000000000001,
+    0b10011001100110011001100110011001,
+    0b10011001100110011001100110011001,
+    0b10000000000000000000000000000001,
+    0b10000000000000000000000000000001,
+    0b10011001111111111111111110011001,
+    0b10011001111111111111111110011001,
+    0b10000000000000000000000000000001,
+    0b11111111111111111111111111111111
   };
-
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
 using namespace pimoroni;
@@ -74,9 +86,7 @@ const uint16_t color_bg = pico_display.create_pen(10, 20, 30); // some dark, sli
 void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
 void clearRect(PicoDisplay pico_display, Rect rectangle);
-void pixel(int x, int y, uint16_t c, PicoDisplay pico_display);
-void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pico_display);
-
+void icon_32_20(uint32_t *p, int x, int y, uint16_t c, PicoDisplay pico_display);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -111,10 +121,10 @@ int main(void) {
     pico_display.set_pen(color_font);
     pico_display.set_font(&font8);
     pico_display.text("Button A to start", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
-    // TODO: need symbols for those three items below
     pico_display.text("abc...", Point(text_rectBtnB.x, text_rectBtnB.y), text_rectBtnB.w);
     pico_display.text("mouse", Point(text_rectBtnX.x, text_rectBtnX.y), text_rectBtnX.w);
-    pico_display.text("keyboard", Point(text_rectBtnY.x, text_rectBtnY.y), text_rectBtnY.w);
+    // pico_display.text("keyboard", Point(text_rectBtnY.x, text_rectBtnY.y), text_rectBtnY.w);
+    icon_32_20(icon_keyboard, 187, 90, color_font, pico_display);
     pico_display.set_led(15,15,150); // blueish, only at the beginning it's blue
 
     pico_display.update(); // now we've done our drawing let's update the screen
@@ -128,10 +138,7 @@ int main(void) {
     uint8_t which_button = 0;
     Rect text_rect(10, 10, 10, 10); // values here are arbitrary
 
-    uint8_t debounce_cnt = 0;
-
-    // TODO: trial
-    sprite(arrow, 40, 60, true, color_font, pico_display);
+    uint16_t debounce_cnt = 0;
 
     while (1) {
         if (pico_display.is_pressed(pico_display.A)) { // make sure I react only onto one button
@@ -176,11 +183,12 @@ int main(void) {
                 mouse_enabled = !mouse_enabled;
             } // button X
             if (which_button == 4) {
-                if (keyboard_enabled) pico_display.text("no keybrd", Point(text_rect.x, text_rect.y), text_rect.w);
-                else pico_display.text("keyboard", Point(text_rect.x, text_rect.y), text_rect.w);            
+                if (keyboard_enabled) pico_display.text("X", Point(text_rect.x, text_rect.y), text_rect.w); // TODO
+                else icon_32_20(icon_keyboard, 187, 90, color_font, pico_display);
                 
                 keyboard_enabled = !keyboard_enabled;
             } // button Y
+
             pico_display.update();
             move_mouse = running && mouse_enabled;
             type_character = running && keyboard_enabled;
@@ -233,32 +241,15 @@ void clearRect(PicoDisplay pico_display, Rect rectangle) {
     pico_display.rectangle(rectangle); // fill it with that
     pico_display.set_pen(color_font);
 }
-// from examples
-void pixel(int x, int y, uint16_t c, PicoDisplay pico_display) {
-  x *= 2;
-  y *= 2;
-  pico_display.frame_buffer[x + y * 240] = c;
-  pico_display.frame_buffer[x + 1 + y * 240] = c;
-  pico_display.frame_buffer[x + 1 + (y + 1) * 240] = c;
-  pico_display.frame_buffer[x + (y + 1) * 240] = c;
-}
-void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pico_display) {
-  for(int ay = 0; ay < 8; ay++) {
-    uint8_t sl = p[ay];
-    for(int ax = 0; ax < 8; ax++) {
-      if(flip) {
-        if((0b10000000 >> ax) & sl) {
-          pixel(ax + x, ay + y, c, pico_display);
+void icon_32_20(uint32_t *p, int x, int y, uint16_t c, PicoDisplay pico_display) {
+    for(int ay = 0; ay < 20; ay++) {
+        uint32_t sl = p[ay];
+        for(int ax = 0; ax < 32; ax++) {
+            // does not work as expected if((0b10000000000000000000000000000000 >> ax) & sl) pico_display.frame_buffer[(ax + x) + (ay + y) * 240] = c; 
+            if((0b1 << ax) & sl) pico_display.frame_buffer[(ax + x) + (ay + y) * 240] = c;
         }
-      }else{
-        if((0b1 << ax) & sl) {
-          pixel(ax + x, ay + y, c, pico_display);
-        }
-      }
     }
-  }
 }
-
 
 //--------------------------------------------------------------------+
 // USB HID
