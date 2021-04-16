@@ -51,16 +51,32 @@ enum {
     BLINK_SUSPENDED = 2500,
 };
 
+uint8_t arrow[] = {
+    0b00010000,
+    0b00110000,
+    0b01110000,
+    0b11111111,
+    0b11111111,
+    0b01110000,
+    0b00110000,
+    0b00010000
+  };
+
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
 using namespace pimoroni;
 
 uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
 PicoDisplay pico_display(buffer);
+const uint16_t color_font = pico_display.create_pen(200, 200, 200); // almost white
+const uint16_t color_bg = pico_display.create_pen(10, 20, 30); // some dark, slightly blue color
 
 void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
 void clearRect(PicoDisplay pico_display, Rect rectangle);
+void pixel(int x, int y, uint16_t c, PicoDisplay pico_display);
+void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pico_display);
+
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -81,7 +97,7 @@ int main(void) {
 
     // draw a box to put some text in
     const int outer_margin = 10;
-    pico_display.set_pen(10, 20, 30); // some dark, slightly blue color
+    pico_display.set_pen(color_bg); 
     Rect text_rect_inner_box(outer_margin, outer_margin, PicoDisplay::WIDTH-2*outer_margin, PicoDisplay::HEIGHT-2*outer_margin);
     Rect text_rectBtnA(outer_margin, outer_margin, 140, 30); // on/off
     Rect text_rectBtnB(outer_margin, 94, 140, 30); // character select
@@ -92,7 +108,7 @@ int main(void) {
     // write some text inside the box with 10 pixels of margin
     text_rectBtnA.deflate(10);
     text_rectBtnB.deflate(10);
-    pico_display.set_pen(200, 200, 200);
+    pico_display.set_pen(color_font);
     pico_display.set_font(&font8);
     pico_display.text("Button A to start", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
     // TODO: need symbols for those three items below
@@ -113,6 +129,9 @@ int main(void) {
     Rect text_rect(10, 10, 10, 10); // values here are arbitrary
 
     uint8_t debounce_cnt = 0;
+
+    // TODO: trial
+    sprite(arrow, 80, 40, true, color_font, pico_display);
 
     while (1) {
         if (
@@ -169,14 +188,14 @@ int main(void) {
                     
                     keyboard_enabled = !keyboard_enabled;
                 } // button Y
-            pico_display.update();
-            move_mouse = running && mouse_enabled;
-            type_character = running && keyboard_enabled;
+                pico_display.update();
+                move_mouse = running && mouse_enabled;
+                type_character = running && keyboard_enabled;
 
-            debounce_cnt = 10; // TODO: check the value of this one. Maybe I need something more sophisticated
-            } else debounce_cnt--; // just ignore the button
-        } // at least one button is pressed
-
+                debounce_cnt = 100; // TODO: check the value of this one. Maybe I need something more sophisticated like a var for each button
+            } 
+        } else debounce_cnt = 0; // no button is pressed. Can reset the debouncer
+        if (debounce_cnt > 0) debounce_cnt--;
         tud_task(); // tinyusb device task
         hid_task(move_mouse, type_character);
     }
@@ -215,9 +234,34 @@ void tud_resume_cb(void) {
 //--------------------------------------------------------------------+
 // clear previous content in a certain rectangle
 void clearRect(PicoDisplay pico_display, Rect rectangle) {
-    pico_display.set_pen(10, 20, 30); // dark blueish
+    pico_display.set_pen(color_bg);
     pico_display.rectangle(rectangle); // fill it with that
-    pico_display.set_pen(200, 200, 200); // back to white color
+    pico_display.set_pen(color_font);
+}
+// from examples
+void pixel(int x, int y, uint16_t c, PicoDisplay pico_display) {
+  x *= 2;
+  y *= 2;
+  pico_display.frame_buffer[x + y * 240] = c;
+  pico_display.frame_buffer[x + 1 + y * 240] = c;
+  pico_display.frame_buffer[x + 1 + (y + 1) * 240] = c;
+  pico_display.frame_buffer[x + (y + 1) * 240] = c;
+}
+void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pico_display) {
+  for(int ay = 0; ay < 8; ay++) {
+    uint8_t sl = p[ay];
+    for(int ax = 0; ax < 8; ax++) {
+      if(flip) {
+        if((0b10000000 >> ax) & sl) {
+          pixel(ax + x, ay + y, c, pico_display);
+        }
+      }else{
+        if((0b1 << ax) & sl) {
+          pixel(ax + x, ay + y, c, pico_display);
+        }
+      }
+    }
+  }
 }
 
 
