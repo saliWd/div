@@ -32,6 +32,8 @@
 #include "tusb.h"
 
 #include "usb_descriptors.hpp"
+#include "icons.hpp"
+
 
 #include "pico_display.hpp"
 #include "font8_data.hpp"
@@ -51,79 +53,18 @@ enum {
     BLINK_SUSPENDED = 2500,
 };
 
-// icons, 32 x 20px, flipped along vertical axis
-uint32_t icon_keyboard[] = {
-    0b00000110000000000000000000000000,
-    0b00000011000000000000000000000000,
-    0b00000001110000000000000000000000,
-    0b00000000001100000000000000000000,
-    0b00000000000110000000000000000000,
-    0b00000000000011000000000000000000,
-    0b11111111111111111111111111111111,
-    0b10000000000000000000000000000001,
-    0b10011001100110011001100110011001,
-    0b10011001100110011001100110011001,
-    0b10000000000000000000000000000001,
-    0b10000000000000000000000000000001,
-    0b10011001100110011001100110011001,
-    0b10011001100110011001100110011001,
-    0b10000000000000000000000000000001,
-    0b10000000000000000000000000000001,
-    0b10011001111111111111111110011001,
-    0b10011001111111111111111110011001,
-    0b10000000000000000000000000000001,
-    0b11111111111111111111111111111111
-};
-uint32_t icon_mouse[] = {
-    0b00000000000011100111000000000000,
-    0b00000000000111100111100000000000,
-    0b00000000001111100111110000000000,
-    0b00000000011111100111111000000000,
-    0b00000000111111100111111100000000,
-    0b00000000000000000000000000000000,
-    0b00000000000000000000000000000000,
-    0b00000000111111111111111100000000,
-    0b00000000111111111111111100000000,
-    0b00000000111111111111111100000000,
-    0b00000000111111111111111100000000,
-    0b00000000111111111111111100000000,
-    0b00000000111111111111111100000000,
-    0b00000000111111111111111100000000,
-    0b00000000111111111111111100000000,
-    0b00000000011111111111111000000000,
-    0b00000000011111111111111000000000,
-    0b00000000000111111111100000000000,
-    0b00000000000001111110000000000000,
-    0b00000000000000000000000000000000,
-    };
-uint32_t icon_X[] = {
-    0b01111000000000000000000000011110,
-    0b00111100000000000000000000111100,
-    0b00011110000000000000000001111000,
-    0b00000111100000000000000111100000,
-    0b00000011110000000000001111000000,
-    0b00000001111000000000011110000000,
-    0b00000000011110000000111100000000,
-    0b00000000001111000001111000000000,
-    0b00000000000011110111100000000000,
-    0b00000000000001111111000000000000,
-    0b00000000000000111111000000000000,
-    0b00000000000011110111100000000000,
-    0b00000000001111000001111000000000,
-    0b00000000011110000000111100000000,
-    0b00000001111000000000011110000000,
-    0b00000011110000000000001111000000,
-    0b00000111100000000000000111100000,
-    0b00011110000000000000000001111000,
-    0b00111100000000000000000000111100,
-    0b01111000000000000000000000011110
-    };
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
 using namespace pimoroni;
 
 uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
 PicoDisplay pico_display(buffer);
+bool running = false;
+bool move_mouse = false;
+bool type_character = false;
+bool mouse_enabled = true;
+bool keyboard_enabled = false;
+
 const uint16_t color_orange = pico_display.create_pen(255, 165, 0);
 const uint16_t color_white = pico_display.create_pen(200, 200, 200);
 const uint16_t color_darkwhite = pico_display.create_pen(100, 100, 100);
@@ -132,7 +73,8 @@ const uint16_t color_red = pico_display.create_pen(220, 30, 30);
 
 void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
-void clearRect(PicoDisplay pico_display, Rect rectangle);
+void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
+void initial_gui(PicoDisplay pico_display);
 void icon_32_20(uint32_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pico_display);
 
 /*------------- MAIN -------------*/
@@ -143,106 +85,38 @@ int main(void) {
 
     // setup the display
     pico_display.init(); // 240 x 135 pixel
-
     pico_display.set_backlight(150);
-    pico_display.set_pen(color_darkblue); // orange
-    pico_display.clear(); // fill the screen with the current pen colour
-    pico_display.set_pen(color_orange); 
-    Rect rect_border(4, 4, PicoDisplay::WIDTH-8, PicoDisplay::HEIGHT-8);
-    pico_display.rectangle(rect_border);
-    pico_display.set_pen(color_darkblue); 
-    Rect rect_border_inner(6, 6, PicoDisplay::WIDTH-12, PicoDisplay::HEIGHT-12);
-    pico_display.rectangle(rect_border_inner);
-
-    Rect text_rectBtnA(20, 20, 170, 60); // on/off
-    Rect text_rectBtnB(20, 97, 100, 30); // character select
+    pico_display.set_font(&font8);
+    initial_gui(pico_display);
+    
+    Rect rectBtnA(20, 20, 170, 60); // on/off
+    Rect rectBtnB(20, 97, 100, 30); // character select
     Rect rectBtnX(190, 18, 32, 20); // mouse
     Rect rectBtnY(187, 98, 32, 20); // keyboard
-
-    pico_display.set_pen(color_white);
-    pico_display.set_font(&font8);
-    pico_display.text("START", Point(text_rectBtnA.x, text_rectBtnA.y), text_rectBtnA.w);
     
-    icon_32_20(icon_mouse, rectBtnX.x, rectBtnX.y, false, color_white, pico_display);
-    icon_32_20(icon_keyboard, rectBtnY.x, rectBtnY.y, false, color_darkwhite, pico_display); // keyboard is disabled by default
-    icon_32_20(icon_X, rectBtnY.x, rectBtnY.y, false, color_red, pico_display); // print a red X over the icon
-                
-    pico_display.set_led(15,15,150); // blueish, only at the beginning it's blue
-
-    pico_display.update(); // now we've done our drawing let's update the screen
-
-    bool running = false;
-    bool move_mouse = false;
-    bool type_character = false;
-    bool mouse_enabled = true;
-    bool keyboard_enabled = false;
-
-
-
+    update_gui(rectBtnA, rectBtnX, rectBtnY, running, mouse_enabled, keyboard_enabled, pico_display);
+    
     uint8_t which_button = 0;
-    Rect text_rect(10, 10, 10, 10); // values here are arbitrary
-
     uint16_t debounce_cnt = 0;
 
     while (1) {
-        if (pico_display.is_pressed(pico_display.A)) { // make sure I react only onto one button
-                which_button = 1;
-                text_rect = text_rectBtnA;
-            } else if (pico_display.is_pressed(pico_display.B)) {
-                which_button = 2;
-                text_rect = text_rectBtnB;
-            } else if (pico_display.is_pressed(pico_display.X)) {
-                which_button = 3;
-                text_rect = rectBtnX;
-            } else if (pico_display.is_pressed(pico_display.Y)) {
-                which_button = 4;
-                text_rect = rectBtnY;
-            } else which_button = 0;
+        if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button    
+            else if (pico_display.is_pressed(pico_display.B)) which_button = 2;
+            else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
+            else if (pico_display.is_pressed(pico_display.Y)) which_button = 4;
+            else which_button = 0;
 
         if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If not 0, just ignore the pressed button                
-            clearRect(pico_display, text_rect);
+            if (which_button == 1) running = !running;
+            if (which_button == 2) ; // TODO: functionality button B
+            if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
+            if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
 
-            if (which_button == 1) { // button A switches between active and waiting.
-                if (running) { // currently running, afterwards not anymore                        
-                    pico_display.text("START", Point(text_rect.x, text_rect.y), text_rect.w);
-                    pico_display.set_led(150,15,15); //reddish
-                } else { // currently not running, afterwards it is
-                    if (! (mouse_enabled || keyboard_enabled)) {
-                        pico_display.text("nothing enabled...", Point(text_rect.x, text_rect.y), text_rect.w);
-                        pico_display.set_led(15,15,150);
-                    } else {
-                        pico_display.text("stop", Point(text_rect.x, text_rect.y), text_rect.w);
-                        pico_display.set_led(15,150,15); // green
-                    }
-                }                        
-                running = !running;
-            } // button a
-            if (which_button == 2) { // TODO: functionality button B
-                // pico_display.text("abc...", Point(text_rect.x, text_rect.y), text_rect.w);
-            }
-            if (which_button == 3) {
-                mouse_enabled = !mouse_enabled;
-                if (mouse_enabled) icon_32_20(icon_mouse, text_rect.x, text_rect.y, false, color_white, pico_display);
-                else {
-                    icon_32_20(icon_mouse, text_rect.x, text_rect.y, false, color_darkwhite, pico_display);
-                    icon_32_20(icon_X, text_rect.x, text_rect.y, false, color_red, pico_display); // print a red X over the icon
-                } 
-            } // button X
-            if (which_button == 4) {  
-                keyboard_enabled = !keyboard_enabled;
-                if (keyboard_enabled) {
-                    icon_32_20(icon_keyboard, text_rect.x, text_rect.y, false, color_white, pico_display);
-                } else {
-                    icon_32_20(icon_keyboard, text_rect.x, text_rect.y, false, color_darkwhite, pico_display);
-                    icon_32_20(icon_X, text_rect.x, text_rect.y, false, color_red, pico_display); // print a red X over the icon
-                } 
-            } // button Y
-
-            pico_display.update();
+            update_gui(rectBtnA, rectBtnX, rectBtnY, running, mouse_enabled, keyboard_enabled, pico_display);
             move_mouse = running && mouse_enabled;
             type_character = running && keyboard_enabled;
 
-            debounce_cnt = 1000;
+            debounce_cnt = 500;
         }
         if (debounce_cnt > 0) {
             debounce_cnt--;
@@ -284,12 +158,6 @@ void tud_resume_cb(void) {
 //--------------------------------------------------------------------+
 // various helper functions
 //--------------------------------------------------------------------+
-// clear previous content in a certain rectangle
-void clearRect(PicoDisplay pico_display, Rect rectangle) {
-    pico_display.set_pen(color_darkblue);
-    pico_display.rectangle(rectangle); // fill it with that
-    pico_display.set_pen(color_white);
-}
 void icon_32_20(uint32_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pico_display) {
     for(int ay = 0; ay < 20; ay++) {
         uint32_t sl = p[ay];
@@ -301,6 +169,51 @@ void icon_32_20(uint32_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pi
             }
         }
     }
+}
+void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
+    // clear all buttons
+    pico_display.set_pen(color_darkblue);
+    pico_display.rectangle(rectBtnA);
+    pico_display.rectangle(rectBtnX);
+    pico_display.rectangle(rectBtnY);
+    pico_display.set_pen(color_white);
+
+    if (running) {                        
+        if (! (mouse_enabled || keyboard_enabled)) {
+            pico_display.text("nothing enabled...", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
+            pico_display.set_led(15,15,150);
+        } else {
+            pico_display.text("stop", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
+            pico_display.set_led(15,150,15); // green
+        }
+    } else {
+        pico_display.text("START", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
+        pico_display.set_led(15,15,150);
+    }                        
+
+    if (mouse_enabled) icon_32_20(icon_mouse, rectBtnX.x, rectBtnX.y, false, color_white, pico_display);
+    else {
+        icon_32_20(icon_mouse, rectBtnX.x, rectBtnX.y, false, color_darkwhite, pico_display);
+        icon_32_20(icon_X, rectBtnX.x, rectBtnX.y, false, color_red, pico_display); // print a red X over the icon
+    }
+
+    if (keyboard_enabled) {
+        icon_32_20(icon_keyboard, rectBtnY.x, rectBtnY.y, false, color_white, pico_display);
+    } else {
+        icon_32_20(icon_keyboard, rectBtnY.x, rectBtnY.y, false, color_darkwhite, pico_display);
+        icon_32_20(icon_X, rectBtnY.x, rectBtnY.y, false, color_red, pico_display); // print a red X over the icon
+    } 
+    pico_display.update(); // now we've done our drawing let's update the screen
+}
+void initial_gui(PicoDisplay pico_display) {
+    pico_display.set_pen(color_darkblue); // orange
+    pico_display.clear(); // fill the screen with the current pen colour
+    pico_display.set_pen(color_orange); 
+    Rect rect_border(4, 4, PicoDisplay::WIDTH-8, PicoDisplay::HEIGHT-8);
+    pico_display.rectangle(rect_border);
+    pico_display.set_pen(color_darkblue); 
+    Rect rect_border_inner(6, 6, PicoDisplay::WIDTH-12, PicoDisplay::HEIGHT-12);
+    pico_display.rectangle(rect_border_inner);
 }
 
 //--------------------------------------------------------------------+
