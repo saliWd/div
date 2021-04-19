@@ -75,10 +75,24 @@ void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
 void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void initial_gui(PicoDisplay pico_display);
-void icon_32_20(uint32_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pico_display);
+void icon_draw(icon_t icon, bool flip, uint16_t c, PicoDisplay pico_display);
 
 /*------------- MAIN -------------*/
 int main(void) {
+
+    icon_mouse.bitmap = icon_mouse_bmp;
+    icon_mouse.pos_x = 190;
+    icon_mouse.pos_y = 18;
+    icon_mouse.height = 34;// TODO does not work sizeof(icon_mouse.bitmap)/sizeof(icon_mouse.bitmap[0]);
+    icon_kbd.bitmap = icon_kbd_bmp;
+    icon_kbd.pos_x = 187;
+    icon_kbd.pos_y = 98;
+    icon_kbd.height = 20; // sizeof(icon_kbd.bitmap)/sizeof(icon_kbd.bitmap[0]);
+    icon_x.bitmap = icon_x_bmp;
+    // pos x and y vary
+    icon_x.height = 20;
+    
+
     board_init();
     tusb_init();
     srand(time(0));
@@ -91,8 +105,8 @@ int main(void) {
     
     Rect rectBtnA(20, 20, 170, 60); // on/off
     Rect rectBtnB(20, 97, 100, 30); // character select
-    Rect rectBtnX(190, 18, 32, 20); // mouse
-    Rect rectBtnY(187, 98, 32, 20); // keyboard
+    Rect rectBtnX(icon_mouse.pos_x, icon_mouse.pos_y, 32, icon_mouse.height);
+    Rect rectBtnY(icon_kbd.pos_x, icon_kbd.pos_y, 32, icon_kbd.height);
     
     update_gui(rectBtnA, rectBtnX, rectBtnY, running, mouse_enabled, keyboard_enabled, pico_display);
     
@@ -158,18 +172,20 @@ void tud_resume_cb(void) {
 //--------------------------------------------------------------------+
 // various helper functions
 //--------------------------------------------------------------------+
-void icon_32_20(uint32_t *p, int x, int y, bool flip, uint16_t c, PicoDisplay pico_display) {
-    for(int ay = 0; ay < 20; ay++) {
-        uint32_t sl = p[ay];
+void icon_draw(icon_t icon, bool flip, uint16_t c, PicoDisplay pico_display) {
+   for(int ay = 0; ay < icon.height; ay++) {
+        uint32_t sl = icon.bitmap[ay];
         for(int ax = 0; ax < 32; ax++) {
             if(flip) {
-                if((0b10000000000000000000000000000000 >> ax) & sl) pico_display.frame_buffer[(ax + x) + (ay + y) * 240] = c;
+                if((0b10000000000000000000000000000000 >> ax) & sl) pico_display.frame_buffer[(ax + icon.pos_x) + (ay + icon.pos_y) * 240] = c;
             } else {
-                if((0b1 << ax) & sl) pico_display.frame_buffer[(ax + x) + (ay + y) * 240] = c;
+                if((0b1 << ax) & sl) pico_display.frame_buffer[(ax + icon.pos_x) + (ay + icon.pos_y) * 240] = c;
             }
         }
     }
-}
+};
+
+
 void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
     // clear all buttons
     pico_display.set_pen(color_darkblue);
@@ -191,17 +207,20 @@ void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool 
         pico_display.set_led(15,15,150);
     }                        
 
-    if (mouse_enabled) icon_32_20(icon_mouse, rectBtnX.x, rectBtnX.y, false, color_white, pico_display);
+    if (mouse_enabled) icon_draw(icon_mouse, true, color_white, pico_display);
     else {
-        icon_32_20(icon_mouse, rectBtnX.x, rectBtnX.y, false, color_darkwhite, pico_display);
-        icon_32_20(icon_X, rectBtnX.x, rectBtnX.y, false, color_red, pico_display); // print a red X over the icon
+        icon_draw(icon_mouse, true, color_darkwhite, pico_display);
+        icon_x.pos_x = icon_mouse.pos_x;
+        icon_x.pos_y = icon_mouse.pos_y + (icon_mouse.height - icon_x.height) / 2; // different heights
+        icon_draw(icon_x, false, color_red, pico_display);        
     }
 
-    if (keyboard_enabled) {
-        icon_32_20(icon_keyboard, rectBtnY.x, rectBtnY.y, false, color_white, pico_display);
-    } else {
-        icon_32_20(icon_keyboard, rectBtnY.x, rectBtnY.y, false, color_darkwhite, pico_display);
-        icon_32_20(icon_X, rectBtnY.x, rectBtnY.y, false, color_red, pico_display); // print a red X over the icon
+    if (keyboard_enabled) icon_draw(icon_kbd, false, color_white, pico_display);
+    else {
+        icon_draw(icon_kbd, false, color_darkwhite, pico_display);
+        icon_x.pos_x = icon_kbd.pos_x;
+        icon_x.pos_y = icon_kbd.pos_y; 
+        icon_draw(icon_x, false, color_red, pico_display);
     } 
     pico_display.update(); // now we've done our drawing let's update the screen
 }
