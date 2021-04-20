@@ -28,12 +28,15 @@
 #include <string.h>
 #include <time.h>
 
+#include <iostream>
+#include <fstream>
+
 #include "bsp/board.h"
 #include "tusb.h"
 
 #include "usb_descriptors.hpp"
 #include "icons.hpp"
-
+#include "background.hpp"
 
 #include "pico_display.hpp"
 #include "font8_data.hpp"
@@ -225,7 +228,7 @@ void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool 
     pico_display.update(); // now we've done our drawing let's update the screen
 }
 void initial_gui(PicoDisplay pico_display) {
-    pico_display.set_pen(color_darkblue); // orange
+    pico_display.set_pen(color_darkblue);
     pico_display.clear(); // fill the screen with the current pen colour
     pico_display.set_pen(color_orange); 
     Rect rect_border(4, 4, PicoDisplay::WIDTH-8, PicoDisplay::HEIGHT-8);
@@ -233,6 +236,28 @@ void initial_gui(PicoDisplay pico_display) {
     pico_display.set_pen(color_darkblue); 
     Rect rect_border_inner(6, 6, PicoDisplay::WIDTH-12, PicoDisplay::HEIGHT-12);
     pico_display.rectangle(rect_border_inner);
+    
+    // TODO trials
+    if (false) {
+        pico_display.set_pen(color_white);
+        using namespace std;
+        streampos size;
+        char * memblock;
+
+        ifstream file ("240x135.raw", ios::in|ios::binary|ios::ate); // does not work
+        if (file.is_open()) {
+            size = file.tellg();
+            memblock = new char [size];
+            file.seekg (0, ios::beg);
+            file.read (memblock, size);
+            file.close();
+
+            pico_display.text("file access ok", Point(rect_border_inner.x, rect_border_inner.y), rect_border_inner.w);
+
+            delete[] memblock;
+        } else pico_display.text("file access error", Point(rect_border_inner.x, rect_border_inner.y), rect_border_inner.w);
+        // end of TODO
+    }
 }
 
 //--------------------------------------------------------------------+
@@ -255,7 +280,7 @@ void hid_task(bool move_mouse, bool type_character) {
     }
 
     /*------------- Mouse -------------*/
-    uint32_t const  mouse_move_every_x = 19;
+    uint32_t const  mouse_move_every_x = 39;
     static uint32_t mouse_move_every_x_counter = mouse_move_every_x;
     static uint32_t mouse_sequence = 0;
     static uint32_t substepCounter = 0;    
