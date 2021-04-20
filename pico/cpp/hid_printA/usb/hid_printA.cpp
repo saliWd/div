@@ -35,7 +35,6 @@
 #include "tusb.h"
 
 #include "usb_descriptors.hpp"
-#include "icons.hpp"
 #include "background.hpp"
 
 #include "pico_display.hpp"
@@ -72,29 +71,15 @@ const uint16_t color_orange = pico_display.create_pen(255, 165, 0);
 const uint16_t color_white = pico_display.create_pen(200, 200, 200);
 const uint16_t color_darkwhite = pico_display.create_pen(100, 100, 100);
 const uint16_t color_darkblue = pico_display.create_pen(10, 20, 30);
-const uint16_t color_red = pico_display.create_pen(220, 30, 30);
+const uint16_t color_red = pico_display.create_pen(240, 20, 20);
 
 void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
-void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
-void icon_draw(icon_t icon, bool flip, uint16_t c, PicoDisplay pico_display);
+void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
+void draw_x(int center_x, int center_y, int half_len);
 
 /*------------- MAIN -------------*/
 int main(void) {
-
-    icon_mouse.bitmap = icon_mouse_bmp;
-    icon_mouse.pos_x = 190;
-    icon_mouse.pos_y = 18;
-    icon_mouse.height = 34;// TODO does not work sizeof(icon_mouse.bitmap)/sizeof(icon_mouse.bitmap[0]);
-    icon_kbd.bitmap = icon_kbd_bmp;
-    icon_kbd.pos_x = 187;
-    icon_kbd.pos_y = 98;
-    icon_kbd.height = 20; // sizeof(icon_kbd.bitmap)/sizeof(icon_kbd.bitmap[0]);
-    icon_x.bitmap = icon_x_bmp;
-    // pos x and y vary
-    icon_x.height = 20;
-    
-
     board_init();
     tusb_init();
     srand(time(0));
@@ -107,10 +92,9 @@ int main(void) {
     
     Rect rectBtnA(20, 20, 170, 60); // on/off
     Rect rectBtnB(20, 97, 100, 30); // character select
-    Rect rectBtnX(icon_mouse.pos_x, icon_mouse.pos_y, 32, icon_mouse.height);
-    Rect rectBtnY(icon_kbd.pos_x, icon_kbd.pos_y, 32, icon_kbd.height);
     
-    update_gui(rectBtnA, rectBtnX, rectBtnY, running, mouse_enabled, keyboard_enabled, pico_display);
+    
+    update_gui(rectBtnA, running, mouse_enabled, keyboard_enabled, pico_display);
     
     uint8_t which_button = 0;
     uint16_t debounce_cnt = 0;
@@ -128,7 +112,7 @@ int main(void) {
             if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
             if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
 
-            update_gui(rectBtnA, rectBtnX, rectBtnY, running, mouse_enabled, keyboard_enabled, pico_display);
+            update_gui(rectBtnA, running, mouse_enabled, keyboard_enabled, pico_display);
             move_mouse = running && mouse_enabled;
             type_character = running && keyboard_enabled;
 
@@ -174,26 +158,7 @@ void tud_resume_cb(void) {
 //--------------------------------------------------------------------+
 // various helper functions
 //--------------------------------------------------------------------+
-void icon_draw(icon_t icon, bool flip, uint16_t c, PicoDisplay pico_display) {
-   for(int ay = 0; ay < icon.height; ay++) {
-        uint32_t sl = icon.bitmap[ay];
-        for(int ax = 0; ax < 32; ax++) {
-            if(flip) {
-                if((0b10000000000000000000000000000000 >> ax) & sl) pico_display.frame_buffer[(ax + icon.pos_x) + (ay + icon.pos_y) * 240] = c;
-            } else {
-                if((0b1 << ax) & sl) pico_display.frame_buffer[(ax + icon.pos_x) + (ay + icon.pos_y) * 240] = c;
-            }
-        }
-    }
-};
-
-
-void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
-    // clear all buttons
-    // pico_display.set_pen(color_darkblue);
-    // pico_display.rectangle(rectBtnA);
-    // pico_display.rectangle(rectBtnX);
-    // pico_display.rectangle(rectBtnY);
+void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
     memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
     
     pico_display.set_pen(color_white);
@@ -211,28 +176,23 @@ void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool 
         pico_display.set_led(15,15,150);
     }                        
 
-    if (mouse_enabled) icon_draw(icon_mouse, true, color_white, pico_display);
-    else {
-        icon_draw(icon_mouse, true, color_darkwhite, pico_display);
-        icon_x.pos_x = icon_mouse.pos_x;
-        icon_x.pos_y = icon_mouse.pos_y + (icon_mouse.height - icon_x.height) / 2; // different heights
-        icon_draw(icon_x, false, color_red, pico_display);        
-    }
-
-    if (keyboard_enabled) icon_draw(icon_kbd, false, color_white, pico_display);
-    else {
-        icon_draw(icon_kbd, false, color_darkwhite, pico_display);
-        icon_x.pos_x = icon_kbd.pos_x;
-        icon_x.pos_y = icon_kbd.pos_y; 
-        icon_draw(icon_x, false, color_red, pico_display);
-    } 
+    
+    if (! mouse_enabled) draw_x(208, 28, 18);
+    if (! keyboard_enabled) draw_x(208, 114, 18);
     pico_display.update(); // now we've done our drawing let's update the screen
 }
-
+void draw_x(int center_x, int center_y, int half_len) {
+    pico_display.set_pen(color_red);
+    for (int xvar = -1; xvar < 2; xvar++) {
+        for (int yvar = -1; yvar < 2; yvar++) {
+            pico_display.line(Point(center_x-half_len+xvar, center_y-half_len+yvar), Point(center_x+half_len+xvar, center_y+half_len+yvar));
+            pico_display.line(Point(center_x-half_len+xvar, center_y+half_len+yvar), Point(center_x+half_len+xvar, center_y-half_len+yvar));
+        }
+    } 
+}
 //--------------------------------------------------------------------+
 // USB HID
 //--------------------------------------------------------------------+
-
 void hid_task(bool move_mouse, bool type_character) {
     // Poll every 10ms
     const uint32_t interval_ms = 10;

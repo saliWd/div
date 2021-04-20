@@ -1,3 +1,5 @@
 .vscode/settings.json
 pico/cpp/pico-sdk
 pico/libraries/readme.txt
+pico/cpp/hid_printA/usb/_old/icons.hpp
+pico/cpp/hid_printA/usb/_old/old_code.cpp
