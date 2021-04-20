@@ -77,7 +77,6 @@ const uint16_t color_red = pico_display.create_pen(220, 30, 30);
 void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
 void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
-void initial_gui(PicoDisplay pico_display);
 void icon_draw(icon_t icon, bool flip, uint16_t c, PicoDisplay pico_display);
 
 /*------------- MAIN -------------*/
@@ -104,7 +103,7 @@ int main(void) {
     pico_display.init(); // 240 x 135 pixel
     pico_display.set_backlight(150);
     pico_display.set_font(&font8);
-    initial_gui(pico_display);
+    memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
     
     Rect rectBtnA(20, 20, 170, 60); // on/off
     Rect rectBtnB(20, 97, 100, 30); // character select
@@ -191,10 +190,12 @@ void icon_draw(icon_t icon, bool flip, uint16_t c, PicoDisplay pico_display) {
 
 void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
     // clear all buttons
-    pico_display.set_pen(color_darkblue);
-    pico_display.rectangle(rectBtnA);
-    pico_display.rectangle(rectBtnX);
-    pico_display.rectangle(rectBtnY);
+    // pico_display.set_pen(color_darkblue);
+    // pico_display.rectangle(rectBtnA);
+    // pico_display.rectangle(rectBtnX);
+    // pico_display.rectangle(rectBtnY);
+    memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
+    
     pico_display.set_pen(color_white);
 
     if (running) {                        
@@ -226,38 +227,6 @@ void update_gui(Rect rectBtnA, Rect rectBtnX, Rect rectBtnY, bool running, bool 
         icon_draw(icon_x, false, color_red, pico_display);
     } 
     pico_display.update(); // now we've done our drawing let's update the screen
-}
-void initial_gui(PicoDisplay pico_display) {
-    pico_display.set_pen(color_darkblue);
-    pico_display.clear(); // fill the screen with the current pen colour
-    pico_display.set_pen(color_orange); 
-    Rect rect_border(4, 4, PicoDisplay::WIDTH-8, PicoDisplay::HEIGHT-8);
-    pico_display.rectangle(rect_border);
-    pico_display.set_pen(color_darkblue); 
-    Rect rect_border_inner(6, 6, PicoDisplay::WIDTH-12, PicoDisplay::HEIGHT-12);
-    pico_display.rectangle(rect_border_inner);
-    
-    // TODO trials
-    if (false) {
-        pico_display.set_pen(color_white);
-        using namespace std;
-        streampos size;
-        char * memblock;
-
-        ifstream file ("240x135.raw", ios::in|ios::binary|ios::ate); // does not work
-        if (file.is_open()) {
-            size = file.tellg();
-            memblock = new char [size];
-            file.seekg (0, ios::beg);
-            file.read (memblock, size);
-            file.close();
-
-            pico_display.text("file access ok", Point(rect_border_inner.x, rect_border_inner.y), rect_border_inner.w);
-
-            delete[] memblock;
-        } else pico_display.text("file access error", Point(rect_border_inner.x, rect_border_inner.y), rect_border_inner.w);
-        // end of TODO
-    }
 }
 
 //--------------------------------------------------------------------+
