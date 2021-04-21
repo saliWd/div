@@ -172,13 +172,13 @@ void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_e
             pico_display.set_led(15,150,15); // green
         }
     } else {
-        pico_display.text("START", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
+        // pico_display.text("START", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
         pico_display.set_led(15,15,150);
     }                        
 
     
-    if (! mouse_enabled) draw_x(208, 28, 18);
-    if (! keyboard_enabled) draw_x(208, 114, 18);
+    if (! mouse_enabled) draw_x(208, 30, 18);
+    if (! keyboard_enabled) draw_x(208, 108, 18);
     pico_display.update(); // now we've done our drawing let's update the screen
 }
 void draw_x(int center_x, int center_y, int half_len) {
