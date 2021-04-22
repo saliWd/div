@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Pull in SDK (must be before project)
+set(PICO_SDK_PATH "../../pico-sdk")
 include(pico_sdk_import.cmake)
 
 project(pico_examples C CXX ASM)
