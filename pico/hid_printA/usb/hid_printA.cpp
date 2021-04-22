@@ -35,7 +35,7 @@
 #include "tusb.h"
 
 #include "usb_descriptors.hpp"
-#include "background.hpp"
+#include "imgdata.hpp"
 
 #include "pico_display.hpp"
 #include "font8_data.hpp"
@@ -77,6 +77,7 @@ void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
 void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void draw_x(int center_x, int center_y, int half_len);
+void replace_img(uint16_t* new_img, int x, int y, int width, int height);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -168,11 +169,11 @@ void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_e
             pico_display.text("nothing enabled...", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
             pico_display.set_led(15,15,150);
         } else {
-            pico_display.text("stop", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
+            // pico_display.text("stop", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);            
+            replace_img(stop_bmp, 49, 19, 54, 31);
             pico_display.set_led(15,150,15); // green
         }
-    } else {
-        // pico_display.text("START", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
+    } else {        
         pico_display.set_led(15,15,150);
     }                        
 
@@ -180,6 +181,11 @@ void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_e
     if (! mouse_enabled) draw_x(208, 30, 18);
     if (! keyboard_enabled) draw_x(208, 108, 18);
     pico_display.update(); // now we've done our drawing let's update the screen
+}
+void replace_img(uint16_t* new_img, int x, int y, int width, int height) {    
+    uint16_t* startPixel;
+    startPixel = buffer + 240 * y + x;
+    memcpy(startPixel, new_img, 20); // TODO: copying 10 pixels for the moment
 }
 void draw_x(int center_x, int center_y, int half_len) {
     pico_display.set_pen(color_red);

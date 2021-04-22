@@ -1,7 +1,13 @@
 import png # if that one is not yet installed: pip install pypng
 
-infile = "240x135.png"
-outfile_h = "../hid_printA/usb/background.hpp"
+outfile_imgdata = "../hid_printA/usb/imgdata.hpp"
+png_reader=png.Reader("240x135.png")
+image_data_bg = png_reader.asRGBA8()
+print ("PNG file. Width = {}, height = {}".format(image_data_bg[0], image_data_bg[1]))
+png_reader=png.Reader("54x31_49.19.png")
+image_data_stop = png_reader.asRGBA8()
+print ("PNG file. Width = {}, height = {}".format(image_data_stop[0], image_data_stop[1]))
+
 
 def color_to_bytes (color):
     r, g, b = color
@@ -15,30 +21,36 @@ def color_to_bytes (color):
 def padhexa(s):
     return s[2:].zfill(4)
 
-png_reader=png.Reader(infile)
-image_data = png_reader.asRGBA8()
 
-with open(outfile_h, "w") as file_h:
-    print ("PNG file \nwidth {}\nheight {}\n".format(image_data[0], image_data[1]))
-    lineCounter = 0
-    file_h.write("#ifndef BACKGROUND_H_\n#define BACKGROUND_H_\n")
+def writeHexVals(r,g,b,file_h,line_counter,lastElem):
+    img_bytes = color_to_bytes ((r,g,b)) # convert to (RGB565)
+    file_h.write("    0x")
+    two_byte_string = padhexa(hex(img_bytes[1]*256 + img_bytes[0]))
+    file_h.write(two_byte_string)
+    if line_counter == (lastElem):
+        file_h.write("\n")
+    else:
+        file_h.write(", \n")
+    return line_counter + 1
+
+
+with open(outfile_imgdata, "w") as file_h:
+    file_h.write("#ifndef IMGDATA_H_\n#define IMGDATA_H_\n")
+
+    line_counter = 0
     file_h.write("uint16_t background_bmp[] = {\n")
-
-    for row in image_data[2]:
+    for row in image_data_bg[2]:
         for r, g, b, a in zip(row[::4], row[1::4], row[2::4], row[3::4]):
             #print ("This pixel {:02x}{:02x}{:02x} {:02x}".format(r, g, b, a))
-            # convert to (RGB565)
-            img_bytes = color_to_bytes ((r,g,b))
+            line_counter = writeHexVals(r,g,b,file_h,line_counter,240*135-1)
+    file_h.write("};\n")
 
-            file_h.write("    0x")
-            twoByteString = padhexa(hex(img_bytes[1]*256 + img_bytes[0]))
-            file_h.write(twoByteString)
-            if lineCounter == (240 * 135 - 1):
-                file_h.write("\n")
-            else:
-                file_h.write(", \n")
-            lineCounter = lineCounter + 1
+    line_counter = 0
+    file_h.write("uint16_t stop_bmp[] = {\n")
+    for row in image_data_stop[2]:
+        for r, g, b, a in zip(row[::4], row[1::4], row[2::4], row[3::4]):
+            line_counter = writeHexVals(r,g,b,file_h,line_counter,54*31-1)
+    file_h.write("};\n")
 
-    file_h.write("};\n#endif \n")
-
+    file_h.write("#endif \n")
 file_h.close()
