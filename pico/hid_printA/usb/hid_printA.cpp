@@ -72,8 +72,8 @@ const uint16_t color_red = pico_display.create_pen(240, 20, 20);
 
 void hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
-void draw_x(int center_x, int center_y, int half_len);
-void replace_img(uint16_t* new_img, int x, int y, int width, int height);
+void draw_x(Point center, int half_len);
+void replace_img(uint16_t* new_img, Point pos, int width, int height);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -92,15 +92,13 @@ int main(void) {
     uint16_t debounce_cnt = 0;
 
     while (1) {
-        if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button    
-            else if (pico_display.is_pressed(pico_display.B)) which_button = 2;
-            else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
-            else if (pico_display.is_pressed(pico_display.Y)) which_button = 4;
-            else which_button = 0;
+        if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
+        else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
+        else if (pico_display.is_pressed(pico_display.Y)) which_button = 4;
+        else which_button = 0;
 
         if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If not 0, just ignore the pressed button                
             if (which_button == 1) running = !running;
-            if (which_button == 2) ; // TODO: functionality button B
             if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
             if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
 
@@ -151,7 +149,7 @@ void tud_resume_cb(void) {
 // various helper functions
 //--------------------------------------------------------------------+
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
-    // TODO: this is overkill, need only the 'active area'
+    // TODO: this is overkill, need to replace only the 'active area'
     memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
     
     if (running) {                        
@@ -159,35 +157,35 @@ void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDis
             pico_display.set_pen(color_white);
             pico_display.text("nothing enabled...", Point(20, 70), 170);
         }
-        replace_img(stop_bmp, 49, 19, 54, 31);
+        replace_img(stop_bmp, Point(49, 19), 54, 31);
         pico_display.set_led(15,150,15); // green
     } else {        
         pico_display.set_led(15,15,150);
     }                        
 
     
-    if (! mouse_enabled) draw_x(208, 30, 18);
-    if (! keyboard_enabled) draw_x(208, 108, 18);
+    if (! mouse_enabled) draw_x(Point(208, 30), 18);
+    if (! keyboard_enabled) draw_x(Point(208, 108), 18);
     pico_display.update(); // now we've done our drawing let's update the screen
 }
 
 // replace part of the buffer
-void replace_img(uint16_t* new_img, int x, int y, int width, int height) {    
+void replace_img(uint16_t* new_img, Point pos, int width, int height) {    
     uint16_t* startPixel;
     uint16_t* startPixNewImg;
     for (int ay = 0; ay < height; ay++) {
-        startPixel = buffer + 240 * (y+ay) + x;
+        startPixel = buffer + 240 * (pos.y+ay) + pos.x;
         startPixNewImg = new_img + ay * width;
         memcpy(startPixel, startPixNewImg, 2*width);
     }
 }
 
-void draw_x(int center_x, int center_y, int half_len) {
+void draw_x(Point center, int half_len) {
     pico_display.set_pen(color_red);
     for (int xvar = -1; xvar < 2; xvar++) {
         for (int yvar = -1; yvar < 2; yvar++) {
-            pico_display.line(Point(center_x-half_len+xvar, center_y-half_len+yvar), Point(center_x+half_len+xvar, center_y+half_len+yvar));
-            pico_display.line(Point(center_x-half_len+xvar, center_y+half_len+yvar), Point(center_x+half_len+xvar, center_y-half_len+yvar));
+            pico_display.line(Point(center.x-half_len+xvar, center.y-half_len+yvar), Point(center.x+half_len+xvar, center.y+half_len+yvar));
+            pico_display.line(Point(center.x-half_len+xvar, center.y+half_len+yvar), Point(center.x+half_len+xvar, center.y-half_len+yvar));
         }
     } 
 }
