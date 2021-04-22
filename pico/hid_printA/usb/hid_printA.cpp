@@ -67,15 +67,11 @@ bool type_character = false;
 bool mouse_enabled = true;
 bool keyboard_enabled = false;
 
-const uint16_t color_orange = pico_display.create_pen(255, 165, 0);
-const uint16_t color_white = pico_display.create_pen(200, 200, 200);
-const uint16_t color_darkwhite = pico_display.create_pen(100, 100, 100);
-const uint16_t color_darkblue = pico_display.create_pen(10, 20, 30);
+const uint16_t color_white = pico_display.create_pen(255, 255, 255);
 const uint16_t color_red = pico_display.create_pen(240, 20, 20);
 
-void led_blinking_task(void);
 void hid_task(bool move_mouse, bool type_character);
-void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
+void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void draw_x(int center_x, int center_y, int half_len);
 void replace_img(uint16_t* new_img, int x, int y, int width, int height);
 
@@ -90,12 +86,7 @@ int main(void) {
     pico_display.set_backlight(150);
     pico_display.set_font(&font8);
     memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
-    
-    Rect rectBtnA(20, 20, 170, 60); // on/off
-    Rect rectBtnB(20, 97, 100, 30); // character select
-    
-    
-    update_gui(rectBtnA, running, mouse_enabled, keyboard_enabled, pico_display);
+    update_gui(running, mouse_enabled, keyboard_enabled, pico_display);
     
     uint8_t which_button = 0;
     uint16_t debounce_cnt = 0;
@@ -113,7 +104,7 @@ int main(void) {
             if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
             if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
 
-            update_gui(rectBtnA, running, mouse_enabled, keyboard_enabled, pico_display);
+            update_gui(running, mouse_enabled, keyboard_enabled, pico_display);
             move_mouse = running && mouse_enabled;
             type_character = running && keyboard_enabled;
 
@@ -159,20 +150,17 @@ void tud_resume_cb(void) {
 //--------------------------------------------------------------------+
 // various helper functions
 //--------------------------------------------------------------------+
-void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
+void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
+    // TODO: this is overkill, need only the 'active area'
     memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
     
-    pico_display.set_pen(color_white);
-
     if (running) {                        
         if (! (mouse_enabled || keyboard_enabled)) {
-            pico_display.text("nothing enabled...", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);
-            pico_display.set_led(15,15,150);
-        } else {
-            // pico_display.text("stop", Point(rectBtnA.x, rectBtnA.y), rectBtnA.w);            
-            replace_img(stop_bmp, 49, 19, 54, 31);
-            pico_display.set_led(15,150,15); // green
+            pico_display.set_pen(color_white);
+            pico_display.text("nothing enabled...", Point(20, 70), 170);
         }
+        replace_img(stop_bmp, 49, 19, 54, 31);
+        pico_display.set_led(15,150,15); // green
     } else {        
         pico_display.set_led(15,15,150);
     }                        
@@ -182,11 +170,18 @@ void update_gui(Rect rectBtnA, bool running, bool mouse_enabled, bool keyboard_e
     if (! keyboard_enabled) draw_x(208, 108, 18);
     pico_display.update(); // now we've done our drawing let's update the screen
 }
+
+// replace part of the buffer
 void replace_img(uint16_t* new_img, int x, int y, int width, int height) {    
     uint16_t* startPixel;
-    startPixel = buffer + 240 * y + x;
-    memcpy(startPixel, new_img, 20); // TODO: copying 10 pixels for the moment
+    uint16_t* startPixNewImg;
+    for (int ay = 0; ay < height; ay++) {
+        startPixel = buffer + 240 * (y+ay) + x;
+        startPixNewImg = new_img + ay * width;
+        memcpy(startPixel, startPixNewImg, 2*width);
+    }
 }
+
 void draw_x(int center_x, int center_y, int half_len) {
     pico_display.set_pen(color_red);
     for (int xvar = -1; xvar < 2; xvar++) {
@@ -306,19 +301,4 @@ void tud_hid_set_report_cb(uint8_t report_id, hid_report_type_t report_type, uin
     (void) report_type;
     (void) buffer;
     (void) bufsize;
-}
-
-//--------------------------------------------------------------------+
-// BLINKING TASK
-//--------------------------------------------------------------------+
-void led_blinking_task(void) {
-    static uint32_t start_ms = 0;
-    static bool led_state = false;
-
-    // Blink every interval ms
-    if (board_millis() - start_ms < blink_interval_ms) return; // not enough time
-    start_ms += blink_interval_ms;
-
-    board_led_write(led_state);
-    led_state = 1 - led_state; // toggle
 }
