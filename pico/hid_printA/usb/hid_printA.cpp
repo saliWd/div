@@ -54,6 +54,12 @@ enum {
     BLINK_MOUNTED = 1000,
     BLINK_SUSPENDED = 2500,
 };
+struct Rectangle {
+    uint8_t x = 0, y = 0, w = 0, h = 0;
+
+    Rectangle() = default;
+    Rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) : x(x), y(y), w(w), h(h) {}
+  };
 
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
@@ -73,7 +79,7 @@ const uint16_t color_red = pico_display.create_pen(240, 20, 20);
 void hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void draw_x(Point center, int half_len);
-void replace_img(uint16_t* new_img, Point pos, int width, int height);
+void replace_img(uint16_t* new_img, Rectangle rec);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -150,19 +156,18 @@ void tud_resume_cb(void) {
 //--------------------------------------------------------------------+
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
     // TODO: this is overkill, need to replace only the 'active area'
-    memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
+    memcpy(buffer, background_bmp, 240*135*2); // copy the whole background image from the .hpp file into the display buffer
     
     if (running) {                        
         if (! (mouse_enabled || keyboard_enabled)) {
             pico_display.set_pen(color_white);
             pico_display.text("nothing enabled...", Point(20, 70), 170);
         }
-        replace_img(stop_bmp, Point(49, 19), 54, 31);
+        replace_img(stop_bmp, Rectangle(49, 19, 54, 31));
         pico_display.set_led(15,150,15); // green
     } else {        
         pico_display.set_led(15,15,150);
     }                        
-
     
     if (! mouse_enabled) draw_x(Point(208, 30), 18);
     if (! keyboard_enabled) draw_x(Point(208, 108), 18);
@@ -170,13 +175,13 @@ void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDis
 }
 
 // replace part of the buffer
-void replace_img(uint16_t* new_img, Point pos, int width, int height) {    
+void replace_img(uint16_t* new_img, Rectangle rec) {    
     uint16_t* startPixel;
     uint16_t* startPixNewImg;
-    for (int ay = 0; ay < height; ay++) {
-        startPixel = buffer + 240 * (pos.y+ay) + pos.x;
-        startPixNewImg = new_img + ay * width;
-        memcpy(startPixel, startPixNewImg, 2*width);
+    for (int ay = 0; ay < rec.h; ay++) {
+        startPixel = buffer + 240 * (rec.y+ay) + rec.x;
+        startPixNewImg = new_img + ay * rec.w;
+        memcpy(startPixel, startPixNewImg, 2*rec.w);
     }
 }
 
