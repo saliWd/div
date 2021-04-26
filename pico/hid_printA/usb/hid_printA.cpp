@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 #include <iostream>
 #include <fstream>
@@ -55,6 +56,8 @@ struct Rectangle {
     Rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) : x(x), y(y), w(w), h(h) {}
 };
 
+#define PI 3.14159265
+
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
 using namespace pimoroni;
@@ -74,7 +77,8 @@ void hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void draw_x(Point center, int half_len);
 void replace_img(uint16_t *new_img, Rectangle rec);
-void animate_arrow(bool running);
+void animate_arrow();
+void animate_active();
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -111,11 +115,14 @@ int main(void) {
         }
         if (debounce_cnt > 0) {
             debounce_cnt--;
-            busy_wait_us_32(1000);
+            busy_wait_us_32(1000); // TODO: this might be an issue for the animation tasks
         }
         tud_task(); // tinyusb device task
         hid_task(move_mouse, type_character);
-        animate_arrow(running);
+
+        // TODO: below two tasks should run on the second core
+        if (running) animate_active();
+        else animate_arrow(); // don't need to display this animation if we're already running
     }
     return 0;
 }
@@ -151,13 +158,13 @@ void tud_resume_cb(void) {
 // various helper functions
 //--------------------------------------------------------------------+
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
-    // TODO: this is overkill, need to replace only the 'active area'
+    // this is a bit overkill, need to replace only the 'active area'
     memcpy(buffer, background_bmp, 240*135*2); // copy the whole background image from the .hpp file into the display buffer
     
     if (running) {                        
         if (! (mouse_enabled || keyboard_enabled)) {
             pico_display.set_pen(color_white);
-            pico_display.text("nothing enabled...", Point(20, 70), 170);
+            pico_display.text("nothing enabled...", Point(20, 100), 170);
         }
         replace_img(stop_bmp, Rectangle(49, 19, 54, 31));
         pico_display.set_led(15,150,15); // green
@@ -191,15 +198,13 @@ void draw_x(Point center, int half_len) {
     } 
 }
 
-void animate_arrow(bool running) {
+void animate_arrow() {
     const uint32_t interval_ms = 500; // poll every x ms
     static uint32_t start_ms = 0;
     
     if (board_millis() - start_ms < interval_ms) return; // not enough time
     start_ms += interval_ms;
     
-    if (running) return; // don't need to display this animation if we're already running
-
     static uint8_t sequence = 0;
     
     if (sequence < 3) sequence++; // 0 to 4
@@ -229,7 +234,46 @@ void animate_arrow(bool running) {
     replace_img(new_img, Rectangle(0, 21, 24, 22));
     pico_display.update();
 }
-//--------------------------------------------------------------------+
+void animate_active() {
+    const uint32_t interval_ms = 17; // poll every x ms
+    static uint32_t start_ms = 0;
+    
+    if (board_millis() - start_ms < interval_ms) return; // not enough time
+    start_ms += interval_ms;
+    
+    const uint8_t NUM_STEPS = 180;
+    static uint8_t sequence = 0;
+    uint8_t old_sequence = 0;
+    if (sequence < NUM_STEPS - 1) {
+        old_sequence = sequence;
+        sequence++;
+    } else {
+        old_sequence = NUM_STEPS - 1;
+        sequence = 0;
+    }
+    
+    // center_pix: x = 120, y = 67. have a 25px radius
+    const double PI2NUMSTEPS = 2 * PI / NUM_STEPS;
+    uint16_t old_centerpix_x = 120 + round(sin(double(old_sequence) * PI2NUMSTEPS) * 25.0);
+    uint16_t old_centerpix_y = 67 + round(cos(double(old_sequence) * PI2NUMSTEPS) * 25.0);
+    uint16_t centerpix_x = 120 + round(sin(double(sequence) * PI2NUMSTEPS) * 25.0);
+    uint16_t centerpix_y = 67 + round(cos(double(sequence) * PI2NUMSTEPS) * 25.0);
+
+    const int RADIUS = 4; // radius/size of the point which moves
+    const int SIZE = 2*RADIUS+1;
+    
+    // restore the old content
+    int offset;
+    for (int ay = 0; ay < SIZE; ay++) {
+        offset = 240 * (old_centerpix_y-RADIUS+ay) + old_centerpix_x-RADIUS;
+        memcpy(buffer + offset, background_bmp + offset, 2*SIZE);
+    }
+    // draw the new one
+    pico_display.set_pen(color_white);
+    pico_display.circle(Point(centerpix_x,centerpix_y),RADIUS);
+
+    pico_display.update();
+}//--------------------------------------------------------------------+
 // USB HID
 //--------------------------------------------------------------------+
 void hid_task(bool move_mouse, bool type_character) {
