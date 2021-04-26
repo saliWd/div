@@ -43,12 +43,6 @@
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
-
-/* Blink pattern
- * - 250 ms  : device not mounted
- * - 1000 ms : device mounted
- * - 2500 ms : device is suspended
- */
 enum {
     BLINK_NOT_MOUNTED = 250,
     BLINK_MOUNTED = 1000,
@@ -59,7 +53,7 @@ struct Rectangle {
 
     Rectangle() = default;
     Rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) : x(x), y(y), w(w), h(h) {}
-  };
+};
 
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
@@ -196,6 +190,7 @@ void draw_x(Point center, int half_len) {
         }
     } 
 }
+
 void animate_arrow(bool running) {
     const uint32_t interval_ms = 500; // poll every x ms
     static uint32_t start_ms = 0;
@@ -207,7 +202,7 @@ void animate_arrow(bool running) {
 
     static uint8_t sequence = 0;
     
-    if (sequence < 3) sequence++;
+    if (sequence < 3) sequence++; // 0 to 4
     else sequence = 0;
 
     uint16_t* new_img;
@@ -232,7 +227,7 @@ void animate_arrow(bool running) {
             new_img = arr0_bmp;    
     }
     replace_img(new_img, Rectangle(0, 21, 24, 22));
-    pico_display.update(); // now we've done our drawing let's update the screen
+    pico_display.update();
 }
 //--------------------------------------------------------------------+
 // USB HID

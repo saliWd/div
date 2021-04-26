@@ -1,6 +1,6 @@
 import png # if that one is not yet installed: pip install pypng
 
-outfile_imgdata = "../hid_printA/usb/imgdata.hpp"
+OUTFILE_IMGDATA = "../hid_printA/usb/imgdata.hpp"
 png_reader=png.Reader("240x135.png")
 image_data_bg = png_reader.asRGBA8()
 png_reader=png.Reader("54x31_49.19.png")
@@ -8,9 +8,8 @@ image_data_stop = png_reader.asRGBA8()
 
 image_data_arr = ["a","b","c","d","e"] # somehow a initialization is required...
 for i in range(5):
-  png_reader=png.Reader("arr_24x22_0.21/arr_"+str(i)+".png")
-  image_data_arr[i] = png_reader.asRGBA8()
-
+    png_reader=png.Reader("arr_24x22_0.21/arr_"+str(i)+".png")
+    image_data_arr[i] = png_reader.asRGBA8()
 
 def color_to_bytes (color):
     r, g, b = color
@@ -23,7 +22,6 @@ def color_to_bytes (color):
 
 def padhexa(s):
     return s[2:].zfill(4)
-
 
 def writeHexVals(r,g,b,file_h,line_counter,lastElem):
     img_bytes = color_to_bytes ((r,g,b)) # convert to (RGB565)
@@ -38,7 +36,7 @@ def writeHexVals(r,g,b,file_h,line_counter,lastElem):
     
 def writeBmpData(name,image_data,file_h):
     line_counter = 0
-    lastPix = image_data[0] * image_data[1] - 1; # denotes height and width
+    lastPix = image_data[0] * image_data[1] - 1 # denotes height and width
     print ("PNG file. Width = {}, height = {}".format(image_data[0], image_data[1]))
 
     file_h.write("uint16_t "+name+"[] = {\n")
@@ -49,7 +47,7 @@ def writeBmpData(name,image_data,file_h):
     file_h.write("};\n")
 
 
-with open(outfile_imgdata, "w") as file_h:
+with open(OUTFILE_IMGDATA, "w") as file_h:
     file_h.write("#ifndef IMGDATA_H_\n#define IMGDATA_H_\n")
 
     writeBmpData("background_bmp",image_data_bg,file_h)
