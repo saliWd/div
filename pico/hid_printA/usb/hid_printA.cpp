@@ -79,7 +79,8 @@ const uint16_t color_red = pico_display.create_pen(240, 20, 20);
 void hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void draw_x(Point center, int half_len);
-void replace_img(uint16_t* new_img, Rectangle rec);
+void replace_img(uint16_t *new_img, Rectangle rec);
+void animate_arrow(bool running);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -120,6 +121,7 @@ int main(void) {
         }
         tud_task(); // tinyusb device task
         hid_task(move_mouse, type_character);
+        animate_arrow(running);
     }
     return 0;
 }
@@ -193,6 +195,44 @@ void draw_x(Point center, int half_len) {
             pico_display.line(Point(center.x-half_len+xvar, center.y+half_len+yvar), Point(center.x+half_len+xvar, center.y-half_len+yvar));
         }
     } 
+}
+void animate_arrow(bool running) {
+    const uint32_t interval_ms = 500; // poll every x ms
+    static uint32_t start_ms = 0;
+    
+    if (board_millis() - start_ms < interval_ms) return; // not enough time
+    start_ms += interval_ms;
+    
+    if (running) return; // don't need to display this animation if we're already running
+
+    static uint8_t sequence = 0;
+    
+    if (sequence < 3) sequence++;
+    else sequence = 0;
+
+    uint16_t* new_img;
+    
+    switch(sequence) { // the new sequence
+        case 0:
+            new_img = arr0_bmp;
+            break;
+        case 1:
+            new_img = arr1_bmp;
+            break;
+        case 2:
+            new_img = arr2_bmp;
+            break;
+        case 3:
+            new_img = arr3_bmp;
+            break;
+        case 4:
+            new_img = arr4_bmp;
+            break;
+        default:
+            new_img = arr0_bmp;    
+    }
+    replace_img(new_img, Rectangle(0, 21, 24, 22));
+    pico_display.update(); // now we've done our drawing let's update the screen
 }
 //--------------------------------------------------------------------+
 // USB HID
