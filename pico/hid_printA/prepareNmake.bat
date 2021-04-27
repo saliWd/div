@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+if not exist "build/" mkdir build
+
 :: Holzhammermethode, delete some dirs
 if exist "build/CMakeFiles" del /S /Q "build/CMakeFiles" >nul 2>&1
 if exist "build/usb" del /S /Q "build/usb" >nul 2>&1

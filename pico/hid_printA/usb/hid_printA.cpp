@@ -77,8 +77,8 @@ void hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void draw_x(Point center, int half_len);
 void replace_img(uint16_t *new_img, Rectangle rec);
-void animate_arrow();
-void animate_active();
+void animate_arrow(bool running);
+void animate_active(bool running);
 
 /*------------- MAIN -------------*/
 int main(void) {
@@ -121,8 +121,8 @@ int main(void) {
         hid_task(move_mouse, type_character);
 
         // TODO: below two tasks should run on the second core
-        if (running) animate_active();
-        else animate_arrow(); // don't need to display this animation if we're already running
+        animate_active(running);
+        animate_arrow(running);
     }
     return 0;
 }
@@ -157,6 +157,7 @@ void tud_resume_cb(void) {
 //--------------------------------------------------------------------+
 // various helper functions
 //--------------------------------------------------------------------+
+// clears the whole display and draws the icons in correct state (active/inactive)
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display) {
     // this is a bit overkill, need to replace only the 'active area'
     memcpy(buffer, background_bmp, 240*135*2); // copy the whole background image from the .hpp file into the display buffer
@@ -177,7 +178,7 @@ void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDis
     pico_display.update(); // now we've done our drawing let's update the screen
 }
 
-// replace part of the buffer
+// replace part of the buffer with new image
 void replace_img(uint16_t* new_img, Rectangle rec) {    
     uint16_t* startPixel;
     uint16_t* startPixNewImg;
@@ -188,6 +189,7 @@ void replace_img(uint16_t* new_img, Rectangle rec) {
     }
 }
 
+// draws a red X over the center point
 void draw_x(Point center, int half_len) {
     pico_display.set_pen(color_red);
     for (int xvar = -1; xvar < 2; xvar++) {
@@ -198,59 +200,45 @@ void draw_x(Point center, int half_len) {
     } 
 }
 
-void animate_arrow() {
+// plays a small animation by replacing part of the buffer
+void animate_arrow(bool running) {
     const uint32_t interval_ms = 500; // poll every x ms
     static uint32_t start_ms = 0;
     
     if (board_millis() - start_ms < interval_ms) return; // not enough time
     start_ms += interval_ms;
+
+    if (running) return; // nothing to animate if we're running already
     
     static uint8_t sequence = 0;
     
     if (sequence < 3) sequence++; // 0 to 4
     else sequence = 0;
 
-    uint16_t* new_img;
-    
-    switch(sequence) { // the new sequence
-        case 0:
-            new_img = arr0_bmp;
-            break;
-        case 1:
-            new_img = arr1_bmp;
-            break;
-        case 2:
-            new_img = arr2_bmp;
-            break;
-        case 3:
-            new_img = arr3_bmp;
-            break;
-        case 4:
-            new_img = arr4_bmp;
-            break;
-        default:
-            new_img = arr0_bmp;    
-    }
+    uint16_t* new_img = arr0_bmp;
+    if (sequence == 1) new_img = arr1_bmp;
+    else if (sequence == 2) new_img = arr2_bmp;
+    else if (sequence == 3) new_img = arr3_bmp;
+    else if (sequence == 4) new_img = arr4_bmp;
     replace_img(new_img, Rectangle(0, 21, 24, 22));
     pico_display.update();
 }
-void animate_active() {
-    const uint32_t interval_ms = 17; // poll every x ms
+
+// plays a circle-around animation
+void animate_active(bool running) {
+    const uint32_t interval_ms = 40; // poll every x ms
     static uint32_t start_ms = 0;
     
-    if (board_millis() - start_ms < interval_ms) return; // not enough time
+    if (board_millis() - start_ms < interval_ms) return;
     start_ms += interval_ms;
+
+    if (!running) return; // nothing to animate if we're not running
     
     const uint8_t NUM_STEPS = 180;
     static uint8_t sequence = 0;
-    uint8_t old_sequence = 0;
-    if (sequence < NUM_STEPS - 1) {
-        old_sequence = sequence;
-        sequence++;
-    } else {
-        old_sequence = NUM_STEPS - 1;
-        sequence = 0;
-    }
+    uint8_t old_sequence = sequence;
+    if (sequence < NUM_STEPS - 1) sequence++;
+    else sequence = 0;
     
     // center_pix: x = 120, y = 67. have a 25px radius
     const double PI2NUMSTEPS = 2 * PI / NUM_STEPS;
@@ -273,7 +261,8 @@ void animate_active() {
     pico_display.circle(Point(centerpix_x,centerpix_y),RADIUS);
 
     pico_display.update();
-}//--------------------------------------------------------------------+
+}
+//--------------------------------------------------------------------+
 // USB HID
 //--------------------------------------------------------------------+
 void hid_task(bool move_mouse, bool type_character) {
