@@ -41,6 +41,8 @@
 #include "pico_display.hpp"
 #include "font8_data.hpp"
 
+#include "pico/multicore.h"
+
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
@@ -80,6 +82,25 @@ void replace_img(uint16_t *new_img, Rectangle rec);
 void animate_arrow(bool running);
 void animate_active(bool running);
 
+
+void core1_entry() {
+ 
+    multicore_fifo_push_blocking(123);
+ 
+    uint32_t g = multicore_fifo_pop_blocking();
+ 
+    if (g != 123)
+        ;// printf("Hmm, that's not right on core 1!\n");
+    else
+        ;// printf("Its all gone well on core 1!");
+    bool running = false;
+
+    while (1) {
+        animate_active(running);
+        animate_arrow(running);
+    }
+}
+
 /*------------- MAIN -------------*/
 int main(void) {
     board_init();
@@ -96,6 +117,21 @@ int main(void) {
     uint8_t which_button = 0;
     uint16_t debounce_cnt = 0;
 
+    // TODO: multicore stuff
+    /* 
+    multicore_launch_core1(core1_entry);
+ 
+    // Wait for it to start up
+ 
+    uint32_t g = multicore_fifo_pop_blocking();
+ 
+    if (g != 123)
+        printf("Hmm, that's not right on core 0!\n");
+    else {
+        multicore_fifo_push_blocking(123);
+        printf("It's all gone well on core 0!");
+    }
+    */
     while (1) {
         if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
         else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
