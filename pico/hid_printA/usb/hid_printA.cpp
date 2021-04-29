@@ -41,6 +41,7 @@
 #include "pico_display.hpp"
 #include "font8_data.hpp"
 
+// #include "pico/stdlib.h"
 #include "pico/multicore.h"
 
 //--------------------------------------------------------------------+
@@ -59,6 +60,7 @@ struct Rectangle {
 };
 
 #define PI 3.14159265
+#define MULTICORE_FLAG 123
 
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
@@ -85,19 +87,19 @@ void animate_active(bool running);
 
 void core1_entry() {
  
-    multicore_fifo_push_blocking(123);
+    multicore_fifo_push_blocking(MULTICORE_FLAG);
  
     uint32_t g = multicore_fifo_pop_blocking();
  
-    if (g != 123)
-        ;// printf("Hmm, that's not right on core 1!\n");
-    else
-        ;// printf("Its all gone well on core 1!");
-    bool running = false;
+    if (g != MULTICORE_FLAG) ;// printf("Hmm, that's not right on core 1!\n");
+    else ;// printf("Its all gone well on core 1!");
+    
+    //bool running = false;
 
     while (1) {
-        animate_active(running);
-        animate_arrow(running);
+        sleep_ms(1000);
+        // animate_active(running);
+        // animate_arrow(running);
     }
 }
 
@@ -118,20 +120,16 @@ int main(void) {
     uint16_t debounce_cnt = 0;
 
     // TODO: multicore stuff
-    /* 
-    multicore_launch_core1(core1_entry);
- 
-    // Wait for it to start up
- 
-    uint32_t g = multicore_fifo_pop_blocking();
- 
-    if (g != 123)
-        printf("Hmm, that's not right on core 0!\n");
+    multicore_launch_core1(core1_entry);    
+    uint32_t g = multicore_fifo_pop_blocking(); // Wait for it to start up
+
+    
+    if (g != MULTICORE_FLAG) ; // printf("Hmm, that's not right on core 0!\n");
     else {
-        multicore_fifo_push_blocking(123);
-        printf("It's all gone well on core 0!");
+        multicore_fifo_push_blocking(MULTICORE_FLAG);
+        // printf("It's all gone well on core 0!");
     }
-    */
+    
     while (1) {
         if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
         else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
