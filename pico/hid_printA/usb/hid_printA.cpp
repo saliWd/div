@@ -60,7 +60,9 @@ struct Rectangle {
 };
 
 #define PI 3.14159265
+#define MULTICORE_ENABLE false
 #define MULTICORE_FLAG 123
+#define MULTI_DEBUG true
 
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
@@ -87,31 +89,22 @@ void animate_active(bool running);
 
 
 void core1_entry() {
- 
-    multicore_fifo_push_blocking(MULTICORE_FLAG);
- 
-    uint32_t g = multicore_fifo_pop_blocking();
- 
-    if (g == MULTICORE_FLAG) { // all as expected
-        pico_display.set_pen(color_green);
+    multicore_fifo_push_blocking(MULTICORE_FLAG); // signal core 0 the startup is done
+    uint32_t g = multicore_fifo_pop_blocking(); // check communication from core 0 to core 1
+    if (MULTI_DEBUG) {
+        if (g == MULTICORE_FLAG) pico_display.set_pen(color_green);  // all as expected
+        else pico_display.set_pen(color_red); // something wrong
         pico_display.circle(Point(120,67),10);
-    }else { // something wrong
-        pico_display.set_pen(color_red);
-        pico_display.circle(Point(120,67),10);
+        pico_display.update();
     }
-    
     bool running_core1 = false;
-
     while (1) {
-        if (multicore_fifo_rvalid()) {
-            running_core1 = multicore_fifo_pop_blocking(); // returns 32bit unsigned. Converting it to bool
-        }        
+        if (multicore_fifo_rvalid()) running_core1 = multicore_fifo_pop_blocking(); // returns 32bit unsigned. Converting it to bool
         animate_active(running_core1);
         animate_arrow(running_core1);
     }
 }
 
-/*------------- MAIN -------------*/
 int main(void) {
     board_init();
     tusb_init();
@@ -127,17 +120,20 @@ int main(void) {
     uint8_t which_button = 0;
     uint16_t debounce_cnt = 0;
 
-    // multicore init
-    multicore_launch_core1(core1_entry);    
-    uint32_t g = multicore_fifo_pop_blocking(); // Blocks until Wait for it to start up
+    if (MULTICORE_ENABLE) {
+        // multicore init
+        multicore_launch_core1(core1_entry);    
+        uint32_t g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
 
-    if (g == MULTICORE_FLAG) {
-        pico_display.set_pen(color_green);
-        multicore_fifo_push_blocking(MULTICORE_FLAG);
-    } else {
-        pico_display.set_pen(color_green);
-    }
-    pico_display.circle(Point(140,67),10); // core0 signal
+        if (MULTI_DEBUG) {
+            if (g == MULTICORE_FLAG) {
+                pico_display.set_pen(color_green);
+                multicore_fifo_push_blocking(MULTICORE_FLAG);
+            } else pico_display.set_pen(color_red);
+            pico_display.circle(Point(140,67),10); // core0 signal
+            pico_display.update();
+        } else if (g == MULTICORE_FLAG) multicore_fifo_push_blocking(MULTICORE_FLAG);
+    } 
     
     while (1) {
         if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
@@ -155,10 +151,12 @@ int main(void) {
             type_character = running && keyboard_enabled;
 
             debounce_cnt = 500;
-            if (multicore_fifo_wready()) multicore_fifo_push_blocking(running);  // update core1 running variable
-            else { // we have an issue, can't write into FIFO because it's full 
-                pico_display.set_pen(color_white);
-                pico_display.text("Fifo Error", Point(20, 100), 170);
+            if (MULTICORE_ENABLE) {
+                if (multicore_fifo_wready()) multicore_fifo_push_blocking(running);  // update core1 running variable
+                else { // we have an issue, can't write into FIFO because it's full 
+                    pico_display.set_pen(color_white);
+                    pico_display.text("Fifo Error", Point(20, 100), 170);
+                }
             }
         }
         if (debounce_cnt > 0) {
@@ -167,6 +165,10 @@ int main(void) {
         }
         tud_task(); // tinyusb device task
         hid_task(move_mouse, type_character);
+        if (! MULTICORE_ENABLE) {
+            animate_active(running);
+            animate_arrow(running);
+        }
     }
     return 0;
 }
@@ -270,7 +272,7 @@ void animate_arrow(bool running) {
 
 // plays a circle-around animation
 void animate_active(bool running) {
-    const uint32_t interval_ms = 40; // poll every x ms
+    const uint32_t interval_ms = 30; // poll every x ms
     static uint32_t start_ms = 0;
     
     if (board_millis() - start_ms < interval_ms) return;
