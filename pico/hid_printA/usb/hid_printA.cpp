@@ -76,6 +76,7 @@ bool keyboard_enabled = false;
 
 const uint16_t color_white = pico_display.create_pen(255, 255, 255);
 const uint16_t color_red = pico_display.create_pen(240, 20, 20);
+const uint16_t color_green = pico_display.create_pen(20, 240, 20);
 
 void hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
@@ -91,15 +92,22 @@ void core1_entry() {
  
     uint32_t g = multicore_fifo_pop_blocking();
  
-    if (g != MULTICORE_FLAG) ;// printf("Hmm, that's not right on core 1!\n");
-    else ;// printf("Its all gone well on core 1!");
+    if (g == MULTICORE_FLAG) { // all as expected
+        pico_display.set_pen(color_green);
+        pico_display.circle(Point(120,67),10);
+    }else { // something wrong
+        pico_display.set_pen(color_red);
+        pico_display.circle(Point(120,67),10);
+    }
     
-    //bool running = false;
+    bool running_core1 = false;
 
     while (1) {
-        sleep_ms(1000);
-        // animate_active(running);
-        // animate_arrow(running);
+        if (multicore_fifo_rvalid()) {
+            running_core1 = multicore_fifo_pop_blocking(); // returns 32bit unsigned. Converting it to bool
+        }        
+        animate_active(running_core1);
+        animate_arrow(running_core1);
     }
 }
 
@@ -119,16 +127,17 @@ int main(void) {
     uint8_t which_button = 0;
     uint16_t debounce_cnt = 0;
 
-    // TODO: multicore stuff
+    // multicore init
     multicore_launch_core1(core1_entry);    
-    uint32_t g = multicore_fifo_pop_blocking(); // Wait for it to start up
+    uint32_t g = multicore_fifo_pop_blocking(); // Blocks until Wait for it to start up
 
-    
-    if (g != MULTICORE_FLAG) ; // printf("Hmm, that's not right on core 0!\n");
-    else {
+    if (g == MULTICORE_FLAG) {
+        pico_display.set_pen(color_green);
         multicore_fifo_push_blocking(MULTICORE_FLAG);
-        // printf("It's all gone well on core 0!");
+    } else {
+        pico_display.set_pen(color_green);
     }
+    pico_display.circle(Point(140,67),10); // core0 signal
     
     while (1) {
         if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
@@ -146,6 +155,11 @@ int main(void) {
             type_character = running && keyboard_enabled;
 
             debounce_cnt = 500;
+            if (multicore_fifo_wready()) multicore_fifo_push_blocking(running);  // update core1 running variable
+            else { // we have an issue, can't write into FIFO because it's full 
+                pico_display.set_pen(color_white);
+                pico_display.text("Fifo Error", Point(20, 100), 170);
+            }
         }
         if (debounce_cnt > 0) {
             debounce_cnt--;
@@ -153,10 +167,6 @@ int main(void) {
         }
         tud_task(); // tinyusb device task
         hid_task(move_mouse, type_character);
-
-        // TODO: below two tasks should run on the second core
-        animate_active(running);
-        animate_arrow(running);
     }
     return 0;
 }
