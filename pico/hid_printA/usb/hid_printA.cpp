@@ -60,9 +60,7 @@ struct Rectangle {
 };
 
 #define PI 3.14159265
-#define MULTICORE_ENABLE false
-#define MULTICORE_FLAG 123
-#define MULTI_DEBUG true
+#define MULTICORE_FLAG 16384
 
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
@@ -70,11 +68,6 @@ using namespace pimoroni;
 
 uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
 PicoDisplay pico_display(buffer);
-bool running = false;
-bool move_mouse = false;
-bool type_character = false;
-bool mouse_enabled = true;
-bool keyboard_enabled = false;
 
 const uint16_t color_white = pico_display.create_pen(255, 255, 255);
 const uint16_t color_red = pico_display.create_pen(240, 20, 20);
@@ -86,20 +79,37 @@ void draw_x(Point center, int half_len);
 void replace_img(uint16_t *new_img, Rectangle rec);
 void animate_arrow(bool running);
 void animate_active(bool running);
+uint32_t get_status(bool running, bool mouse_enabled, bool keyboard_enabled);
+bool get_status_bit(uint16_t bit, uint32_t status);
 
-
+// core1 is responsible for all the display/buffer accesses
 void core1_entry() {
     multicore_fifo_push_blocking(MULTICORE_FLAG); // signal core 0 the startup is done
-    uint32_t g = multicore_fifo_pop_blocking(); // check communication from core 0 to core 1
-    if (MULTI_DEBUG) {
-        if (g == MULTICORE_FLAG) pico_display.set_pen(color_green);  // all as expected
-        else pico_display.set_pen(color_red); // something wrong
-        pico_display.circle(Point(120,67),10);
-        pico_display.update();
-    }
     bool running_core1 = false;
+    bool mouse_enabled_core1 = true;
+    bool keyboard_enabled_core1 = false;
+
+    // setup the display
+    pico_display.init(); // 240 x 135 pixel
+    pico_display.set_backlight(150);
+    pico_display.set_led(15,15,150); // blue
+    pico_display.set_font(&font8);
+    memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
+    update_gui(running_core1, mouse_enabled_core1, keyboard_enabled_core1, pico_display);
+    
+    uint32_t g = multicore_fifo_pop_blocking(); // check communication from core 0 to core 1
+    if (g != MULTICORE_FLAG) pico_display.set_led(150,15,15); // red
+    
+    uint32_t status_core1 = 0;
+    
     while (1) {
-        if (multicore_fifo_rvalid()) running_core1 = multicore_fifo_pop_blocking(); // returns 32bit unsigned. Converting it to bool
+        if (multicore_fifo_rvalid()) {
+            status_core1 = multicore_fifo_pop_blocking();
+            running_core1 = get_status_bit(0, status_core1);
+            mouse_enabled_core1 = get_status_bit(1, status_core1);
+            keyboard_enabled_core1 = get_status_bit(2, status_core1);
+            update_gui(running_core1, mouse_enabled_core1, keyboard_enabled_core1, pico_display);
+        } 
         animate_active(running_core1);
         animate_arrow(running_core1);
     }
@@ -110,31 +120,22 @@ int main(void) {
     tusb_init();
     srand(time(0));
 
-    // setup the display
-    pico_display.init(); // 240 x 135 pixel
-    pico_display.set_backlight(150);
-    pico_display.set_font(&font8);
-    memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
-    update_gui(running, mouse_enabled, keyboard_enabled, pico_display);
-    
     uint8_t which_button = 0;
-    uint16_t debounce_cnt = 0;
+    uint16_t debounce_cnt = 500;
+    bool running = false;
+    bool move_mouse = false;
+    bool type_character = false;
+    bool mouse_enabled = true;
+    bool keyboard_enabled = false;
 
-    if (MULTICORE_ENABLE) {
-        // multicore init
-        multicore_launch_core1(core1_entry);    
-        uint32_t g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
 
-        if (MULTI_DEBUG) {
-            if (g == MULTICORE_FLAG) {
-                pico_display.set_pen(color_green);
-                multicore_fifo_push_blocking(MULTICORE_FLAG);
-            } else pico_display.set_pen(color_red);
-            pico_display.circle(Point(140,67),10); // core0 signal
-            pico_display.update();
-        } else if (g == MULTICORE_FLAG) multicore_fifo_push_blocking(MULTICORE_FLAG);
-    } 
+    // multicore init
+    multicore_launch_core1(core1_entry);    
+    uint32_t g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
     
+    if (g == MULTICORE_FLAG) multicore_fifo_push_blocking(MULTICORE_FLAG);
+    else pico_display.set_led(150,15,15); // red
+
     while (1) {
         if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
         else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
@@ -146,29 +147,19 @@ int main(void) {
             if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
             if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
 
-            update_gui(running, mouse_enabled, keyboard_enabled, pico_display);
             move_mouse = running && mouse_enabled;
             type_character = running && keyboard_enabled;
 
             debounce_cnt = 500;
-            if (MULTICORE_ENABLE) {
-                if (multicore_fifo_wready()) multicore_fifo_push_blocking(running);  // update core1 running variable
-                else { // we have an issue, can't write into FIFO because it's full 
-                    pico_display.set_pen(color_white);
-                    pico_display.text("Fifo Error", Point(20, 100), 170);
-                }
-            }
+            if (multicore_fifo_wready()) multicore_fifo_push_blocking(get_status(running,mouse_enabled,keyboard_enabled));  // update core1 running variable
+            else pico_display.set_led(150,15,15); // red // we have an issue, can't write into FIFO because it's full 
         }
         if (debounce_cnt > 0) {
             debounce_cnt--;
-            busy_wait_us_32(1000); // TODO: this might be an issue for the animation tasks
+            busy_wait_us_32(1000);
         }
         tud_task(); // tinyusb device task
-        hid_task(move_mouse, type_character);
-        if (! MULTICORE_ENABLE) {
-            animate_active(running);
-            animate_arrow(running);
-        }
+        hid_task(move_mouse, type_character);        
     }
     return 0;
 }
@@ -213,10 +204,7 @@ void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDis
             pico_display.set_pen(color_white);
             pico_display.text("nothing enabled...", Point(20, 100), 170);
         }
-        replace_img(stop_bmp, Rectangle(49, 19, 54, 31));
-        pico_display.set_led(15,150,15); // green
-    } else {        
-        pico_display.set_led(15,15,150);
+        replace_img(stop_bmp, Rectangle(49, 19, 54, 31));        
     }                        
     
     if (! mouse_enabled) draw_x(Point(208, 30), 18);
@@ -308,6 +296,23 @@ void animate_active(bool running) {
 
     pico_display.update();
 }
+
+uint32_t get_status(bool running, bool mouse_enabled, bool keyboard_enabled) {
+    uint32_t status = 0;
+    if (running) status += 1; // bit0
+    if (mouse_enabled) status += 2; // bit1
+    if (keyboard_enabled) status += 4; // bit2
+    return status;
+}
+
+bool get_status_bit(uint16_t bit, uint32_t status) {
+    // TODO code more nicely
+    if (bit == 0) return status & 0x00000001;
+    if (bit == 1) return status & 0x00000002;
+    if (bit == 2) return status & 0x00000004;
+    return false; 
+}
+
 //--------------------------------------------------------------------+
 // USB HID
 //--------------------------------------------------------------------+
