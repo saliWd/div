@@ -40,8 +40,6 @@
 
 #include "pico_display.hpp"
 #include "font8_data.hpp"
-
-// #include "pico/stdlib.h"
 #include "pico/multicore.h"
 
 //--------------------------------------------------------------------+
@@ -60,7 +58,7 @@ struct Rectangle {
 };
 
 #define PI 3.14159265
-#define MULTICORE_FLAG 16384
+#define MULTICORE_FLAG 16384 // arbitrary value, just not using the lower bits
 
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
@@ -71,7 +69,6 @@ PicoDisplay pico_display(buffer);
 
 const uint16_t color_white = pico_display.create_pen(255, 255, 255);
 const uint16_t color_red = pico_display.create_pen(240, 20, 20);
-const uint16_t color_green = pico_display.create_pen(20, 240, 20);
 
 void hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
@@ -115,13 +112,14 @@ void core1_entry() {
     }
 }
 
+// core 0 handles all the button inputs and the USB keyboard/mouse stuff
 int main(void) {
     board_init();
     tusb_init();
     srand(time(0));
 
     uint8_t which_button = 0;
-    uint16_t debounce_cnt = 500;
+    uint16_t debounce_cnt = 500; // make sure there is not button press at the beginning
     bool running = false;
     bool move_mouse = false;
     bool type_character = false;
@@ -133,7 +131,7 @@ int main(void) {
     multicore_launch_core1(core1_entry);    
     uint32_t g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
     
-    if (g == MULTICORE_FLAG) multicore_fifo_push_blocking(MULTICORE_FLAG);
+    if (g == MULTICORE_FLAG) multicore_fifo_push_blocking(MULTICORE_FLAG); // check communication to core1
     else pico_display.set_led(150,15,15); // red
 
     while (1) {
@@ -142,7 +140,7 @@ int main(void) {
         else if (pico_display.is_pressed(pico_display.Y)) which_button = 4;
         else which_button = 0;
 
-        if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If not 0, just ignore the pressed button                
+        if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If debounce is not 0, just ignore the pressed button                
             if (which_button == 1) running = !running;
             if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
             if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
@@ -306,11 +304,9 @@ uint32_t get_status(bool running, bool mouse_enabled, bool keyboard_enabled) {
 }
 
 bool get_status_bit(uint16_t bit, uint32_t status) {
-    // TODO code more nicely
-    if (bit == 0) return status & 0x00000001;
-    if (bit == 1) return status & 0x00000002;
-    if (bit == 2) return status & 0x00000004;
-    return false; 
+    uint32_t bitmask = 1 << bit;
+    if (bit < 3)  return status & bitmask;
+    else return false; 
 }
 
 //--------------------------------------------------------------------+

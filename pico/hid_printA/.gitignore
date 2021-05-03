@@ -1,7 +1,6 @@
-.idea
 .vscode
-_deps
-cmake-*
-build
-.DS_Store
-*.pdf
+build/*
+# does not work as expected
+!build/usb/*
+build/usb/*
+!build/usb/hid_printA.uf2
