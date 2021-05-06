@@ -1,6 +1,0 @@
-.vscode
-build/*
-# TODO does not work as expected
-!build/usb/*
-build/usb/*
-!build/usb/hid_printA.uf2

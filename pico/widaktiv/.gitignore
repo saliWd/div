@@ -1,0 +1,6 @@
+.vscode
+!build/*
+build/*
+!build/usb/*
+build/usb/*
+!build/usb/widaktiv.uf2
