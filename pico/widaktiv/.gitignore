@@ -1,6 +1,7 @@
 .vscode
 !build/*
 build/*
+# TODO: does not work as expected
 !build/usb/*
 build/usb/*
 !build/usb/widaktiv.uf2
