@@ -1,0 +1,7 @@
+'op'-Part from stop
+- upper left coordinates: 50/19
+- width x height: 43x29
+
+arrows
+- upper left coordinates: 0/20
+- width x height: 23x19

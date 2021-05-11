@@ -1,14 +1,14 @@
 import png # if that one is not yet installed: pip install pypng
 
-OUTFILE_IMGDATA = "../hid_printA/usb/imgdata.hpp"
-png_reader=png.Reader("240x135.png")
+OUTFILE_IMGDATA = "../widaktiv/usb/imgdata.hpp"
+png_reader=png.Reader("background.png")
 image_data_bg = png_reader.asRGBA8()
-png_reader=png.Reader("54x31_49.19.png")
+png_reader=png.Reader("stop.png")
 image_data_stop = png_reader.asRGBA8()
 
-image_data_arr = ["a","b","c","d","e"] # somehow a initialization is required...
-for i in range(5):
-    png_reader=png.Reader("arr_24x22_0.21/arr_"+str(i)+".png")
+image_data_arr = ["0","1","2","3","4","5"] # initialization to get correct length
+for i in range(len(image_data_arr)):
+    png_reader=png.Reader("arrow/arr_"+str(i)+".png")
     image_data_arr[i] = png_reader.asRGBA8()
 
 def color_to_bytes (color):
@@ -52,8 +52,9 @@ with open(OUTFILE_IMGDATA, "w") as file_h:
 
     writeBmpData("background_bmp",image_data_bg,file_h)
     writeBmpData("stop_bmp",image_data_stop,file_h)
-    for i in range(5):
+    for i in range(len(image_data_arr)):
         writeBmpData("arr"+str(i)+"_bmp",image_data_arr[i],file_h)
     
     file_h.write("#endif \n")
 file_h.close()
+print ("wrote image data to "+OUTFILE_IMGDATA)

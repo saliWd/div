@@ -68,6 +68,7 @@ uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
 PicoDisplay pico_display(buffer);
 
 const uint16_t color_white = pico_display.create_pen(255, 255, 255);
+const uint16_t color_black = pico_display.create_pen(0, 0, 0);
 const uint16_t color_red = pico_display.create_pen(240, 20, 20);
 
 void hid_task(bool move_mouse, bool type_character);
@@ -202,7 +203,7 @@ void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDis
             pico_display.set_pen(color_white);
             pico_display.text("nothing enabled...", Point(20, 100), 170);
         }
-        replace_img(stop_bmp, Rectangle(49, 19, 54, 31));        
+        replace_img(stop_bmp, Rectangle(50, 19, 43, 29));        
     }                        
     
     if (! mouse_enabled) draw_x(Point(208, 30), 18);
@@ -244,7 +245,7 @@ void animate_arrow(bool running) {
     
     static uint8_t sequence = 0;
     
-    if (sequence < 3) sequence++; // 0 to 4
+    if (sequence < 4) sequence++; // 0 to 5
     else sequence = 0;
 
     uint16_t* new_img = arr0_bmp;
@@ -252,7 +253,8 @@ void animate_arrow(bool running) {
     else if (sequence == 2) new_img = arr2_bmp;
     else if (sequence == 3) new_img = arr3_bmp;
     else if (sequence == 4) new_img = arr4_bmp;
-    replace_img(new_img, Rectangle(0, 21, 24, 22));
+    else if (sequence == 5) new_img = arr5_bmp;
+    replace_img(new_img, Rectangle(0, 20, 23, 19));
     pico_display.update();
 }
 
@@ -279,7 +281,7 @@ void animate_active(bool running) {
     uint16_t centerpix_x = 120 + round(sin(double(sequence) * PI2NUMSTEPS) * 25.0);
     uint16_t centerpix_y = 67 + round(cos(double(sequence) * PI2NUMSTEPS) * 25.0);
 
-    const int RADIUS = 4; // radius/size of the point which moves
+    const int RADIUS = 5; // radius/size of the point which moves
     const int SIZE = 2*RADIUS+1;
     
     // restore the old content
@@ -289,8 +291,10 @@ void animate_active(bool running) {
         memcpy(buffer + offset, background_bmp + offset, 2*SIZE);
     }
     // draw the new one
-    pico_display.set_pen(color_white);
+    pico_display.set_pen(color_black);
     pico_display.circle(Point(centerpix_x,centerpix_y),RADIUS);
+    pico_display.set_pen(color_white);
+    pico_display.circle(Point(centerpix_x,centerpix_y),RADIUS-2);
 
     pico_display.update();
 }
