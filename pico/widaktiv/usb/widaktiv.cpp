@@ -203,11 +203,11 @@ void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDis
             pico_display.set_pen(color_white);
             pico_display.text("nothing enabled...", Point(20, 100), 170);
         }
-        replace_img(stop_bmp, Rectangle(50, 19, 43, 29));        
+        replace_img(stop_bmp, Rectangle(50, 13, 43, 29));        
     }                        
     
-    if (! mouse_enabled) draw_x(Point(208, 30), 18);
-    if (! keyboard_enabled) draw_x(Point(208, 108), 18);
+    if (! mouse_enabled) draw_x(Point(213, 24), 20);
+    if (! keyboard_enabled) draw_x(Point(213, 111), 20);
     pico_display.update(); // now we've done our drawing let's update the screen
 }
 
@@ -235,7 +235,7 @@ void draw_x(Point center, int half_len) {
 
 // plays a small animation by replacing part of the buffer
 void animate_arrow(bool running) {
-    const uint32_t interval_ms = 500; // poll every x ms
+    const uint32_t interval_ms = 400; // poll every x ms
     static uint32_t start_ms = 0;
     
     if (board_millis() - start_ms < interval_ms) return; // not enough time
@@ -245,7 +245,7 @@ void animate_arrow(bool running) {
     
     static uint8_t sequence = 0;
     
-    if (sequence < 4) sequence++; // 0 to 5
+    if (sequence < 5) sequence++; // 0 to 5
     else sequence = 0;
 
     uint16_t* new_img = arr0_bmp;
@@ -254,7 +254,7 @@ void animate_arrow(bool running) {
     else if (sequence == 3) new_img = arr3_bmp;
     else if (sequence == 4) new_img = arr4_bmp;
     else if (sequence == 5) new_img = arr5_bmp;
-    replace_img(new_img, Rectangle(0, 20, 23, 19));
+    replace_img(new_img, Rectangle(0, 14, 23, 19));
     pico_display.update();
 }
 

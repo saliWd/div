@@ -1,7 +1,7 @@
 'op'-Part from stop
-- upper left coordinates: 50/19
+- upper left coordinates: 50/13
 - width x height: 43x29
 
 arrows
-- upper left coordinates: 0/20
+- upper left coordinates: 0/14
 - width x height: 23x19
