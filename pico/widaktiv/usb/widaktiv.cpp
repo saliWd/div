@@ -332,7 +332,7 @@ void hid_task(bool move_mouse, bool type_character) {
     }
 
     /*------------- Mouse -------------*/
-    uint32_t const  mouse_move_every_x = 39;
+    uint32_t const  mouse_move_every_x = 79;
     static uint32_t mouse_move_every_x_counter = mouse_move_every_x;
     static uint32_t mouse_sequence = 0;
     static uint32_t substepCounter = 0;    
