@@ -59,7 +59,11 @@ struct Rectangle {
 
 #define PI 3.14159265
 #define MULTICORE_FLAG 16384 // arbitrary value, just not using the lower bits
-
+#ifdef headlessMode // when headless, the mouse is enabled and starts right away. Keyboard is disabled
+    const bool HEADLESS = true; 
+#else
+    const bool HEADLESS = false;
+#endif
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 
 using namespace pimoroni;
@@ -122,6 +126,7 @@ int main(void) {
     uint8_t which_button = 0;
     uint16_t debounce_cnt = 500; // make sure there is not button press at the beginning
     bool running = false;
+    if (HEADLESS) running = true; // have no buttons in headless. Start right away with the mouse
     bool move_mouse = false;
     bool type_character = false;
     bool mouse_enabled = true;
