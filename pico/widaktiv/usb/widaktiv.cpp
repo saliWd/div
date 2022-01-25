@@ -128,6 +128,7 @@ int main(void) {
     bool running = false;
     if (HEADLESS) running = true; // have no buttons in headless. Start right away with the mouse
     bool move_mouse = false;
+    if (HEADLESS)  move_mouse = true; // move_mouse is not updated if no button is pressed
     bool type_character = false;
     bool mouse_enabled = true;
     bool keyboard_enabled = false;
