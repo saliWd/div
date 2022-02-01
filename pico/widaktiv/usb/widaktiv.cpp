@@ -69,7 +69,7 @@ struct Rectangle {
 #define PI 3.14159265
 #define MULTICORE_FLAG 16384 // arbitrary value, just not using the lower bits
 #ifdef headlessMode // when headless, the mouse is enabled and starts right away. Keyboard is disabled
-    const bool HEADLESS = true; 
+    const bool HEADLESS = false;// FIXME true; 
 #else
     const bool HEADLESS = false;
 #endif
@@ -134,20 +134,20 @@ int main(void) {
     tusb_init();
     srand(time(0));
 
-    gpio_init(PICO_DEFAULT_LED_PIN);
-    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-
-
     uint8_t which_button = 0;
     uint16_t debounce_cnt = 500; // make sure there is not button press at the beginning
     bool running = false;
-    if (HEADLESS) running = true; // have no buttons in headless. Start right away with the mouse
     bool move_mouse = false;
-    if (HEADLESS)  move_mouse = true; // move_mouse is not updated if no button is pressed
+    if (HEADLESS) {
+        gpio_init(PICO_DEFAULT_LED_PIN);
+        gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+        running = true; // mouse is enabled by default in headless
+        move_mouse = true; // move_mouse is not updated if no button is pressed
+        gpio_put(PICO_DEFAULT_LED_PIN, running);
+    }
     bool type_character = false;
     bool mouse_enabled = true;
     bool keyboard_enabled = false;
-
 
     // multicore init
     multicore_launch_core1(core1_entry);    
@@ -158,31 +158,34 @@ int main(void) {
 
     while (1) {
         if (HEADLESS) {
-            gpio_put(PICO_DEFAULT_LED_PIN, get_bootsel_button() ^ PICO_DEFAULT_LED_PIN_INVERTED);
-            sleep_ms(10);
+            if(get_bootsel_button()) which_button = 1; // function returns true when pressed, this is the start/stop button in non-headless
+            else which_button = 0;
         } else { // not headless, have several buttons on the display
             if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
             else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
             else if (pico_display.is_pressed(pico_display.Y)) which_button = 4;
             else which_button = 0;
+        } // end non-headless
+        if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If debounce is not 0, just ignore the pressed button                
+            if (which_button == 1) running = !running;
+            if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
+            if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
 
-            if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If debounce is not 0, just ignore the pressed button                
-                if (which_button == 1) running = !running;
-                if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
-                if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
+            move_mouse = running && mouse_enabled;
+            type_character = running && keyboard_enabled;
 
-                move_mouse = running && mouse_enabled;
-                type_character = running && keyboard_enabled;
-
-                debounce_cnt = 500;
+            debounce_cnt = 500;
+            if(HEADLESS) {
+                gpio_put(PICO_DEFAULT_LED_PIN, running);
+            } else {
                 if (multicore_fifo_wready()) multicore_fifo_push_blocking(get_status(running,mouse_enabled,keyboard_enabled));  // update core1 running variable
                 else pico_display.set_led(150,15,15); // red // we have an issue, can't write into FIFO because it's full 
             }
-            if (debounce_cnt > 0) {
-                debounce_cnt--;
-                busy_wait_us_32(1000);
-            }
-        } // end non-headless
+        }
+        if (debounce_cnt > 0) {
+            debounce_cnt--;
+            busy_wait_us_32(1000);
+        }
 
         tud_task(); // tinyusb device task
         hid_task(move_mouse, type_character);        
