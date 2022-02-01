@@ -42,6 +42,15 @@
 #include "font8_data.hpp"
 #include "pico/multicore.h"
 
+// required for the bootsel button check in headless mode
+#include "pico/stdlib.h"
+#include "hardware/gpio.h"
+#include "hardware/sync.h"
+#include "hardware/structs/ioqspi.h"
+#include "hardware/structs/sio.h"
+
+
+
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
@@ -83,6 +92,7 @@ void animate_arrow(bool running);
 void animate_active(bool running);
 uint32_t get_status(bool running, bool mouse_enabled, bool keyboard_enabled);
 bool get_status_bit(uint16_t bit, uint32_t status);
+bool __no_inline_not_in_flash_func(get_bootsel_button)();
 
 // core1 is responsible for all the display/buffer accesses
 void core1_entry() {
@@ -117,11 +127,16 @@ void core1_entry() {
     }
 }
 
+
 // core 0 handles all the button inputs and the USB keyboard/mouse stuff
 int main(void) {
     board_init();
     tusb_init();
     srand(time(0));
+
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+
 
     uint8_t which_button = 0;
     uint16_t debounce_cnt = 500; // make sure there is not button press at the beginning
@@ -142,27 +157,33 @@ int main(void) {
     else pico_display.set_led(150,15,15); // red
 
     while (1) {
-        if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
-        else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
-        else if (pico_display.is_pressed(pico_display.Y)) which_button = 4;
-        else which_button = 0;
+        if (HEADLESS) {
+            gpio_put(PICO_DEFAULT_LED_PIN, get_bootsel_button() ^ PICO_DEFAULT_LED_PIN_INVERTED);
+            sleep_ms(10);
+        } else { // not headless, have several buttons on the display
+            if (pico_display.is_pressed(pico_display.A)) which_button = 1; // make sure I react only onto one button. Button2 = B is not used
+            else if (pico_display.is_pressed(pico_display.X)) which_button = 3;
+            else if (pico_display.is_pressed(pico_display.Y)) which_button = 4;
+            else which_button = 0;
 
-        if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If debounce is not 0, just ignore the pressed button                
-            if (which_button == 1) running = !running;
-            if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
-            if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
+            if ((debounce_cnt == 0) && (which_button > 0)) { // do something. If debounce is not 0, just ignore the pressed button                
+                if (which_button == 1) running = !running;
+                if (which_button == 3) mouse_enabled = !mouse_enabled; // button X
+                if (which_button == 4) keyboard_enabled = !keyboard_enabled; // button Y
 
-            move_mouse = running && mouse_enabled;
-            type_character = running && keyboard_enabled;
+                move_mouse = running && mouse_enabled;
+                type_character = running && keyboard_enabled;
 
-            debounce_cnt = 500;
-            if (multicore_fifo_wready()) multicore_fifo_push_blocking(get_status(running,mouse_enabled,keyboard_enabled));  // update core1 running variable
-            else pico_display.set_led(150,15,15); // red // we have an issue, can't write into FIFO because it's full 
-        }
-        if (debounce_cnt > 0) {
-            debounce_cnt--;
-            busy_wait_us_32(1000);
-        }
+                debounce_cnt = 500;
+                if (multicore_fifo_wready()) multicore_fifo_push_blocking(get_status(running,mouse_enabled,keyboard_enabled));  // update core1 running variable
+                else pico_display.set_led(150,15,15); // red // we have an issue, can't write into FIFO because it's full 
+            }
+            if (debounce_cnt > 0) {
+                debounce_cnt--;
+                busy_wait_us_32(1000);
+            }
+        } // end non-headless
+
         tud_task(); // tinyusb device task
         hid_task(move_mouse, type_character);        
     }
@@ -430,3 +451,38 @@ void tud_hid_set_report_cb(uint8_t report_id, hid_report_type_t report_type, uin
     (void) buffer;
     (void) bufsize;
 }
+
+
+// bootsel button: use it in headless mode to start/stop the mouse
+// Picoboard has a button attached to the flash CS pin, which the bootrom checks, and jumps straight to the USB bootcode if the button is pressed (pulling flash CS low). 
+// We can check this pin in by jumping to some code in SRAM (so that the XIP interface is not required), floating the flash CS pin, and observing whether it is pulled low.
+// This doesn't work if others are trying to access flash at the same time, e.g. the other core.
+bool __no_inline_not_in_flash_func(get_bootsel_button)() {
+    const uint CS_PIN_INDEX = 1;
+
+    // Must disable interrupts, as interrupt handlers may be in flash
+    uint32_t flags = save_and_disable_interrupts();
+
+    // Set chip select to Hi-Z
+    hw_write_masked(&ioqspi_hw->io[CS_PIN_INDEX].ctrl,
+                    GPIO_OVERRIDE_LOW << IO_QSPI_GPIO_QSPI_SS_CTRL_OEOVER_LSB,
+                    IO_QSPI_GPIO_QSPI_SS_CTRL_OEOVER_BITS);
+
+    // Note we can't call into any sleep functions in flash right now
+    for (volatile int i = 0; i < 1000; ++i);
+
+    // The HI GPIO registers in SIO can observe and control the 6 QSPI pins.
+    // Note the button pulls the pin *low* when pressed.
+    bool button_state = !(sio_hw->gpio_hi_in & (1u << CS_PIN_INDEX));
+
+    // Need to restore the state of chip select to return to code in flash
+    hw_write_masked(&ioqspi_hw->io[CS_PIN_INDEX].ctrl,
+                    GPIO_OVERRIDE_NORMAL << IO_QSPI_GPIO_QSPI_SS_CTRL_OEOVER_LSB,
+                    IO_QSPI_GPIO_QSPI_SS_CTRL_OEOVER_BITS);
+
+    restore_interrupts(flags);
+
+    return button_state;
+}
+
+
