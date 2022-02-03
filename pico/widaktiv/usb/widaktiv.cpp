@@ -37,7 +37,6 @@
 
 #include "usb_descriptors.hpp"
 #include "imgdata.hpp"
-
 #include "pico_display.hpp"
 #include "font8_data.hpp"
 #include "pico/multicore.h"
@@ -69,7 +68,7 @@ struct Rectangle {
 #define PI 3.14159265
 #define MULTICORE_FLAG 16384 // arbitrary value, just not using the lower bits
 #ifdef headlessMode // when headless, the mouse is enabled and starts right away. Keyboard is disabled
-    const bool HEADLESS = false;// FIXME true; 
+    const bool HEADLESS = true; 
 #else
     const bool HEADLESS = false;
 #endif
@@ -148,13 +147,14 @@ int main(void) {
     bool type_character = false;
     bool mouse_enabled = true;
     bool keyboard_enabled = false;
-
-    // multicore init
-    multicore_launch_core1(core1_entry);    
-    uint32_t g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
     
-    if (g == MULTICORE_FLAG) multicore_fifo_push_blocking(MULTICORE_FLAG); // check communication to core1
-    else pico_display.set_led(150,15,15); // red
+    if (!HEADLESS) { // multicore init. Core1 does the display stuff
+        multicore_launch_core1(core1_entry);    
+        uint32_t g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
+    
+        if (g == MULTICORE_FLAG) multicore_fifo_push_blocking(MULTICORE_FLAG); // check communication to core1
+        else pico_display.set_led(150,15,15); // red
+    }
 
     while (1) {
         if (HEADLESS) {
