@@ -137,18 +137,18 @@ int main(void) {
     uint16_t debounce_cnt = 500; // make sure there is not button press at the beginning
     bool running = false;
     bool move_mouse = false;
-    if (HEADLESS) {
-        gpio_init(PICO_DEFAULT_LED_PIN);
-        gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-        running = true; // mouse is enabled by default in headless
-        move_mouse = true; // move_mouse is not updated if no button is pressed
-        gpio_put(PICO_DEFAULT_LED_PIN, running);
-    }
     bool type_character = false;
     bool mouse_enabled = true;
     bool keyboard_enabled = false;
-    
-    if (!HEADLESS) { // multicore init. Core1 does the display stuff
+    // initialization stuff
+    if (HEADLESS) { // use the board LED and move the mouse from beginning
+        gpio_init(PICO_DEFAULT_LED_PIN);
+        gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+        running = true; // mouse is enabled by default in headless
+        move_mouse = running && mouse_enabled; // move_mouse = true at the start
+        gpio_put(PICO_DEFAULT_LED_PIN, running);
+        // TODO: use pwm on this led, see https://raspberrypi.github.io/pico-sdk-doxygen/group__hardware__pwm.html#pwm_example
+    } else { // multicore init. Core1 does the display stuff
         multicore_launch_core1(core1_entry);    
         uint32_t g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
     
