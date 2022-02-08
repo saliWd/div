@@ -86,7 +86,7 @@ const u16 color_white = pico_display.create_pen(255, 255, 255);
 const u16 color_black = pico_display.create_pen(0, 0, 0);
 const u16 color_red = pico_display.create_pen(240, 20, 20);
 
-u32 hid_task(bool move_mouse, bool type_character);
+void hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void draw_x(Point center, int half_len);
 void replace_img(u16 *new_img, Rectangle rec);
@@ -138,16 +138,16 @@ int main(void) {
 
     uint8_t which_button = 0;
     u16 debounce_cnt = 500; // make sure there is not button press at the beginning
-    u32 substepCounter = 0;
+    u16 pulseLedCnt = 18000; // initial brightness
+    bool incPolarity = false; // polarity of increment, either + 1 or - 1; 
+
     bool running = false;
     bool move_mouse = false;
     bool type_character = false;
     bool mouse_enabled = true;
     bool keyboard_enabled = false;
     uint slice_num = 0;
-    const u32 f_pwm = 440; // frequency we want to generate 
-    const u16 default_duty = 60; // duty cycle, in percent
-    u32 top = 0;
+    u16 top = 0;
 
     // initialization stuff
     if (HEADLESS) { // use the board LED and move the mouse from beginning
@@ -160,14 +160,11 @@ int main(void) {
 	    // set frequency
 	    float divider = clock_get_hz(clk_sys) / 1'000'000UL;  // typically 125 MHz (free running). let's arbitrarily choose to run pwm clock at 1MHz
 	    pwm_set_clkdiv(slice_num, divider); // pwm clock should now be running at 1MHz
-	    top =  1'000'000UL/f_pwm -1; // TOP is u16 has a max of 65535, being 65536 cycles
+        top =  1'000'000UL/440 -1; // 440 frequency we want to generate in Hz, TOP is u16 has a max of 65535, being 65536 cycles
 	    pwm_set_wrap(slice_num, top);
 
-	    // set duty cycle
-	    u16 pwm_level = (top+1) * default_duty / 100 -1; // calculate channel level from given duty cycle in %
-	    pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, pwm_level); 
-	
-	    pwm_set_enabled(slice_num, true); // let's go!
+	    pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, (top+1) * pulseLedCnt/32000 - 1); // start with 60% duty cycle
+	    pwm_set_enabled(slice_num, true); // start
     } else { // multicore init. Core1 does the display stuff
         multicore_launch_core1(core1_entry);    
         u32 g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
@@ -198,11 +195,9 @@ int main(void) {
             if(HEADLESS) {
                 if (running)  {
                     gpio_set_function(PICO_DEFAULT_LED_PIN, GPIO_FUNC_PWM); // Tell GPIO 0 it is allocated to the PWM
-                    u16 pwm_level = (top+1) * default_duty / 100 -1; // calculate channel pwm_level from given duty cycle in %
-	                pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, pwm_level);
-                    pwm_set_enabled(slice_num, true); // enable at the end
+                    pwm_set_enabled(slice_num, true); // enable pwm again
                 } else  { // need to use the GPIO function to make sure it's 0 when not running
-                    pwm_set_enabled(slice_num, false); // disable first
+                    pwm_set_enabled(slice_num, false); // disable pwm first, then switch to GPIO
                     gpio_init(PICO_DEFAULT_LED_PIN);
                     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
                     gpio_put(PICO_DEFAULT_LED_PIN, 0); 
@@ -218,9 +213,17 @@ int main(void) {
         }
 
         tud_task(); // tinyusb device task
-        substepCounter = hid_task(move_mouse, type_character);
+        hid_task(move_mouse, type_character);
         if(HEADLESS && running) {
-            u16 pwm_level = (top+1) * (100 - substepCounter * 10) / 100 -1; // pwm_level 100% to 10%
+            if (incPolarity) { // counting up
+                if (pulseLedCnt < 22000) pulseLedCnt++; // do not use the max value, limit brightness
+                else incPolarity = !incPolarity;
+            } else { // counting down
+                if (pulseLedCnt > 1000) pulseLedCnt--; // 0 brightness is bad, can be mistaken for 'not running'
+                else incPolarity = !incPolarity;
+            }
+
+            u16 pwm_level = (top+1) * pulseLedCnt / 32000 - 1; // pwm_level
 	        pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, pwm_level);
         }
     }
@@ -380,14 +383,14 @@ bool get_status_bit(u16 bit, u32 status) {
 //--------------------------------------------------------------------+
 // USB HID
 //--------------------------------------------------------------------+
-u32 hid_task(bool move_mouse, bool type_character) {
+void hid_task(bool move_mouse, bool type_character) {
     // Poll every 10ms
     const u32 interval_ms = 10;
     static u32 start_ms = 0;
     static u32 mouse_sequence = 0;
     static u32 substepCounter = 0;    
     
-    if (board_millis() - start_ms < interval_ms) return(substepCounter); // not enough time
+    if (board_millis() - start_ms < interval_ms) return; // not enough time
     start_ms += interval_ms;
     
     // Remote wakeup
@@ -463,7 +466,7 @@ u32 hid_task(bool move_mouse, bool type_character) {
             }            
         }
     }
-    return(substepCounter);
+    return;
 }
 
 
