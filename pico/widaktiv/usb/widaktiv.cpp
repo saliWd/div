@@ -43,12 +43,15 @@
 
 // required for the bootsel button check in headless mode
 #include "pico/stdlib.h"
+#include "hardware/clocks.h"
 #include "hardware/gpio.h"
 #include "hardware/sync.h"
+#include "hardware/pwm.h"
 #include "hardware/structs/ioqspi.h"
 #include "hardware/structs/sio.h"
 
-
+typedef uint16_t u16;
+typedef uint32_t u32;
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
@@ -72,25 +75,25 @@ struct Rectangle {
 #else
     const bool HEADLESS = false;
 #endif
-static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
+static u32 blink_interval_ms = BLINK_NOT_MOUNTED;
 
 using namespace pimoroni;
 
-uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
+u16 buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
 PicoDisplay pico_display(buffer);
 
-const uint16_t color_white = pico_display.create_pen(255, 255, 255);
-const uint16_t color_black = pico_display.create_pen(0, 0, 0);
-const uint16_t color_red = pico_display.create_pen(240, 20, 20);
+const u16 color_white = pico_display.create_pen(255, 255, 255);
+const u16 color_black = pico_display.create_pen(0, 0, 0);
+const u16 color_red = pico_display.create_pen(240, 20, 20);
 
-void hid_task(bool move_mouse, bool type_character);
+u32 hid_task(bool move_mouse, bool type_character);
 void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDisplay pico_display);
 void draw_x(Point center, int half_len);
-void replace_img(uint16_t *new_img, Rectangle rec);
+void replace_img(u16 *new_img, Rectangle rec);
 void animate_arrow(bool running);
 void animate_active(bool running);
-uint32_t get_status(bool running, bool mouse_enabled, bool keyboard_enabled);
-bool get_status_bit(uint16_t bit, uint32_t status);
+u32 get_status(bool running, bool mouse_enabled, bool keyboard_enabled);
+bool get_status_bit(u16 bit, u32 status);
 bool __no_inline_not_in_flash_func(get_bootsel_button)();
 
 // core1 is responsible for all the display/buffer accesses
@@ -108,10 +111,10 @@ void core1_entry() {
     memcpy(buffer, background_bmp, 240*135*2); // copy the background image from the .hpp file into the display buffer
     update_gui(running_core1, mouse_enabled_core1, keyboard_enabled_core1, pico_display);
     
-    uint32_t g = multicore_fifo_pop_blocking(); // check communication from core 0 to core 1
+    u32 g = multicore_fifo_pop_blocking(); // check communication from core 0 to core 1
     if (g != MULTICORE_FLAG) pico_display.set_led(150,15,15); // red
     
-    uint32_t status_core1 = 0;
+    u32 status_core1 = 0;
     
     while (1) {
         if (multicore_fifo_rvalid()) {
@@ -134,23 +137,47 @@ int main(void) {
     srand(time(0));
 
     uint8_t which_button = 0;
-    uint16_t debounce_cnt = 500; // make sure there is not button press at the beginning
+    u16 debounce_cnt = 500; // make sure there is not button press at the beginning
+    u32 substepCounter = 0;
     bool running = false;
     bool move_mouse = false;
     bool type_character = false;
     bool mouse_enabled = true;
     bool keyboard_enabled = false;
+    uint slice_num = 0;
+    const u32 f_pwm = 440; // frequency we want to generate 
+    const u16 duty = 60; // duty cycle, in percent
+    u32 top = 0;
+
     // initialization stuff
     if (HEADLESS) { // use the board LED and move the mouse from beginning
-        gpio_init(PICO_DEFAULT_LED_PIN);
-        gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
         running = true; // mouse is enabled by default in headless
         move_mouse = running && mouse_enabled; // move_mouse = true at the start
-        gpio_put(PICO_DEFAULT_LED_PIN, running);
-        // TODO: use pwm on this led, see https://raspberrypi.github.io/pico-sdk-doxygen/group__hardware__pwm.html#pwm_example
+
+        // gpio_init(PICO_DEFAULT_LED_PIN);
+        // gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+        // gpio_put(PICO_DEFAULT_LED_PIN, 0);
+
+        
+	    gpio_set_function(PICO_DEFAULT_LED_PIN, GPIO_FUNC_PWM); // Tell GPIO 0 it is allocated to the PWM
+	    slice_num = pwm_gpio_to_slice_num(PICO_DEFAULT_LED_PIN); // get PWM slice for GPIO
+
+	    // set frequency
+	    // determine top given Hz - assumes free-running counter rather than phase-correct
+	    u32 f_sys = clock_get_hz(clk_sys); // typically 125'000'000 Hz
+	    float divider = f_sys / 1'000'000UL;  // let's arbitrarily choose to run pwm clock at 1MHz
+	    pwm_set_clkdiv(slice_num, divider); // pwm clock should now be running at 1MHz
+	    top =  1'000'000UL/f_pwm -1; // TOP is u16 has a max of 65535, being 65536 cycles
+	    pwm_set_wrap(slice_num, top);
+
+	    // set duty cycle
+	    u16 level = (top+1) * duty / 100 -1; // calculate channel level from given duty cycle in %
+	    pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, level); 
+	
+	    pwm_set_enabled(slice_num, true); // let's go!
     } else { // multicore init. Core1 does the display stuff
         multicore_launch_core1(core1_entry);    
-        uint32_t g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
+        u32 g = multicore_fifo_pop_blocking(); // Blocks until core1 is done starting up
     
         if (g == MULTICORE_FLAG) multicore_fifo_push_blocking(MULTICORE_FLAG); // check communication to core1
         else pico_display.set_led(150,15,15); // red
@@ -176,7 +203,17 @@ int main(void) {
 
             debounce_cnt = 500;
             if(HEADLESS) {
-                gpio_put(PICO_DEFAULT_LED_PIN, running);
+                if (running)  {
+                    gpio_set_function(PICO_DEFAULT_LED_PIN, GPIO_FUNC_PWM); // Tell GPIO 0 it is allocated to the PWM
+                    u16 level = (top+1) * duty / 100 -1; // calculate channel level from given duty cycle in %
+	                pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, level);
+                    pwm_set_enabled(slice_num, true); // enable at the end
+                } else  { // need to use the GPIO function to make sure it's 0 when not running
+                    pwm_set_enabled(slice_num, false); // disable first
+                    gpio_init(PICO_DEFAULT_LED_PIN);
+                    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+                    gpio_put(PICO_DEFAULT_LED_PIN, 0); 
+                }
             } else {
                 if (multicore_fifo_wready()) multicore_fifo_push_blocking(get_status(running,mouse_enabled,keyboard_enabled));  // update core1 running variable
                 else pico_display.set_led(150,15,15); // red // we have an issue, can't write into FIFO because it's full 
@@ -188,7 +225,11 @@ int main(void) {
         }
 
         tud_task(); // tinyusb device task
-        hid_task(move_mouse, type_character);        
+        substepCounter = hid_task(move_mouse, type_character);
+        if(HEADLESS && running) {
+            u16 level = (top+1) * (100 - substepCounter * 10) / 100 -1; // calculate channel level from given duty cycle in %
+	        pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, level);
+        }
     }
     return 0;
 }
@@ -242,9 +283,9 @@ void update_gui(bool running, bool mouse_enabled, bool keyboard_enabled, PicoDis
 }
 
 // replace part of the buffer with new image
-void replace_img(uint16_t* new_img, Rectangle rec) {    
-    uint16_t* startPixel;
-    uint16_t* startPixNewImg;
+void replace_img(u16* new_img, Rectangle rec) {    
+    u16* startPixel;
+    u16* startPixNewImg;
     for (int ay = 0; ay < rec.h; ay++) {
         startPixel = buffer + 240 * (rec.y+ay) + rec.x;
         startPixNewImg = new_img + ay * rec.w;
@@ -265,8 +306,8 @@ void draw_x(Point center, int half_len) {
 
 // plays a small animation by replacing part of the buffer
 void animate_arrow(bool running) {
-    const uint32_t interval_ms = 400; // poll every x ms
-    static uint32_t start_ms = 0;
+    const u32 interval_ms = 400; // poll every x ms
+    static u32 start_ms = 0;
     
     if (board_millis() - start_ms < interval_ms) return; // not enough time
     start_ms += interval_ms;
@@ -278,7 +319,7 @@ void animate_arrow(bool running) {
     if (sequence < 5) sequence++; // 0 to 5
     else sequence = 0;
 
-    uint16_t* new_img = arr0_bmp;
+    u16* new_img = arr0_bmp;
     if (sequence == 1) new_img = arr1_bmp;
     else if (sequence == 2) new_img = arr2_bmp;
     else if (sequence == 3) new_img = arr3_bmp;
@@ -290,8 +331,8 @@ void animate_arrow(bool running) {
 
 // plays a circle-around animation
 void animate_active(bool running) {
-    const uint32_t interval_ms = 30; // poll every x ms
-    static uint32_t start_ms = 0;
+    const u32 interval_ms = 30; // poll every x ms
+    static u32 start_ms = 0;
     
     if (board_millis() - start_ms < interval_ms) return;
     start_ms += interval_ms;
@@ -306,10 +347,10 @@ void animate_active(bool running) {
     
     // center_pix: x = 120, y = 67. have a 25px radius
     const double PI2NUMSTEPS = 2 * PI / NUM_STEPS;
-    uint16_t old_centerpix_x = 120 + round(sin(double(old_sequence) * PI2NUMSTEPS) * 25.0);
-    uint16_t old_centerpix_y = 67 + round(cos(double(old_sequence) * PI2NUMSTEPS) * 25.0);
-    uint16_t centerpix_x = 120 + round(sin(double(sequence) * PI2NUMSTEPS) * 25.0);
-    uint16_t centerpix_y = 67 + round(cos(double(sequence) * PI2NUMSTEPS) * 25.0);
+    u16 old_centerpix_x = 120 + round(sin(double(old_sequence) * PI2NUMSTEPS) * 25.0);
+    u16 old_centerpix_y = 67 + round(cos(double(old_sequence) * PI2NUMSTEPS) * 25.0);
+    u16 centerpix_x = 120 + round(sin(double(sequence) * PI2NUMSTEPS) * 25.0);
+    u16 centerpix_y = 67 + round(cos(double(sequence) * PI2NUMSTEPS) * 25.0);
 
     const int RADIUS = 5; // radius/size of the point which moves
     const int SIZE = 2*RADIUS+1;
@@ -329,16 +370,16 @@ void animate_active(bool running) {
     pico_display.update();
 }
 
-uint32_t get_status(bool running, bool mouse_enabled, bool keyboard_enabled) {
-    uint32_t status = 0;
+u32 get_status(bool running, bool mouse_enabled, bool keyboard_enabled) {
+    u32 status = 0;
     if (running) status += 1; // bit0
     if (mouse_enabled) status += 2; // bit1
     if (keyboard_enabled) status += 4; // bit2
     return status;
 }
 
-bool get_status_bit(uint16_t bit, uint32_t status) {
-    uint32_t bitmask = 1 << bit;
+bool get_status_bit(u16 bit, u32 status) {
+    u32 bitmask = 1 << bit;
     if (bit < 3)  return status & bitmask;
     else return false; 
 }
@@ -346,12 +387,14 @@ bool get_status_bit(uint16_t bit, uint32_t status) {
 //--------------------------------------------------------------------+
 // USB HID
 //--------------------------------------------------------------------+
-void hid_task(bool move_mouse, bool type_character) {
+u32 hid_task(bool move_mouse, bool type_character) {
     // Poll every 10ms
-    const uint32_t interval_ms = 10;
-    static uint32_t start_ms = 0;
+    const u32 interval_ms = 10;
+    static u32 start_ms = 0;
+    static u32 mouse_sequence = 0;
+    static u32 substepCounter = 0;    
     
-    if (board_millis() - start_ms < interval_ms) return; // not enough time
+    if (board_millis() - start_ms < interval_ms) return(substepCounter); // not enough time
     start_ms += interval_ms;
     
     // Remote wakeup
@@ -362,10 +405,8 @@ void hid_task(bool move_mouse, bool type_character) {
     }
 
     /*------------- Mouse -------------*/
-    uint32_t const  mouse_move_every_x = 79;
-    static uint32_t mouse_move_every_x_counter = mouse_move_every_x;
-    static uint32_t mouse_sequence = 0;
-    static uint32_t substepCounter = 0;    
+    u32 const  mouse_move_every_x = 79;
+    static u32 mouse_move_every_x_counter = mouse_move_every_x;
     int8_t const substep = 40 / 10; // 40 px in total for every arc of the lying-8
 
     // define a 'lying-8 type' of structure
@@ -405,8 +446,8 @@ void hid_task(bool move_mouse, bool type_character) {
 
     /*------------- Keyboard -------------*/
     if (tud_hid_ready()) {
-        uint32_t const  kbd_print_every_x = 499;
-        static uint32_t kbd_print_every_x_counter = kbd_print_every_x; // make sure it prints a character first and then waits
+        u32 const  kbd_print_every_x = 499;
+        static u32 kbd_print_every_x_counter = kbd_print_every_x; // make sure it prints a character first and then waits
         
 
         // use to avoid send multiple consecutive zero report for keyboard
@@ -429,13 +470,14 @@ void hid_task(bool move_mouse, bool type_character) {
             }            
         }
     }
+    return(substepCounter);
 }
 
 
 // Invoked when received GET_REPORT control request
 // Application must fill buffer report's content and return its length.
 // Return zero will cause the stack to STALL request
-uint16_t tud_hid_get_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer, uint16_t reqlen) {
+u16 tud_hid_get_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer, u16 reqlen) {
     // TODO not Implemented
     (void) report_id;
     (void) report_type;
@@ -447,7 +489,7 @@ uint16_t tud_hid_get_report_cb(uint8_t report_id, hid_report_type_t report_type,
 
 // Invoked when received SET_REPORT control request or
 // received data on OUT endpoint ( Report ID = 0, Type = 0 )
-void tud_hid_set_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer, uint16_t bufsize) {
+void tud_hid_set_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer, u16 bufsize) {
     // TODO set LED based on CAPLOCK, NUMLOCK etc...
     (void) report_id;
     (void) report_type;
@@ -464,7 +506,7 @@ bool __no_inline_not_in_flash_func(get_bootsel_button)() {
     const uint CS_PIN_INDEX = 1;
 
     // Must disable interrupts, as interrupt handlers may be in flash
-    uint32_t flags = save_and_disable_interrupts();
+    u32 flags = save_and_disable_interrupts();
 
     // Set chip select to Hi-Z
     hw_write_masked(&ioqspi_hw->io[CS_PIN_INDEX].ctrl,
