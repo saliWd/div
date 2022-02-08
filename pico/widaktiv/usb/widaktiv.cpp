@@ -146,7 +146,7 @@ int main(void) {
     bool keyboard_enabled = false;
     uint slice_num = 0;
     const u32 f_pwm = 440; // frequency we want to generate 
-    const u16 duty = 60; // duty cycle, in percent
+    const u16 default_duty = 60; // duty cycle, in percent
     u32 top = 0;
 
     // initialization stuff
@@ -154,25 +154,18 @@ int main(void) {
         running = true; // mouse is enabled by default in headless
         move_mouse = running && mouse_enabled; // move_mouse = true at the start
 
-        // gpio_init(PICO_DEFAULT_LED_PIN);
-        // gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-        // gpio_put(PICO_DEFAULT_LED_PIN, 0);
-
-        
 	    gpio_set_function(PICO_DEFAULT_LED_PIN, GPIO_FUNC_PWM); // Tell GPIO 0 it is allocated to the PWM
 	    slice_num = pwm_gpio_to_slice_num(PICO_DEFAULT_LED_PIN); // get PWM slice for GPIO
 
 	    // set frequency
-	    // determine top given Hz - assumes free-running counter rather than phase-correct
-	    u32 f_sys = clock_get_hz(clk_sys); // typically 125'000'000 Hz
-	    float divider = f_sys / 1'000'000UL;  // let's arbitrarily choose to run pwm clock at 1MHz
+	    float divider = clock_get_hz(clk_sys) / 1'000'000UL;  // typically 125 MHz (free running). let's arbitrarily choose to run pwm clock at 1MHz
 	    pwm_set_clkdiv(slice_num, divider); // pwm clock should now be running at 1MHz
 	    top =  1'000'000UL/f_pwm -1; // TOP is u16 has a max of 65535, being 65536 cycles
 	    pwm_set_wrap(slice_num, top);
 
 	    // set duty cycle
-	    u16 level = (top+1) * duty / 100 -1; // calculate channel level from given duty cycle in %
-	    pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, level); 
+	    u16 pwm_level = (top+1) * default_duty / 100 -1; // calculate channel level from given duty cycle in %
+	    pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, pwm_level); 
 	
 	    pwm_set_enabled(slice_num, true); // let's go!
     } else { // multicore init. Core1 does the display stuff
@@ -205,8 +198,8 @@ int main(void) {
             if(HEADLESS) {
                 if (running)  {
                     gpio_set_function(PICO_DEFAULT_LED_PIN, GPIO_FUNC_PWM); // Tell GPIO 0 it is allocated to the PWM
-                    u16 level = (top+1) * duty / 100 -1; // calculate channel level from given duty cycle in %
-	                pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, level);
+                    u16 pwm_level = (top+1) * default_duty / 100 -1; // calculate channel pwm_level from given duty cycle in %
+	                pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, pwm_level);
                     pwm_set_enabled(slice_num, true); // enable at the end
                 } else  { // need to use the GPIO function to make sure it's 0 when not running
                     pwm_set_enabled(slice_num, false); // disable first
@@ -227,8 +220,8 @@ int main(void) {
         tud_task(); // tinyusb device task
         substepCounter = hid_task(move_mouse, type_character);
         if(HEADLESS && running) {
-            u16 level = (top+1) * (100 - substepCounter * 10) / 100 -1; // calculate channel level from given duty cycle in %
-	        pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, level);
+            u16 pwm_level = (top+1) * (100 - substepCounter * 10) / 100 -1; // pwm_level 100% to 10%
+	        pwm_set_chan_level(slice_num, PICO_DEFAULT_LED_PIN, pwm_level);
         }
     }
     return 0;
