@@ -11,11 +11,12 @@ if exist "build/libraries" del /S /Q "build/libraries" >nul 2>&1
 
 
 cd build
-cmake -G "NMake Makefiles" .. 
+:: source one directory up, build in this directory
+cmake -G "NMake Makefiles" -S .. -B .
 cd ../
 dir build
 
-:: now use nmake (in build directory) with the Developer command console for VS2019 (%comspec% /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat")
+:: now use nmake (in build directory) with the Developer command console for VS2022
 
 endlocal
 @echo on
