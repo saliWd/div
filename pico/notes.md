@@ -16,10 +16,10 @@
 
 ## build the targets
 
-1. visual studio -> tools -> command line -> developer power shell
+1. open developer power shell VS2022
 1. cd widaktiv
-1. ./prepareNmake.bat (TODO: build directory useless)
-1. nmake (in widaktiv directory)
+1. python prepareNmake.py
+1. (...follow further instructions given by script)
 
 
 
