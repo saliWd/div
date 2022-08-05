@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.15)
 # Pull in SDK (must be before project)
 # assuming it's in the normal 'git-repo' location
 set(PICO_SDK_PATH "../../../../pico-sdk")
+# set(PICO_BOARD "pico_w")
+set(PICO_BOARD "pico")
 include(pico_sdk_import.cmake)
 
 project(pico_examples C CXX ASM)

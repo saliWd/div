@@ -47,8 +47,8 @@ os.chdir('build')
 p0 = subprocess.run('cmake -G "NMake Makefiles" -S .. -B .')
 os.chdir('..\\')
 
-# doesn't work at the moment. Don't know why though...
-# p1 = subprocess.run('dir build') # TODO: could use python functionality for that
+print('build directory: ')
+print('\n'.join(os.listdir(build_dir)))
 
-print('Done. Now use nmake (in build directory) with the Developer command console for VS2022')
+print('\n***Done. Now use nmake (in build directory) with the Developer command console for VS2022')
 exit()
