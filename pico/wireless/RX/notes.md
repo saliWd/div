@@ -1,0 +1,1 @@
+copy the content of this folder to server root

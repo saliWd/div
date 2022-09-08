@@ -21,6 +21,13 @@
 1. (...follow further instructions given by script)
 
 
+## pico_w adaptions
+
+1. project folder wireless
+1. start with micropython to check wireless configuration / server side first
+   1. server code is in folder RX, needs to be copied to the webserver
+   1. 
+1. TODO: use an example from the sdk
 
 
 ## Sources
