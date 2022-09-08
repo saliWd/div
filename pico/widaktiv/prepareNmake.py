@@ -40,7 +40,7 @@ if (build_dir_exist) :
   ## do not change the pico-sdk / elf2uf2 / pioasm directories (shouldn't change that often and they are big)
   
 else : # build directory does not exist. create it
-  os.mkdir(build)
+  os.mkdir('build')
 
 # now I am sure the build directory exists and the (user code) outputs are deleted
 os.chdir('build')
