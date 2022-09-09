@@ -9,7 +9,7 @@
 
 require_once('dbConn.php'); // this will return the $dbConn variable as 'new mysqli'
 if ($dbConn->connect_error) {
-    printErrorAndDie('Connection to the data base failed', 'Please try again later and/or send me an email: sali@widmedia.ch');
+    die('Connection to the data base failed. Please try again later and/or send me an email: sali@widmedia.ch');
 }
 $dbConn->set_charset('utf8');
 
