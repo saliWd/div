@@ -3,13 +3,30 @@
 // setting then some db variable to the value 27. TX must be pico and value0 must be a number (smaller than some limit)
 
 // no visible (=HTML) output is generated. Use index.php to monitor the value itself
+// db structure:
+// SELECT * FROM `pico_w` 
+// INSERT INTO `pico_w` (`id`, `value0`, `date`) 
+//               VALUES (NULL, '55',      current_timestamp()); 
 
-require_once('../start/php/dbConn.php'); // this will return the $dbConn variable as 'new mysqli'
+require_once('dbConn.php'); // this will return the $dbConn variable as 'new mysqli'
 if ($dbConn->connect_error) {
     printErrorAndDie('Connection to the data base failed', 'Please try again later and/or send me an email: sali@widmedia.ch');
 }
 $dbConn->set_charset('utf8');
-  
 
 
+if (isset($_GET['TX'])) { // only do something if this is set
+    $getTXsafe = htmlentities(substr($_GET['TX'], 0, 4)); // length-limited variable, HTML encoded
+    if ($getTXsafe == 'pico') {
+        $unsafeInt = filter_var(substr($_GET['value0'], 0, 11), FILTER_SANITIZE_NUMBER_INT); // sanitize a length-limited variable
+        if (filter_var($unsafeInt, FILTER_VALIDATE_INT)) { 
+            $safeInt = (int)$unsafeInt;
+            // now I can do something
+            if (!($result = $dbConn->query('INSERT INTO `pico_w` (`value0`) VALUES ("'.$safeInt.'")'))) {
+                echo 'Some Error happened when inserting';
+            }
+            echo 'ok';
+        }
+    }
+}
 ?>
