@@ -26,7 +26,8 @@
 1. project folder wireless
 1. start with micropython to check wireless configuration / server side first
    1. server code is in folder RX, needs to be copied to the webserver
-   1. 
+   1. simple counter value monitoring
+   1. working fine, db_update as expected
 1. TODO: use an example from the sdk
 
 

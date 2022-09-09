@@ -3,7 +3,7 @@ import urequests
 from time import sleep
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-wlan.connect("widmedia_mobile","PublicPassword")
+wlan.connect("widmedia_mobile","publicPassword")
 sleep(5)
 print(wlan.isconnected())
 counterValue = 0

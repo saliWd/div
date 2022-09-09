@@ -33,7 +33,7 @@ if (isset($_GET['TX'])) { // only do something if this is set
             } else { // already some content in the db, update it
                 $row = $result->fetch_assoc();
                 $id = (int)$row['id'];
-                if (!($result = $dbConn->query('UPDATE `pico_w` SET `value0` = "'.$safeInt.'" WHERE `id` = "'.$id.'"'))) { 
+                if (!($result = $dbConn->query('UPDATE `pico_w` SET `value0` = "'.$safeInt.'", `date` = current_timestamp() WHERE `id` = "'.$id.'"'))) { 
                     echo 'error when updating';
                 } else { 
                     echo 'updating ok'; 
