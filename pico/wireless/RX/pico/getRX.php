@@ -4,7 +4,6 @@
 
 // no visible (=HTML) output is generated. Use index.php to monitor the value itself
 // db structure:
-// SELECT * FROM `pico_w` 
 // INSERT INTO `pico_w` (`id`, `value0`, `date`) 
 //               VALUES (NULL, '55',      current_timestamp()); 
 
@@ -22,10 +21,24 @@ if (isset($_GET['TX'])) { // only do something if this is set
         if (filter_var($unsafeInt, FILTER_VALIDATE_INT)) { 
             $safeInt = (int)$unsafeInt;
             // now I can do something
-            if (!($result = $dbConn->query('INSERT INTO `pico_w` (`value0`) VALUES ("'.$safeInt.'")'))) {
-                echo 'Some Error happened when inserting';
-            }
-            echo 'ok';
+
+            $result = $dbConn->query('SELECT `id`, `value0` FROM `pico_w` WHERE 1 ORDER BY `id` DESC');
+            $numRows = $result->num_rows;
+            if ($numRows == 0) { // no content yet, insert one row
+                if (!($result = $dbConn->query('INSERT INTO `pico_w` (`value0`) VALUES ("'.$safeInt.'")'))) {
+                    echo 'error when inserting';
+                } else { 
+                    echo 'inserting ok'; 
+                }
+            } else { // already some content in the db, update it
+                $row = $result->fetch_assoc();
+                $id = (int)$row['id'];
+                if (!($result = $dbConn->query('UPDATE `pico_w` SET `value0` = "'.$safeInt.'" WHERE `id` = "'.$id.'"'))) { 
+                    echo 'error when updating';
+                } else { 
+                    echo 'updating ok'; 
+                }
+            } // numrows == 0            
         }
     }
 }
