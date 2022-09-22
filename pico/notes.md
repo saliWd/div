@@ -39,3 +39,6 @@
 * [Animations and stuff](http://www.penguintutor.com/programming/picodisplay)
 * maybe future ...next step, Tetris on it: [TomsHardware](https://www.tomshardware.com/news/pico-tetris-display-pack-demo)
 
+## Div
+* [some possible display for raspi](https://www.heise.de/news/Transparentes-OLED-Display-fuer-Raspberry-und-Arduino-Bastelrechner-7269567.html)
+

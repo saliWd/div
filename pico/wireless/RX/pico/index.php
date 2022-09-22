@@ -11,8 +11,6 @@
 <div class="section noBottom">
 <div class="container">    
 <h3>pico wireless receiver</h3>
-<h4>print status</h4>
-<p>&nbsp;</p>
 <p>&nbsp;</p>
 <?php 
 require_once('dbConn.php'); // this will return the $dbConn variable as 'new mysqli'
