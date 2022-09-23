@@ -27,8 +27,12 @@
 1. start with micropython to check wireless configuration / server side first
    1. server code is in folder RX, needs to be copied to the webserver
    1. simple counter value monitoring
-   1. main.py: working fine, db_update as expected 
-1. TODO: check serial connection with IR header. Doable?
+   1. main.py: working fine, db_update as expected, extended with error handling (LED when not connected and stuff)
+   1. TODO: check serial connection with IR header. NB: pico pins not 5V tolerant, 3.3 only. Use 3.3V supply for IR header (37=3.3V_enable has a pull-up)
+     * pin36=3.3V (300 mA recommendation)
+     * pin38=GND
+     * pin01=TX
+     * pin02=RX
 1. TODO: use an example from the sdk
 
 
