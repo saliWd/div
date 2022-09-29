@@ -32,7 +32,7 @@ tim.deinit()
 led_onboard.off()
 
 while True:
-    message = "https://widmedia.ch/pico/getRX.php?TX=pico&value0="+str(counterValue)
+    message = "https://widmedia.ch/pico/getRX.php?TX=pico&device=home&value0="+str(counterValue)
     print(message)  # debug purpose only
     response = urequests.post(message)    
     counterValue = counterValue + 1 # I don't care about overflow
