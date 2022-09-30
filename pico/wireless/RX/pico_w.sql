@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 29. Sep 2022 um 10:44
+-- Erstellungszeit: 30. Sep 2022 um 13:54
 -- Server-Version: 10.3.36-MariaDB
 -- PHP-Version: 7.4.29
 
@@ -28,11 +28,15 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `pico_w` (
-  `id` int(11) NOT NULL,
+  `id` bigint(20) NOT NULL,
   `device` varchar(8) DEFAULT NULL,
   `value0` int(11) NOT NULL,
   `date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Indizes der exportierten Tabellen
+--
 
 --
 -- Indizes für die Tabelle `pico_w`
@@ -40,6 +44,16 @@ CREATE TABLE `pico_w` (
 ALTER TABLE `pico_w`
   ADD PRIMARY KEY (`id`);
 
+--
+-- AUTO_INCREMENT für exportierte Tabellen
+--
+
+--
+-- AUTO_INCREMENT für Tabelle `pico_w`
+--
+ALTER TABLE `pico_w`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

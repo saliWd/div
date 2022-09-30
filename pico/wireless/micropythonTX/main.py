@@ -13,8 +13,9 @@ tim = Timer() # TODO: should I specify a number? I don't really care about preci
 def blink(timer):
     led_onboard.toggle()
 
-led_onboard.on()
+led_onboard.off()
 
+tim.init(freq=4.0, mode=Timer.PERIODIC, callback=blink) # signals I'm searching for WLAN
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 sleep(3)
@@ -23,13 +24,11 @@ while not wlan_ok:
     wlan.connect("widmedia_mobile","publicPassword")
     sleep(3)
     wlan_ok = wlan.isconnected()
-    print(wlan_ok) # debug output
+    print("WLAN connected? "+str(wlan_ok)) # debug output
 
 # signals wlan connection is ok
-tim.init(freq=2.5, mode=Timer.PERIODIC, callback=blink)
-sleep(5) # let it blink for some seconds before going back to static values
 tim.deinit()
-led_onboard.off()
+led_onboard.on()
 
 while True:
     message = "https://widmedia.ch/pico/getRX.php?TX=pico&device=home&value0="+str(counterValue)

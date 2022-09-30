@@ -9,18 +9,16 @@
 
 
     if (isset($_GET['TX'])) { // only do something if this is set
-        $getTXsafe = htmlentities(substr($_GET['TX'], 0, 4)); // length-limited variable, HTML encoded
+        $getTXsafe = safeStrFromExt('GET','TX', 4); // length-limited variable, HTML encoded
         if ($getTXsafe === 'pico') {
-            $unsafeInt = filter_var(substr($_GET['value0'], 0, 11), FILTER_SANITIZE_NUMBER_INT); // sanitize a length-limited variable
-            if (filter_var($unsafeInt, FILTER_VALIDATE_INT)) { 
-                $safeInt = (int)$unsafeInt;
-                // now I can do something
 
+            $safeInt = safeIntFromExt('GET', 'value0', 11);
+            if ($safeInt !== 0) {  // 0 value is considered invalid
                 $deviceName = 'unknown';
-                $unsafeDevice = htmlentities(substr($_GET['device'], 0, 8)); // maximum length of 8
+                $unsafeDevice = safeStrFromExt('GET','device', 8); // maximum length of 8
                 // TODO: have the known-device-names as a constant array or something similar
                 if (($unsafeDevice ==='home') or ($unsafeDevice === 'work')) {
-                    $deviceName = $unsafeDevice; // otherwise, just leave the device name
+                    $deviceName = $unsafeDevice; // otherwise, just leave the device name (backwards compatibility)
                 }
 
                 if ($result = $dbConn->query('INSERT INTO `pico_w` (`device`, `value0`) VALUES ("'.$deviceName.'", "'.$safeInt.'")')) {
