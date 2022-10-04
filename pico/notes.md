@@ -36,6 +36,13 @@
 1. TODO: use an example from the sdk
 
 
+### Volkszähler
+
+1. IR-Header: Sources [bayha-electronics.de](bayha-electronics.de/download/Bauanleitung-TTL.pdf)
+1. use main.py for the pico side
+1. TODO: solder documentation, setup pictures
+1. 
+
 
 ## Sources
 
