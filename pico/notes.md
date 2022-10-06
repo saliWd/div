@@ -39,9 +39,48 @@
 ### Volkszähler
 
 1. IR-Header: Sources [bayha-electronics.de](bayha-electronics.de/download/Bauanleitung-TTL.pdf)
+1. UART communication, source [volkszaehler.org](https://wiki.volkszaehler.org/hardware/channels/meters/power/edl-ehz/landisgyr_e350)
+   1. 300bd, 7bit, even parity, 1 stoppbit
+   1. init sequenz: /?!<CR><LF> (in hex: 2F 3F 21 0D 0A)
+   1. answer: /LGZ4ZMF100AC.M23 (means he could communicate with 4.8 kbaud)
+   1. need to ack it: <ACK>000<CR><LF> (in hex: 06 30 30 30 0D 0A)
+   1. example answer: 
+```
+/?!\\
+/LGZ4ZMF100AC.M23
+000
+F.F(00)
+C.1.0(12314330)
+0.0(00188123        )
+C.1.1(        )
+1.8.1(001234.120*kWh)
+1.8.0(001234.120*kWh)
+2.8.0(000000.000*kWh)
+15.8.0(001234.120*kWh)
+C.7.0(0005)
+32.7(229*V)
+52.7(230*V)
+72.7(230*V)
+31.7(000.03*A)
+51.7(000.04*A)
+71.7(000.09*A)
+C.5.0(0400)
+0.2.0(M23)
+16.7(000.00*kW)
+```  
+
+
+
+
+
+
 1. use main.py for the pico side
 1. TODO: solder documentation, setup pictures
-1. 
+
+
+#### Electrical setup
+![electrical connections](./pictures/pico_w_setup_w500.png)
+Also connect GP28 to 3V3_EN to save some power (works though without it)
 
 
 ## Sources
