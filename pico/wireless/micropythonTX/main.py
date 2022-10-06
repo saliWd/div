@@ -33,7 +33,7 @@ sleep(2)
 # try sending the init sequence
 uart_ir.write('/?!\r\n')
 ir_answer = uart_ir.read() # read all. should be /LGZ4ZMF100AC.M23 (without anything connected it is b'\x00')
-print("UART answer is "+str(ir_answer))
+print("UART answer is "+str(ir_answer)) # TODO with this read I get: UART answer is None
 
 sleep(10)  # required?
 
@@ -42,7 +42,7 @@ uart_ir.write('000\r\n') # need to ack it. Then the values should appear...
 # (without anything connected it is 'NONE')
 ir_answer = uart_ir.read() # should be several lines like "/?!\\ /LGZ4ZMF100AC.M23 000 F.F(00) C.1.0(12314330) 0.0(00188123        )" and so on
 
-print("UART second answer is "+str(ir_answer))
+print("UART second answer is "+str(ir_answer)) # TODO with this read I get: UART second answer is b'/LGZ4ZMF100AC.M26\r\n'
 
 sleep(2)
 enable3v3_pin.off() # power off IR head. Save some power
