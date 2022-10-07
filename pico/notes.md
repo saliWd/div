@@ -36,6 +36,7 @@
      * pin01=TX
      * pin02=RX
 1. maybe: use an example from the sdk, switch to c-buildchain instead of micropython
+1. TODO: look at picosleep to reduce power consumption [picosleep](https://ghubcoder.github.io/posts/deep-sleeping-the-pico-micropython/)
 
 
 ### Volkszähler info
