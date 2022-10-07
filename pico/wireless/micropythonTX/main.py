@@ -20,6 +20,14 @@ wlan_ok = False
 def blink(timer):
     led_onboard.toggle()
 
+def uart_comm(uart_ir, text, iteration):
+    uart_ir.write(text)
+    sleep(2) # make sure it has been sent. Required?
+    ir_answer = uart_ir.read() # read all
+    sleep(2) # Required?
+    print(str(iteration)+". UART answer is "+str(ir_answer))
+    return(iteration+1)
+
 
 ## program starts here
 led_onboard.off()
@@ -28,27 +36,25 @@ enable3v3_pin.off()
 ##########################################################################################
 ### temporary, UART trials (TODO: will be moved into while loop after WLAN connection)
 enable3v3_pin.on() # power on IR head
-sleep(2)
+sleep(2) # make sure 3.3V power is stable
+iteration = 0
 
-# try sending the init sequence
-uart_ir.write('/?!\r\n')
-ir_answer = uart_ir.read() # read all. should be /LGZ4ZMF100AC.M23 (without anything connected it is b'\x00')
-print("UART answer is "+str(ir_answer)) # TODO with this read I get: UART answer is None
+# send the init sequence
+iteration = uart_comm(uart_ir, '/?!\r\n', iteration) # should be /LGZ4ZMF100AC.M23 (without anything connected it is b'\x00')
 
 sleep(10)  # required?
 
-uart_ir.write('000\r\n') # need to ack it. Then the values should appear...
-# read all
-# (without anything connected it is 'NONE')
-ir_answer = uart_ir.read() # should be several lines like "/?!\\ /LGZ4ZMF100AC.M23 000 F.F(00) C.1.0(12314330) 0.0(00188123        )" and so on
+# need to ack it
+iteration = uart_comm(uart_ir, '000\r\n', iteration) # should be several lines like "/?!\\ /LGZ4ZMF100AC.M23 000 F.F(00) C.1.0(12314330) 0.0(00188123        )" and so on
+# TODO with this read I get: UART second answer is b'/LGZ4ZMF100AC.M26\r\n'
 
-print("UART second answer is "+str(ir_answer)) # TODO with this read I get: UART second answer is b'/LGZ4ZMF100AC.M26\r\n'
+#### trial. Just do another ir_communication
+iteration = uart_comm(uart_ir, '000\r\n', iteration) # 
 
 sleep(2)
 enable3v3_pin.off() # power off IR head. Save some power
 ### /end of temporary, UART trials 
 ##########################################################################################
-
 
 
 

@@ -1,9 +1,11 @@
 # Project documentation
 
-* Goal: document the build chain to get widaktiv-target on current build tools. One build running on the pimorini display (using animations and background picture), the other headless with just one button.
+* Goal: document 
+   1. the build chain to get widaktiv-target on current build tools. One build running on the pimorini display (using animations and background picture), the other headless with just one button.
+   1. the development of the power meter readout using the pico_w board. Micropython is used for this one
 
 
-## build chain
+## widaktiv build chain
 
 1. Get pico sdk: https://github.com/raspberrypi/pico-sdk. Tested with repository from 2022-07-26 (more or less release 1.4.0)
 1. Get pico examples: https://github.com/raspberrypi/pico-examples Tested with repository from 2022-07-26
@@ -21,22 +23,22 @@
 1. (...follow further instructions given by script)
 
 
-## pico_w adaptions
+## power meter readout using pico_w and micropython
 
 1. project folder wireless
-1. start with micropython to check wireless configuration / server side first
+1. use micropython to check wireless configuration / server side first (micropython version: 20221006-unstable-v1.19.1, use thonny to run/update code)
    1. server code is in folder RX, needs to be copied to the webserver
-   1. simple counter value monitoring
+   1. simple counter value monitoring to verify internet connection
    1. main.py: working fine, db_update as expected, extended with error handling (LED when not connected and stuff)
-   1. TODO: check serial connection with IR header. NB: pico pins not 5V tolerant, 3.3 only. Use 3.3V supply for IR header (37=3.3V_enable has a pull-up)
+   1. serial connection with IR header. NB: pico pins not 5V tolerant, 3.3 only. Use 3.3V supply for IR header (37=3.3V_enable has a pull-up)
      * pin36=3.3V (300 mA recommendation)
      * pin38=GND
      * pin01=TX
      * pin02=RX
-1. TODO: use an example from the sdk
+1. maybe: use an example from the sdk, switch to c-buildchain instead of micropython
 
 
-### Volkszähler
+### Volkszähler info
 
 1. IR-Header: Sources [bayha-electronics.de](bayha-electronics.de/download/Bauanleitung-TTL.pdf)
 1. UART communication, source [volkszaehler.org](https://wiki.volkszaehler.org/hardware/channels/meters/power/edl-ehz/landisgyr_e350)
@@ -68,11 +70,6 @@ C.5.0(0400)
 0.2.0(M23)
 16.7(000.00*kW)
 ```  
-
-
-
-
-
 
 1. use main.py for the pico side
 1. TODO: solder documentation, setup pictures
