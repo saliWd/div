@@ -40,16 +40,16 @@ sleep(2) # make sure 3.3V power is stable
 iteration = 0
 
 # send the init sequence
-iteration = uart_comm(uart_ir, '/?!\r\n', iteration) # should be /LGZ4ZMF100AC.M23 (without anything connected it is b'\x00')
+iteration = uart_comm(uart_ir, '/?!\r\n', iteration) # response: UART answer is b'/LGZ4ZMF100AC.M26\r\n'. as it should be (without anything connected it is b'\x00')
 
 sleep(10)  # required?
 
 # need to ack it
 iteration = uart_comm(uart_ir, '000\r\n', iteration) # should be several lines like "/?!\\ /LGZ4ZMF100AC.M23 000 F.F(00) C.1.0(12314330) 0.0(00188123        )" and so on
-# TODO with this read I get: UART second answer is b'/LGZ4ZMF100AC.M26\r\n'
+# TODO with this read I get: 1. UART answer is None
 
 #### trial. Just do another ir_communication
-iteration = uart_comm(uart_ir, '000\r\n', iteration) # 
+iteration = uart_comm(uart_ir, '000\r\n', iteration) # TODO, I get: 2. UART answer is None
 
 sleep(2)
 enable3v3_pin.off() # power off IR head. Save some power
