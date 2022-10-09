@@ -1,0 +1,52 @@
+>>> uart_ir.write('\x2F\x3F\x21\x0D\x0A')
+sleep(1)
+print("UART answer is "+str(uart_ir.read()))
+uart_ir.write('\x06\x30\x30\x30\x0D\x0A')
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+
+5
+UART answer is b'/LGZ4ZMF100AC.M26\r\n'
+6
+UART answer is b'\x02F.F(00)\r\n0.0(          120858)\r\nC.1.0(13647123)\r\nC.1.1(        )\r\n1.8.1(042951.721*kWh)\r\n1.8.2(018609.568*kWh)\r\n2.8.1(000000.302*kWh)\r\n2.8.2(000010.188*kWh)\r\n1.8.0(061561.289*kWh)\r\n2.8.0(000010.490*kWh)\r\n15.8.0(061571.780*kWh)\r\nC.7.0(0008)\r\n32.7(241*V)\r\n5'
+UART answer is b'2.7(243*V)\r\n72.7(242*V)\r\n31.7(000.35*A)\r\n51.7(000.52*A)\r\n71.7(000.47*A)\r\n82.8.1(0000)\r\n82.8.2(0000)\r\n0.2.0(M26)\r\nC.5.0(0401)\r\n!\r\n\x03\x01'
+UART answer is None
+>>> uart_ir.write('\x2F\x3F\x21\x0D\x0A')
+sleep(1)
+print("UART answer is "+str(uart_ir.read()))
+uart_ir.write('\x06\x30\x30\x30\x0D\x0A')
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+
+5
+UART answer is b'/LGZ4ZMF100AC.M26\r\n'
+6
+UART answer is b'\x02F.F(00)\r\n0.0(          120858)\r\nC.1.0(13647123)\r\nC.1.1(        )\r\n1.8.1(042951.722*kWh)\r\n1.8.2(018609.568*kWh)\r\n2.8.1(000000.302*kWh)\r\n2.8.2(000010.188*kWh)\r\n1.8.0(061561.290*kWh)\r\n2.8.0(000010.490*kWh)\r\n15.8.0(061571.781*kWh)\r\nC.7.0(0008)\r\n32.7(241*V)\r\n5'
+UART answer is b'2.7(243*V)\r\n72.7(243*V)\r\n31.7(000.34*A)\r\n51.7(000.52*A)\r\n71.7(000.68*A)\r\n82.8.1(0000)\r\n82.8.2(0000)\r\n0.2.0(M26)\r\nC.5.0(0401)\r\n!\r\n\x03\x06'
+UART answer is None
+>>> uart_ir.write('\x2F\x3F\x21\x0D\x0A')
+sleep(1)
+print("UART answer is "+str(uart_ir.read()))
+uart_ir.write('\x06\x30\x30\x30\x0D\x0A')
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+sleep(2) 
+print("UART answer is "+str(uart_ir.read()))
+
+5
+UART answer is b'/LGZ4ZMF100AC.M26\r\n'
+6
+UART answer is b'\x02F.F(00)\r\n0.0(          120858)\r\nC.1.0(13647123)\r\nC.1.1(        )\r\n1.8.1(042951.723*kWh)\r\n1.8.2(018609.568*kWh)\r\n2.8.1(000000.302*kWh)\r\n2.8.2(000010.188*kWh)\r\n1.8.0(061561.291*kWh)\r\n2.8.0(000010.490*kWh)\r\n15.8.0(061571.783*kWh)\r\nC.7.0(0008)\r\n32.7(241*V)\r\n5'
+UART answer is b'2.7(243*V)\r\n72.7(241*V)\r\n31.7(000.34*A)\r\n51.7(000.51*A)\r\n71.7(010.32*A)\r\n82.8.1(0000)\r\n82.8.2(0000)\r\n0.2.0(M26)\r\nC.5.0(0401)\r\n!\r\n\x03\x0b'
+UART answer is None
+>>> 
