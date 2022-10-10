@@ -43,6 +43,19 @@ def uart_ir_e350(uart_ir, IR_SIMULATION):
         print('Warning: UART buffer is not empty after two reads')
     return(uart_str_id.decode()+uart_str_values_0.decode()+uart_str_values_1.decode())
 
+def find_positions(uart_received_str, positions):
+    positions.append(uart_received_str.find("1.8.1(")+6)
+    positions.append(uart_received_str.find("1.8.2(")+6)
+
+    positions.append(uart_received_str.find("32.7(")+5)
+    positions.append(uart_received_str.find("31.7(")+5)
+    positions.append(uart_received_str.find("52.7(")+5)
+    positions.append(uart_received_str.find("51.7(")+5)
+    positions.append(uart_received_str.find("72.7(")+5)
+    positions.append(uart_received_str.find("71.7(")+5)
+
+    return(positions)
+
 
 ## program starts here
 led_onboard.off()
@@ -57,24 +70,30 @@ uart_received_str = uart_ir_e350(uart_ir,IR_SIMULATION)
 print ("UART_string:\n"+uart_received_str)
 
 # find parameters
-value181pos= uart_received_str.find("1.8.1(")+6
-value182pos= uart_received_str.find("1.8.2(")+6
+positions = list()
+positions = find_positions(uart_received_str=uart_received_str,positions=positions)
 
-value327pos= uart_received_str.find("32.7(")+5
-value317pos= uart_received_str.find("31.7(")+5
-value527pos= uart_received_str.find("52.7(")+5
-value517pos= uart_received_str.find("51.7(")+5
-value727pos= uart_received_str.find("72.7(")+5
-value717pos= uart_received_str.find("71.7(")+5
+values = list()
+values.append(uart_received_str[positions[0]:positions[0]+10]) # HT
+values.append(uart_received_str[positions[1]:positions[1]+10]) # NT
+
+for i in range(2,8):
+    values.append(uart_received_str[positions[i]:positions[i]+3])
+
+print("1.8.1(NT) value: "+values[0])
+print("1.8.2(HT) value: "+values[1])
+
+print("Phase_1 value: "+values[2]+"*"+values[3])
+print("Phase_2 value: "+values[4]+"*"+values[5])
+print("Phase_3 value: "+values[6]+"*"+values[7])
+
+val_watt_cons = str(float(val327)*float(317)+float(val527)*float(517)+float(val727)*float(717))
+
+print("Watt consumption now: "+val_watt_cons)
 
 
+transmit_str = val181+"|"+val182+"|"+val_watt_cons
 
-print("1.8.1(NT) value: "+uart_received_str[value181pos:value181pos+10])
-print("1.8.2(HT) value: "+uart_received_str[value182pos:value182pos+10])
-
-print("Phase_1 value: "+uart_received_str[value327pos:value327pos+3]+"*"+uart_received_str[value317pos:value317pos+6])
-print("Phase_2 value: "+uart_received_str[value527pos:value527pos+3]+"*"+uart_received_str[value517pos:value517pos+6])
-print("Phase_3 value: "+uart_received_str[value727pos:value727pos+3]+"*"+uart_received_str[value717pos:value717pos+6])
 
 
 ##### end of IR trials
