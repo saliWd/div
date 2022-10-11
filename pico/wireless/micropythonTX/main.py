@@ -53,6 +53,10 @@ def get_lengths():
     lengths.append(6)
     return(lengths)
 
+def print_values(DO_DEBUG_PRINT:bool, values:list, val_watt_cons:str):
+    debug_print(DO_DEBUG_PRINT, "NT / HT values [kWh]: "+values[0]+", "+values[1])
+    debug_print(DO_DEBUG_PRINT, "Phase1, Phase2, Phase3 values [V*A]: "+values[2]+"*"+values[5]+", "+values[3]+"*"+values[6]+", "+values[4]+"*"+values[7])
+    debug_print(DO_DEBUG_PRINT, "Watt consumption now [W]: "+val_watt_cons)
 
 # debug stuff
 DO_DEBUG_PRINT = True
@@ -93,39 +97,28 @@ led_onboard.on()
 while True:
     enable3v3_pin.on() # power on IR head
     sleep(2) # make sure 3.3V power is stable
-
-    uart_received_str = uart_ir_e350(uart_ir,IR_SIMULATION)
+    uart_received_str = uart_ir_e350(uart_ir,IR_SIMULATION) # this takes some seconds
     enable3v3_pin.off() # power down IR head
-    
     # debug_print(DO_DEBUG_PRINT, "UART_string:\n"+uart_received_str)
 
     # find parameters
     positions = find_positions(uart_received_str=uart_received_str)
-    lengths = get_lengths()
+    lengths = get_lengths() # MAYBE: could move it outside of the loop, those are constants
 
     values = list()
-    values.append(uart_received_str[positions[0]:positions[0]+lengths[0]]) # HT
-    values.append(uart_received_str[positions[1]:positions[1]+lengths[0]]) # NT
-
-    for i in range(2,5): # the voltages of the 3 phases
-        values.append(uart_received_str[positions[i]:positions[i]+lengths[1]])
-    for i in range(5,8): # the currents on the 3 phases
-        values.append(uart_received_str[positions[i]:positions[i]+lengths[2]])
-
-    debug_print(DO_DEBUG_PRINT, "1.8.1(NT) value: "+values[0])
-    debug_print(DO_DEBUG_PRINT, "1.8.2(HT) value: "+values[1])
-    debug_print(DO_DEBUG_PRINT, "Phase_1 value: "+values[2]+"*"+values[5])
-    debug_print(DO_DEBUG_PRINT, "Phase_2 value: "+values[3]+"*"+values[6])
-    debug_print(DO_DEBUG_PRINT, "Phase_3 value: "+values[4]+"*"+values[7])
+    length = lengths[0] # HT and NT
+    for i in range(0,8):
+        if i in range(2,5): # the voltages of the 3 phases
+            length = lengths[1]
+        if i in range(5,8): # the currents on the 3 phases
+            length = lengths[2]
+        values.append(uart_received_str[positions[i]:positions[i]+length])
 
     val_watt_cons = str(float(values[2])*float(values[5])+float(values[3])*float(values[6])+float(values[4])*float(values[7]))
+    print_values(DO_DEBUG_PRINT=DO_DEBUG_PRINT, values=values, val_watt_cons=val_watt_cons)
 
-    debug_print(DO_DEBUG_PRINT, "Watt consumption now: "+val_watt_cons)
-
-    transmit_str = values[0]+"|"+values[1]+"|"+val_watt_cons
-    debug_print(DO_DEBUG_PRINT, transmit_str)
-
-    message = "https://widmedia.ch/pico/getRX.php?TX=pico&device=austr10&val="+transmit_str
+    transmit_str = values[0]+"_"+values[1]+"_"+val_watt_cons # TODO: rather transmit the whole readout as JSON and have the string logic on the server
+    message = "https://widmedia.ch/wmeter/getRX.php?TX=pico&device=austr10&val="+transmit_str
     debug_print(DO_DEBUG_PRINT, message)
     response = urequests.post(message)    
     response.close() # this is needed, I'm getting outOfMemory exception otherwise after 4 loops
