@@ -41,7 +41,7 @@
 
 ### Volkszähler info
 
-1. IR-Header: Sources [bayha-electronics.de](bayha-electronics.de/download/Bauanleitung-TTL.pdf)
+1. IR-Header: auf [ebay](https://www.ebay.ch/itm/275076138187?hash=item400bd0c4cb:g:VxwAAOSwbkdhxLJL), Sources [bayha-electronics.de](bayha-electronics.de/download/Bauanleitung-TTL.pdf) 
 1. UART communication, source [volkszaehler.org](https://wiki.volkszaehler.org/hardware/channels/meters/power/edl-ehz/landisgyr_e350)
    1. 300bd, 7bit, even parity, 1 stoppbit
    1. init sequenz: /?!<CR><LF> (in hex: 2F 3F 21 0D 0A)

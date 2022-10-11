@@ -4,38 +4,44 @@ $dbConn = initialize();
 
 echo '<!DOCTYPE html><html><head>
 <meta charset="utf-8" />
-<title>pico_w Empfänger</title>
-<meta name="description" content="a page displaying the value of the pico_w counter" />  
+<title>Wmeter</title>
+<meta name="description" content="a page displaying the smart meter value" />  
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="refresh" content="10; url=https://widmedia.ch/pico/">
+<meta http-equiv="refresh" content="10; url=https://widmedia.ch/wmeter/">
 <link rel="stylesheet" href="css/font.css" type="text/css" />
 <link rel="stylesheet" href="css/normalize.css" type="text/css" />
 <link rel="stylesheet" href="css/skeleton.css" type="text/css" />
 </head><body>
 <div class="section noBottom">
 <div class="container">
-<h3>pico wireless: Empfänger</h3>
+<h3>Wmeter</h3>
 <p>&nbsp;</p>';
 
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
 if ($doSafe === 0) { // entry point of this site
   // select all entries
-  $result = $dbConn->query('SELECT `id`, `device`, `value0`, `date` FROM `pico_w` WHERE 1 ORDER BY `id`');
+  $result = $dbConn->query('SELECT `id`, `device`, `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `id` DESC LIMIT 100');
   $rowCnt = $result->num_rows;
   
   echo '<div class="row">
           <div class="six columns">Insgesamt '.$rowCnt.' Einträge</div>
           <div class="six columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
         </div>';
+  $onlyOnce = TRUE;
   while ($row = $result->fetch_assoc()) {
     $id = (int)$row['id'];  
-    $value0 = (int)$row['value0'];  
+    $nt = (float)$row['nt'];  
+    $ht = (float)$row['ht'];  
+    $watt = (float)$row['watt'];  
 
+    if ($onlyOnce) {
+      echo '<div class="row twelve columns"><hr>Letzte Wattmessung: '.$watt.' W<hr></div>';
+      $onlyOnce = FALSE;
+    }
+    // TODO: mix of classes and style in the divs below is ugly
     echo '<div class="row">
-            <div class="three columns">id: '.$id.'</div>
-            <div class="three columns">device: '.$row['device'].'</div>
-            <div class="three columns">value: '.$value0.'</div>
-            <div class="three columns">update: '.$row['date'].'</div>
+            <div class="six columns" style="text-align: left;">id: '.$id.'<br>device: '.$row['device'].'<br>update: '.$row['date'].'</div>
+            <div class="six columns" style="text-align: left;">Aktueller Verbrauch: '.$watt.' W<br>Niedertarif: '.$nt.' kWh<br>Hochtarif: '.$ht.' kWh</div>
           </div>';
   } // while
   echo '<div class="row twelve columns">...diese Seite wird alle 10 Sekunden neu geladen...</div>';
