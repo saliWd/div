@@ -1,9 +1,12 @@
-import network # type: ignore
+import network # type: ignore (this is a pylance ignore warning directive)
 import urequests # type: ignore
 from time import sleep
 from machine import Pin, Timer, UART # type: ignore
+# my own files
+# from my_config import config_get_wlan # type: ignore
+import my_config # type: ignore
 
-def debug_print(DO_DEBUG_PRINT:bool,text:str):
+def debug_print(DO_DEBUG_PRINT:bool, text:str):
     if(DO_DEBUG_PRINT):
         print(text)
     # otherwise just return
@@ -46,21 +49,47 @@ def find_positions(uart_received_str):
 
     return(positions)
 
-def get_lengths():
-    lengths = list()
-    lengths.append(10)
-    lengths.append(3)
-    lengths.append(6)
-    return(lengths)
-
 def print_values(DO_DEBUG_PRINT:bool, values:list, val_watt_cons:str):
     debug_print(DO_DEBUG_PRINT, "NT / HT values [kWh]: "+values[0]+", "+values[1])
     debug_print(DO_DEBUG_PRINT, "Phase1, Phase2, Phase3 values [V*A]: "+values[2]+"*"+values[5]+", "+values[3]+"*"+values[6]+", "+values[4]+"*"+values[7])
     debug_print(DO_DEBUG_PRINT, "Watt consumption now [W]: "+val_watt_cons)
 
+def get_wlan_ok(WLAN_SIMULATION:bool, wlan):
+    if(WLAN_SIMULATION):
+        return(True)
+    return(wlan.isconnected())
+
+def wlan_connect(WLAN_SIMULATION:bool, wlan, tim, led_onboard):
+    wlan_ok = get_wlan_ok(WLAN_SIMULATION=WLAN_SIMULATION, wlan=wlan)
+    if(wlan_ok):
+        return() # nothing to do
+    else:
+        tim.init(freq=4.0, mode=Timer.PERIODIC, callback=blink) # signals I'm searching for WLAN    
+        while not wlan_ok:
+            config_wlan = my_config.get_wlan_config() # stored in external file
+            wlan.connect(config_wlan['ssid'], config_wlan['pw'])
+            sleep(3)
+            wlan_ok = get_wlan_ok(WLAN_SIMULATION=WLAN_SIMULATION, wlan=wlan)
+            print("WLAN connected? "+str(wlan_ok)) # debug output
+
+        # signals wlan connection is ok
+        tim.deinit()
+        led_onboard.on()
+
+def send_message_and_wait(WLAN_SIMULATION:bool, message:str, wait_time:int, led_onboard):
+    if(not WLAN_SIMULATION): # not sending anything in simulation
+        response = urequests.post(message)    
+        response.close() # this is needed, I'm getting outOfMemory exception otherwise after 4 loops
+    sleep(wait_time)  # in seconds. Do not set it below ~3 to limit the number of requests
+    led_onboard.toggle()
+    
+
+# constants
+LENGTHS = [10,10,3,3,3,6,6,6] # HT, NT, 3 x voltages, 3 x currents
 # debug stuff
 DO_DEBUG_PRINT = True
 IR_SIMULATION = True
+WLAN_SIMULATION = True
 
 # pins
 led_onboard = Pin("LED", Pin.OUT)
@@ -74,54 +103,36 @@ uart_ir = UART(0, baudrate=300, bits=7, parity=0, stop=1, tx=Pin(0), rx=Pin(1))
 message = ""
 wlan_ok = False
 
-
 ## program starts here
 led_onboard.off()
 enable3v3_pin.off()
 
-tim.init(freq=4.0, mode=Timer.PERIODIC, callback=blink) # signals I'm searching for WLAN
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 sleep(3)
-
-while not wlan_ok:
-    wlan.connect("widmedia_mobile","publicPassword")
-    sleep(3)
-    wlan_ok = wlan.isconnected()
-    print("WLAN connected? "+str(wlan_ok)) # debug output
-
-# signals wlan connection is ok
-tim.deinit()
-led_onboard.on()
 
 while True:
     enable3v3_pin.on() # power on IR head
     sleep(2) # make sure 3.3V power is stable
     uart_received_str = uart_ir_e350(uart_ir,IR_SIMULATION) # this takes some seconds
     enable3v3_pin.off() # power down IR head
-    # debug_print(DO_DEBUG_PRINT, "UART_string:\n"+uart_received_str)
 
     # find parameters
     positions = find_positions(uart_received_str=uart_received_str)
-    lengths = get_lengths() # MAYBE: could move it outside of the loop, those are constants
 
     values = list()
-    length = lengths[0] # HT and NT
-    for i in range(0,8):
-        if i in range(2,5): # the voltages of the 3 phases
-            length = lengths[1]
-        if i in range(5,8): # the currents on the 3 phases
-            length = lengths[2]
-        values.append(uart_received_str[positions[i]:positions[i]+length])
+    for i in range(0,8):        
+        values.append(uart_received_str[positions[i]:positions[i]+LENGTHS[i]])
 
+    # TODO: the calculation below is not correct. Not sure what the reported current value (in mA) relates to, simple P = U * I does not work (Scheinleistung/Wirkleistung?)
     val_watt_cons = str(float(values[2])*float(values[5])+float(values[3])*float(values[6])+float(values[4])*float(values[7]))
     print_values(DO_DEBUG_PRINT=DO_DEBUG_PRINT, values=values, val_watt_cons=val_watt_cons)
 
     transmit_str = values[0]+"_"+values[1]+"_"+val_watt_cons # TODO: rather transmit the whole readout as JSON and have the string logic on the server
-    message = "https://widmedia.ch/wmeter/getRX.php?TX=pico&device=austr10&val="+transmit_str
+    message = "https://widmedia.ch/wmeter/getRX.php?TX=pico&device="+my_config.get_device_name()+"&val="+transmit_str
     debug_print(DO_DEBUG_PRINT, message)
-    response = urequests.post(message)    
-    response.close() # this is needed, I'm getting outOfMemory exception otherwise after 4 loops
-    sleep(10)  # in seconds. Do not set it below ~3 to limit the number of requests    
-    led_onboard.toggle()
+    
+    wlan_connect(WLAN_SIMULATION=WLAN_SIMULATION, wlan=wlan, tim=tim, led_onboard=led_onboard) # try to connect to the WLAN. Hangs there if no connection can be made
+
+    send_message_and_wait(WLAN_SIMULATION=WLAN_SIMULATION, message=message, wait_time=10, led_onboard=led_onboard) # does not send anything when in simulation
 # end while
