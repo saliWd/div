@@ -20,11 +20,12 @@ echo '<!DOCTYPE html><html><head>
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
 if ($doSafe === 0) { // entry point of this site
   // select all entries
-  $result = $dbConn->query('SELECT `id`, `device`, `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `id` DESC LIMIT 100');
-  $rowCnt = $result->num_rows;
+  $result = $dbConn->query('SELECT `id`, `device`, `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `id` DESC LIMIT 50');
+  $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `pico_w` WHERE 1'); // TODO: where device = something
+  $rowTotal = $resultCnt->fetch_assoc(); // returns one row only
   
   echo '<div class="row">
-          <div class="six columns">Insgesamt '.$rowCnt.' Einträge</div>
+          <div class="six columns">Insgesamt '.$rowTotal['total'].' Einträge</div>
           <div class="six columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
         </div>';
   $onlyOnce = TRUE;
