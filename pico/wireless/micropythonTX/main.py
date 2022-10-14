@@ -3,7 +3,6 @@ import urequests # type: ignore
 from time import sleep
 from machine import Pin, Timer, UART # type: ignore
 # my own files
-# from my_config import config_get_wlan # type: ignore
 import my_config # type: ignore
 
 def debug_print(DO_DEBUG_PRINT:bool, text:str):
@@ -36,8 +35,8 @@ def uart_ir_e350(uart_ir, IR_SIMULATION:bool):
 
 def find_positions(uart_received_str):
     positions = list()
-    positions.append(uart_received_str.find("1.8.1(")+6)
-    positions.append(uart_received_str.find("1.8.2(")+6)
+    positions.append(uart_received_str.find("1.8.1(")+6) # returns -1 if not found
+    positions.append(uart_received_str.find("1.8.2(")+6)    
 
     positions.append(uart_received_str.find("32.7(")+5)
     positions.append(uart_received_str.find("52.7(")+5)
@@ -47,6 +46,8 @@ def find_positions(uart_received_str):
     positions.append(uart_received_str.find("51.7(")+5)
     positions.append(uart_received_str.find("71.7(")+5)
 
+    positions.append(min(positions) > 20) # all of them need to be bigger than 20. Otherwise returning false (find returns -1 but I add the length of the string)
+    
     return(positions)
 
 def print_values(DO_DEBUG_PRINT:bool, values:list, val_watt_cons:str):
@@ -87,9 +88,9 @@ def send_message_and_wait(WLAN_SIMULATION:bool, message:str, wait_time:int, led_
 # constants
 LENGTHS = [10,10,3,3,3,6,6,6] # HT, NT, 3 x voltages, 3 x currents
 # debug stuff
-DO_DEBUG_PRINT = True
-IR_SIMULATION = True
-WLAN_SIMULATION = True
+DO_DEBUG_PRINT = my_config.get_debug_print()
+IR_SIMULATION = my_config.get_ir_simulation()
+WLAN_SIMULATION = my_config.get_wlan_simulation()
 
 # pins
 led_onboard = Pin("LED", Pin.OUT)
@@ -115,10 +116,15 @@ while True:
     enable3v3_pin.on() # power on IR head
     sleep(2) # make sure 3.3V power is stable
     uart_received_str = uart_ir_e350(uart_ir,IR_SIMULATION) # this takes some seconds
+    # print(uart_received_str)
     enable3v3_pin.off() # power down IR head
 
     # find parameters
     positions = find_positions(uart_received_str=uart_received_str)
+    if (not positions[8]): # one of the finds did not work. Doesn't make sense to continue in this while loop
+        print('Warning: did not find the values in the IR answer')
+        sleep(10)
+        continue
 
     values = list()
     for i in range(0,8):        
