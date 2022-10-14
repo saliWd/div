@@ -1,0 +1,63 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8" />
+<title>Wmeter</title>
+<meta name="description" content="a page displaying the smart meter value" />  
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="css/font.css" type="text/css" />
+<link rel="stylesheet" href="css/normalize.css" type="text/css" />
+<link rel="stylesheet" href="css/skeleton.css" type="text/css" />
+<script src="script/chart.min.js"></script>
+</head><body>
+<div class="section noBottom">
+<div class="container">
+<h3>Wmeter</h3>
+<p>&nbsp;</p>
+
+
+<canvas id="myChart" width="600" height="300"></canvas>
+<script>
+const ctx = document.getElementById('myChart');
+const data = {
+  datasets: [{
+    label: 'Niedertarif',
+    data: [ {x:0,y:477.25},{x:33,y:500.84},{x:68,y:503.52},{x:102,y:487.59},{x:134,y:474.85},{x:167,y:453.08},{x:201,y:472.45},{x:236,y:468.96},{x:268,y:457.01},{x:301,y:462.47} ],
+    yAxisID: 'y',
+    backgroundColor: 'rgb(255, 99, 132)'
+  },
+  {
+    label: 'Hochtarif',
+    data: [ {x:0,y:277.25},{x:33,y:600.84},{x:68,y:603.52},{x:102,y:587.59},{x:134,y:574.85},{x:167,y:553.08},{x:201,y:572.45},{x:236,y:568.96},{x:268,y:557.01},{x:301,y:562.47} ],
+    yAxisID: 'y2',
+    backgroundColor: 'rgb(25, 99, 132)'
+  }
+],
+};
+const config = {
+  type: 'scatter',
+  data: data,
+  options: {
+    scales: {
+      x: {
+        type: 'linear',
+        position: 'bottom'
+      },
+      y: {
+        type: 'linear',
+        position: 'left',
+        ticks: {color: 'rgb(255, 99, 132)'}
+      },
+      y2: {
+        type: 'linear', 
+        position: 'right',
+        ticks: {color: 'rgb(25, 99, 132)'},
+        grid: {drawOnChartArea: false}
+      }
+    }
+  }
+};
+const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+  );
+</script>
+</div></div></body></html>
