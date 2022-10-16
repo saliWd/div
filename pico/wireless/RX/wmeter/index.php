@@ -7,7 +7,7 @@ echo '<!DOCTYPE html><html><head>
 <title>Wmeter</title>
 <meta name="description" content="a page displaying the smart meter value" />  
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="refresh" content="10; url=https://widmedia.ch/wmeter/">
+<meta http-equiv="refresh" content="30; url=https://widmedia.ch/wmeter/">
 <link rel="stylesheet" href="css/font.css" type="text/css" />
 <link rel="stylesheet" href="css/normalize.css" type="text/css" />
 <link rel="stylesheet" href="css/skeleton.css" type="text/css" />
@@ -20,7 +20,7 @@ echo '<!DOCTYPE html><html><head>
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
 if ($doSafe === 0) { // entry point of this site
   // select all entries
-  $result = $dbConn->query('SELECT `id`, `device`, `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `id` DESC LIMIT 50');
+  $result = $dbConn->query('SELECT `id`, `device`, `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `id` DESC LIMIT 20');
   $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `pico_w` WHERE 1'); // TODO: where device = something
   $rowTotal = $resultCnt->fetch_assoc(); // returns one row only
   
@@ -45,7 +45,7 @@ if ($doSafe === 0) { // entry point of this site
             <div class="six columns" style="text-align: left;">Aktueller Verbrauch: '.$watt.' W<br>Niedertarif: '.$nt.' kWh<br>Hochtarif: '.$ht.' kWh</div>
           </div>';
   } // while
-  echo '<div class="row twelve columns">...diese Seite wird alle 10 Sekunden neu geladen...</div>';
+  echo '<div class="row twelve columns">...diese Seite wird alle 30 Sekunden neu geladen...</div>';
 } elseif ($doSafe === 1) { // delete all entries, then go back to default page
   $result = $dbConn->query('DELETE FROM `pico_w` WHERE 1'); // `device` = "home"); // MAYBE: want to delete only some things
   if ($result) {

@@ -1,0 +1,69 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8" />
+<title>Wmeter</title>
+<meta name="description" content="a page displaying the smart meter value" />  
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="css/font.css" type="text/css" />
+<link rel="stylesheet" href="css/normalize.css" type="text/css" />
+<link rel="stylesheet" href="css/skeleton.css" type="text/css" />
+<script src="script/chart.min.js"></script>
+</head><body>
+<div class="section noBottom">
+<div class="container">
+<h3>Wmeter</h3>
+<p>&nbsp;</p>
+
+
+<canvas id="myChart" width="600" height="300"></canvas>
+<script>
+const ctx = document.getElementById('myChart');
+const labels = [-102, -68, -33, 0];
+const data = {
+  labels: labels,
+  datasets: [{
+    label: 'Niedertarif [kWh]',
+    data: [ 477.25, 500.84, 503.52, 487.59 ],
+    yAxisID: 'y',
+    backgroundColor: 'rgb(255, 99, 132)'
+  },
+  {
+    label: 'Hochtarif [kWh]',
+    data: [ 277.25, 600.84, 603.52, 587.59 ],
+    yAxisID: 'y2',
+    backgroundColor: 'rgb(25, 99, 132)'
+  }
+],
+};
+const config = {
+  type: 'line',
+  data: data,
+  options: {
+    scales: {
+      x: {
+        type: 'linear',
+        position: 'bottom',
+        title: {
+          display: true,
+          text: 'Sekunden'
+        }
+      },
+      y: {
+        type: 'linear',
+        position: 'left',
+        ticks: {color: 'rgb(255, 99, 132)'}
+      },
+      y2: {
+        type: 'linear', 
+        position: 'right',
+        ticks: {color: 'rgb(25, 99, 132)'},
+        grid: {drawOnChartArea: false}
+      }
+    }
+  }
+};
+const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+  );
+</script>
+</div></div></body></html>
