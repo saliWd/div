@@ -5,3 +5,4 @@ pico/cpp/hid_printA/usb/_old/icons.hpp
 pico/cpp/hid_printA/usb/_old/old_code.cpp
 pico/helperFunctions/background_stop.png
 pico/wireless/RX/pico/dbConn.php
+pico/wireless/micropythonTX/my_config_austr10.py

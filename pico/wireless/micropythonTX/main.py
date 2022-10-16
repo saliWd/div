@@ -31,7 +31,11 @@ def uart_ir_e350(uart_ir, IR_SIMULATION:bool):
     sleep(2) 
     if (uart_ir.any() != 0):
         print('Warning: UART buffer is not empty after two reads')
-    return(uart_str_id.decode()+uart_str_values_0.decode()+uart_str_values_1.decode())
+        
+    if ((uart_str_id == None) or (uart_str_values_0 == None) or (uart_str_values_1 == None)):
+        return('uart communication did not work')
+    else:
+        return(uart_str_id.decode()+uart_str_values_0.decode()+uart_str_values_1.decode())
 
 def find_positions(uart_received_str):
     positions = list()
