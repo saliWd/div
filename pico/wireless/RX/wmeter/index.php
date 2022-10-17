@@ -11,6 +11,7 @@ echo '<!DOCTYPE html><html><head>
 <link rel="stylesheet" href="css/font.css" type="text/css" />
 <link rel="stylesheet" href="css/normalize.css" type="text/css" />
 <link rel="stylesheet" href="css/skeleton.css" type="text/css" />
+<script src="script/chart.min.js"></script>
 </head><body>
 <div class="section noBottom">
 <div class="container">
@@ -19,32 +20,105 @@ echo '<!DOCTYPE html><html><head>
 
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
 if ($doSafe === 0) { // entry point of this site
-  // select all entries
-  $result = $dbConn->query('SELECT `id`, `device`, `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `id` DESC LIMIT 20');
-  $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `pico_w` WHERE 1'); // TODO: where device = something
+  // TODO: SQL queries: use where device = something
+  $QUERY_LIMIT = 1000; // TODO: check js-performance for a meaningful value
+  $GRAPH_LIMIT = 3; // does not make sense to display a graph otherwise
+
+  $result = $dbConn->query('SELECT `id`, `device`, `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `id` DESC LIMIT '.$QUERY_LIMIT);
+  $queryCount = $result->num_rows; // this may be 0 ( = need to exclude from logic), or < graph-limit ( = display at least the newest) or >= graph-limit ( = all good)
+
+  $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `pico_w` WHERE 1');
   $rowTotal = $resultCnt->fetch_assoc(); // returns one row only
   
   echo '<div class="row">
           <div class="six columns">Insgesamt '.$rowTotal['total'].' Einträge</div>
           <div class="six columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
-        </div>';
-  $onlyOnce = TRUE;
-  while ($row = $result->fetch_assoc()) {
-    $id = (int)$row['id'];  
-    $nt = (float)$row['nt'];  
-    $ht = (float)$row['ht'];  
-    $watt = (float)$row['watt'];  
+        </div>'; 
 
-    if ($onlyOnce) {
-      echo '<div class="row twelve columns"><hr>Letzte Wattmessung: '.$watt.' W<hr></div>';
-      $onlyOnce = FALSE;
-    }
-    // TODO: mix of classes and style in the divs below is ugly
-    echo '<div class="row">
-            <div class="six columns" style="text-align: left;">id: '.$id.'<br>device: '.$row['device'].'<br>update: '.$row['date'].'</div>
-            <div class="six columns" style="text-align: left;">Aktueller Verbrauch: '.$watt.' W<br>Niedertarif: '.$nt.' kWh<br>Hochtarif: '.$ht.' kWh</div>
-          </div>';
-  } // while
+  if ($queryCount > 0) { // have at least one. Can display the newest
+    $row_newest = $result->fetch_assoc();
+    $nt_new = (float)$row_newest['nt'];  
+    $ht_new = (float)$row_newest['ht'];  
+    $watt_new = (float)$row_newest['watt'];
+    $date_new = date_create($row_newest['date']);
+
+    echo '<div class="row twelve columns"><hr>Letzte Wattmessung: '.$watt_new.' W um '.$date_new->format('Y-m-d H:i:s').'<hr></div>';
+
+    if ($queryCount >= $GRAPH_LIMIT) {
+      $axis_x = ''; // rightmost value comes first. Remove something again after the while loop
+      $val_y0_nt = '';
+      $val_y1_ht = '';
+      $val_y2_wa = '';
+      
+      while ($row = $result->fetch_assoc()) { // did already fetch the newest one. At least 2 remaining
+        $dateDiff = date_diff($date_new, date_create($row['date'])); // will be negative
+        $dateMinutes = ($dateDiff->days * 24 * 60) - ($dateDiff->h * 60) - ($dateDiff->i); // values are negative
+        $nt = (float)$row['nt'] - $nt_new; // will be 0 or negative
+        $ht = (float)$row['ht'] - $ht_new;
+        $watt = (float)$row['watt'];
+        
+        // revert the ordering
+        $axis_x = $dateMinutes.', '.$axis_x; 
+        $val_y0_nt = $nt.', '.$val_y0_nt;
+        $val_y1_ht = $ht.', '.$val_y1_ht;
+        $val_y2_wa = $watt.', '.$val_y2_wa;
+      } // while 
+      // remove the last two caracters (a comma-space) and add the brackets before and after
+      $axis_x = '[ '.substr($axis_x, 0, -2).' ]';
+      $val_y0_nt = '[ '.substr($val_y0_nt, 0, -2).' ]';
+      $val_y1_ht = '[ '.substr($val_y1_ht, 0, -2).' ]';
+      $val_y2_wa = '[ '.substr($val_y2_wa, 0, -2).' ]';
+      
+      // TODO: add some text about the absolute value (of kWh and date)
+
+      echo '<div class="row twelve columns"><canvas id="myChart" width="600" height="300"></canvas></div>      
+      <script>
+      const ctx = document.getElementById("myChart");
+      const labels = '.$axis_x.';
+      const data = {
+        labels: labels,
+        datasets: [{
+          label: "Niedertarif [kWh]",
+          data: '.$val_y0_nt.',
+          yAxisID: "yleft",
+          backgroundColor: "rgb(255, 99, 132)",
+          showLine: false
+        },
+        {
+          label: "Hochtarif [kWh]",
+          data: '.$val_y1_ht.',
+          yAxisID: "yleft",
+          backgroundColor: "rgb(132, 255, 99)",
+          showLine: false
+        },
+        {
+          label: "Aktueller Verbrauch [W]",
+          data: '.$val_y2_wa.',
+          yAxisID: "yright",
+          backgroundColor: "rgb(25, 99, 132)",
+          showLine: false
+        }
+      ],
+      };
+      const config = {
+        type: "line",
+        data: data,
+        options: {
+          scales: {
+            x: { type: "linear", position: "bottom", title: { display: true, text: "Minuten" } },
+            yleft: { type: "linear", position: "left", ticks: {color: "rgb(255, 99, 132)"} },
+            yright: { type: "linear",  position: "right", ticks: {color: "rgb(25, 99, 132)"}, grid: {drawOnChartArea: false} }
+          }
+        }
+      };
+      const myChart = new Chart( document.getElementById("myChart"), config );
+      </script>';
+    } else {
+      echo '<div class="row twelve columns"> - weniger als '.$GRAPH_LIMIT.' Einträge - </div>';
+    }    
+  } else {
+    echo '<div class="row twelve columns"> - noch keine Einträge - </div>';
+  }
   echo '<div class="row twelve columns">...diese Seite wird alle 30 Sekunden neu geladen...</div>';
 } elseif ($doSafe === 1) { // delete all entries, then go back to default page
   $result = $dbConn->query('DELETE FROM `pico_w` WHERE 1'); // `device` = "home"); // MAYBE: want to delete only some things

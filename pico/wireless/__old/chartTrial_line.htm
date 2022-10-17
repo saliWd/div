@@ -16,54 +16,35 @@
 
 <canvas id="myChart" width="600" height="300"></canvas>
 <script>
-const ctx = document.getElementById('myChart');
+const ctx = document.getElementById("myChart");
 const labels = [-102, -68, -33, 0];
 const data = {
   labels: labels,
   datasets: [{
-    label: 'Niedertarif [kWh]',
+    label: "Niedertarif [kWh]",
     data: [ 477.25, 500.84, 503.52, 487.59 ],
-    yAxisID: 'y',
-    backgroundColor: 'rgb(255, 99, 132)'
+    yAxisID: "yleft",
+    backgroundColor: "rgb(255, 99, 132)"
   },
   {
-    label: 'Hochtarif [kWh]',
+    label: "Aktueller Verbrauch [W]",
     data: [ 277.25, 600.84, 603.52, 587.59 ],
-    yAxisID: 'y2',
-    backgroundColor: 'rgb(25, 99, 132)'
+    yAxisID: "yright",
+    backgroundColor: "rgb(25, 99, 132)"
   }
 ],
 };
 const config = {
-  type: 'line',
+  type: "line",
   data: data,
   options: {
     scales: {
-      x: {
-        type: 'linear',
-        position: 'bottom',
-        title: {
-          display: true,
-          text: 'Sekunden'
-        }
-      },
-      y: {
-        type: 'linear',
-        position: 'left',
-        ticks: {color: 'rgb(255, 99, 132)'}
-      },
-      y2: {
-        type: 'linear', 
-        position: 'right',
-        ticks: {color: 'rgb(25, 99, 132)'},
-        grid: {drawOnChartArea: false}
-      }
+      x: { type: "linear", position: "bottom", title: { display: true, text: "Sekunden" } },
+      yleft: { type: "linear", position: "left", ticks: {color: "rgb(255, 99, 132)"} },
+      yright: { type: "linear",  position: "right", ticks: {color: "rgb(25, 99, 132)"}, grid: {drawOnChartArea: false} }
     }
   }
 };
-const myChart = new Chart(
-    document.getElementById('myChart'),
-    config
-  );
+const myChart = new Chart( document.getElementById("myChart"), config );
 </script>
 </div></div></body></html>
