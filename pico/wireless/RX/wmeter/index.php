@@ -21,10 +21,10 @@ echo '<!DOCTYPE html><html><head>
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
 if ($doSafe === 0) { // entry point of this site
   // TODO: SQL queries: use where device = something
-  $QUERY_LIMIT = 1000; // TODO: check js-performance for a meaningful value
+  $QUERY_LIMIT = 5000; // TODO: check js-performance for a meaningful value
   $GRAPH_LIMIT = 3; // does not make sense to display a graph otherwise
 
-  $result = $dbConn->query('SELECT `id`, `device`, `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `id` DESC LIMIT '.$QUERY_LIMIT);
+  $result = $dbConn->query('SELECT `nt`, `ht`, `watt`, `date` FROM `pico_w` WHERE 1 ORDER BY `date` DESC LIMIT '.$QUERY_LIMIT);
   $queryCount = $result->num_rows; // this may be 0 ( = need to exclude from logic), or < graph-limit ( = display at least the newest) or >= graph-limit ( = all good)
 
   $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `pico_w` WHERE 1');
@@ -52,7 +52,8 @@ if ($doSafe === 0) { // entry point of this site
       
       while ($row = $result->fetch_assoc()) { // did already fetch the newest one. At least 2 remaining
         $dateDiff = date_diff($date_new, date_create($row['date'])); // will be negative
-        $dateMinutes = ($dateDiff->days * 24 * 60) - ($dateDiff->h * 60) - ($dateDiff->i); // values are negative
+        $dateMinutes = ($dateDiff->d * 24 * -60) - ($dateDiff->h * 60) - ($dateDiff->i); // values are negative
+
         $nt = (float)$row['nt'] - $nt_new; // will be 0 or negative
         $ht = (float)$row['ht'] - $ht_new;
         $watt = (float)$row['watt'];
