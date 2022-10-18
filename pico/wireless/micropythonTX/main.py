@@ -1,9 +1,15 @@
 import network # type: ignore (this is a pylance ignore warning directive)
 import urequests # type: ignore
+import ujson # type: ignore
 from time import sleep
 from machine import Pin, Timer, UART # type: ignore
 # my own files
 import my_config # type: ignore
+
+# 0 is doing GET-communication
+# 1 uses post. transmits a identifier, values as blob, sends to RX1.php
+TX_INTERFACE_VERSION = 1 # integer (range 0 to 9), just increasing when there is a change on the transmitted value format 
+
 
 def debug_print(DO_DEBUG_PRINT:bool, text:str):
     if(DO_DEBUG_PRINT):
@@ -95,6 +101,23 @@ def send_message_and_wait_post(WLAN_SIMULATION:bool, message:str, wait_time:int,
         
         someDataToSend = dict([('val0','something with spaces'),('val1','some other value')])
 
+        # post_data = ujson.dumps({ "cid": 3, "arg": 5})
+        # post_data = 'val_0=value&val_1=another' # works. TODO: need to urlencode that one
+        post_data_json = ujson.dumps(someDataToSend)
+        debug_print(DO_DEBUG_PRINT, 'post_data_json:'+post_data_json) # gets me: {"val0": "something with spaces", "val1": "some other value"}
+        # headers = {'Content-Type':'application/json'} # does not yet work
+        headers = {'Content-Type':'application/x-www-form-urlencoded'} # this works
+        
+
+        post_data = post_data_json
+        response = urequests.post(URL, json=post_data, headers=headers) # has the value as the first post_array index, not as post_array_index/value combinations
+        debug_print(DO_DEBUG_PRINT, "Text:"+response.text)
+        debug_print(DO_DEBUG_PRINT, "Status:"+str(response.status_code))    
+        response.close() # this is needed, I'm getting outOfMemory exception otherwise after 4 loops
+    sleep(wait_time)  # in seconds
+    led_onboard.toggle() # signal success
+	    
+
 # constants
 LENGTHS = [10,10,3,3,3,6,6,6] # HT, NT, 3 x voltages, 3 x currents
 # debug stuff
@@ -140,15 +163,17 @@ while True:
     for i in range(0,8):        
         values.append(uart_received_str[positions[i]:positions[i]+LENGTHS[i]])
 
-    # TODO: the calculation below is not correct. Not sure what the reported current value (in mA) relates to, simple P = U * I does not work (Scheinleistung/Wirkleistung?)
+    # TODO: the calculation below is not correct. Not sure what the reported current value (in mA) relates to, simple P = U * I does not work (Scheinleistung/Wirkleistung)
     val_watt_cons = str(float(values[2])*float(values[5])+float(values[3])*float(values[6])+float(values[4])*float(values[7]))
     print_values(DO_DEBUG_PRINT=DO_DEBUG_PRINT, values=values, val_watt_cons=val_watt_cons)
 
     transmit_str = values[0]+"_"+values[1]+"_"+val_watt_cons # TODO: rather transmit the whole readout as JSON and have the string logic on the server
     message = "https://widmedia.ch/wmeter/getRX.php?TX=pico&device="+my_config.get_device_name()+"&val="+transmit_str
+    # message = "&device="+my_config.get_device_name()+"&val="+transmit_str
     debug_print(DO_DEBUG_PRINT, message)
     
     wlan_connect(WLAN_SIMULATION=WLAN_SIMULATION, wlan=wlan, tim=tim, led_onboard=led_onboard) # try to connect to the WLAN. Hangs there if no connection can be made
 
     send_message_and_wait(WLAN_SIMULATION=WLAN_SIMULATION, message=message, wait_time=10, led_onboard=led_onboard) # does not send anything when in simulation
+    # send_message_and_wait_post(WLAN_SIMULATION=WLAN_SIMULATION, message=message, wait_time=10, led_onboard=led_onboard, TX_INTERFACE_VERSION=TX_INTERFACE_VERSION) # does not send anything when in simulation
 # end while
