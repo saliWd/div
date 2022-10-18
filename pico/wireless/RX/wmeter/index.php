@@ -2,24 +2,34 @@
 require_once('functions.php');
 $dbConn = initialize();
 
-echo '<!DOCTYPE html><html><head>
-<meta charset="utf-8" />
-<title>Wmeter</title>
-<meta name="description" content="a page displaying the smart meter value" />  
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="refresh" content="30; url=https://widmedia.ch/wmeter/">
-<link rel="stylesheet" href="css/font.css" type="text/css" />
-<link rel="stylesheet" href="css/normalize.css" type="text/css" />
-<link rel="stylesheet" href="css/skeleton.css" type="text/css" />
-<script src="script/chart.min.js"></script>
-</head><body>
-<div class="section noBottom">
-<div class="container">
-<h3>Wmeter</h3>
-<p>&nbsp;</p>';
+function printBeginOfPage_index(bool $enableAutoload):void {
+  echo '<!DOCTYPE html><html><head>
+  <meta charset="utf-8" />
+  <title>Wmeter</title>
+  <meta name="description" content="a page displaying the smart meter value" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/font.css" type="text/css" />
+  <link rel="stylesheet" href="css/normalize.css" type="text/css" />
+  <link rel="stylesheet" href="css/skeleton.css" type="text/css" />
+  <script src="script/chart.min.js"></script>';
+  if ($enableAutoload) {
+    echo '<meta http-equiv="refresh" content="40; url=https://widmedia.ch/wmeter/index.php?do=2">';
+  }
+  echo '
+  </head><body>
+  <div class="section noBottom">
+  <div class="container">
+  <h3>Wmeter</h3>
+  <p>&nbsp;</p>';
+  return;
+}
 
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
-if ($doSafe === 0) { // entry point of this site
+// do = 0: entry point, display graph and stuff
+// do = 1: delete all entries in DB
+// do = 2: enable autoload
+if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
+  printBeginOfPage_index(($doSafe === 2)); // autoload is enabled when do=2
   // TODO: SQL queries: use where device = something
   $QUERY_LIMIT = 5000; // TODO: check js-performance for a meaningful value
   $GRAPH_LIMIT = 3; // does not make sense to display a graph otherwise
@@ -32,7 +42,7 @@ if ($doSafe === 0) { // entry point of this site
   
   echo '<div class="row">
           <div class="six columns">Insgesamt '.$rowTotal['total'].' Einträge</div>
-          <div class="six columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
+          <div class="six columns"><div class="button"><a href="index.php">neu laden</a></div></div>
         </div>'; 
 
   if ($queryCount > 0) { // have at least one. Can display the newest
@@ -120,8 +130,9 @@ if ($doSafe === 0) { // entry point of this site
   } else {
     echo '<div class="row twelve columns"> - noch keine Einträge - </div>';
   }
-  echo '<div class="row twelve columns">...diese Seite wird alle 30 Sekunden neu geladen...</div>';
+  echo '<div class="row twelve columns"><hr><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>';
 } elseif ($doSafe === 1) { // delete all entries, then go back to default page
+  printBeginOfPage_index(FALSE);
   $result = $dbConn->query('DELETE FROM `pico_w` WHERE 1'); // `device` = "home"); // MAYBE: want to delete only some things
   if ($result) {
     echo '<div class="row twelve columns">...alle Einträge gelöscht. <a href="index.php">zurück</a>...</div>';
