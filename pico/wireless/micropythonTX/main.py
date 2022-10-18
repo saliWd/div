@@ -1,6 +1,5 @@
 import network # type: ignore (this is a pylance ignore warning directive)
 import urequests # type: ignore
-import ujson # type: ignore
 from time import sleep
 from machine import Pin, Timer, UART # type: ignore
 # my own files
@@ -94,29 +93,25 @@ def send_message_and_wait(WLAN_SIMULATION:bool, message:str, wait_time:int, led_
     sleep(wait_time)  # in seconds. Do not set it below ~3 to limit the number of requests
     led_onboard.toggle()
     
-def send_message_and_wait_post(WLAN_SIMULATION:bool, message:str, wait_time:int, led_onboard, TX_INTERFACE_VERSION:int):
+def urlencode(dictionary:dict):
+    urlenc = ""
+    for key, val in dictionary.items():
+        urlenc += "%s=%s&" %(key,val)
+    urlenc = urlenc[:-1] # gets me something like 'val0=23&val1=bla space'
+    return(urlenc)
+
+def send_message_and_wait_post(WLAN_SIMULATION:bool, message:dict, wait_time:int, led_onboard, TX_INTERFACE_VERSION:int):
     if(not WLAN_SIMULATION): # not sending anything in simulation
         URL = "https://widmedia.ch/wmeter/getRX1.php?TX=pico&TXVER="+str(TX_INTERFACE_VERSION)
+        HEADERS = {'Content-Type':'application/x-www-form-urlencoded'}
 
-        
-        someDataToSend = dict([('val0','something with spaces'),('val1','some other value')])
-
-        # post_data = ujson.dumps({ "cid": 3, "arg": 5})
-        # post_data = 'val_0=value&val_1=another' # works. TODO: need to urlencode that one
-        post_data_json = ujson.dumps(someDataToSend)
-        debug_print(DO_DEBUG_PRINT, 'post_data_json:'+post_data_json) # gets me: {"val0": "something with spaces", "val1": "some other value"}
-        # headers = {'Content-Type':'application/json'} # does not yet work
-        headers = {'Content-Type':'application/x-www-form-urlencoded'} # this works
-        
-
-        post_data = post_data_json
-        response = urequests.post(URL, json=post_data, headers=headers) # has the value as the first post_array index, not as post_array_index/value combinations
+        urlenc = urlencode(message)
+        response = urequests.post(URL, data=urlenc, headers=HEADERS)
         debug_print(DO_DEBUG_PRINT, "Text:"+response.text)
-        debug_print(DO_DEBUG_PRINT, "Status:"+str(response.status_code))    
         response.close() # this is needed, I'm getting outOfMemory exception otherwise after 4 loops
     sleep(wait_time)  # in seconds
     led_onboard.toggle() # signal success
-	    
+
 
 # constants
 LENGTHS = [10,10,3,3,3,6,6,6] # HT, NT, 3 x voltages, 3 x currents
@@ -134,7 +129,6 @@ tim = Timer() # no need to specify a number on pico, all SW timers
 uart_ir = UART(0, baudrate=300, bits=7, parity=0, stop=1, tx=Pin(0), rx=Pin(1))
 
 # normal variables
-message = ""
 wlan_ok = False
 
 ## program starts here
@@ -167,13 +161,11 @@ while True:
     val_watt_cons = str(float(values[2])*float(values[5])+float(values[3])*float(values[6])+float(values[4])*float(values[7]))
     print_values(DO_DEBUG_PRINT=DO_DEBUG_PRINT, values=values, val_watt_cons=val_watt_cons)
 
-    transmit_str = values[0]+"_"+values[1]+"_"+val_watt_cons # TODO: rather transmit the whole readout as JSON and have the string logic on the server
-    message = "https://widmedia.ch/wmeter/getRX.php?TX=pico&device="+my_config.get_device_name()+"&val="+transmit_str
-    # message = "&device="+my_config.get_device_name()+"&val="+transmit_str
-    debug_print(DO_DEBUG_PRINT, message)
+    transmit_str = values[0]+"_"+values[1]+"_"+val_watt_cons # TODO: rather transmit the whole readout and have the string logic on the server
+    message = dict([('device',my_config.get_device_name()),('val',transmit_str)])
+    debug_print(DO_DEBUG_PRINT, str(message))
     
     wlan_connect(WLAN_SIMULATION=WLAN_SIMULATION, wlan=wlan, tim=tim, led_onboard=led_onboard) # try to connect to the WLAN. Hangs there if no connection can be made
 
-    send_message_and_wait(WLAN_SIMULATION=WLAN_SIMULATION, message=message, wait_time=10, led_onboard=led_onboard) # does not send anything when in simulation
-    # send_message_and_wait_post(WLAN_SIMULATION=WLAN_SIMULATION, message=message, wait_time=10, led_onboard=led_onboard, TX_INTERFACE_VERSION=TX_INTERFACE_VERSION) # does not send anything when in simulation
+    send_message_and_wait_post(WLAN_SIMULATION=WLAN_SIMULATION, message=message, wait_time=10, led_onboard=led_onboard, TX_INTERFACE_VERSION=TX_INTERFACE_VERSION) # does not send anything when in simulation
 # end while
