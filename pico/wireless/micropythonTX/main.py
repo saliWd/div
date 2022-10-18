@@ -88,6 +88,12 @@ def send_message_and_wait(WLAN_SIMULATION:bool, message:str, wait_time:int, led_
     sleep(wait_time)  # in seconds. Do not set it below ~3 to limit the number of requests
     led_onboard.toggle()
     
+def send_message_and_wait_post(WLAN_SIMULATION:bool, message:str, wait_time:int, led_onboard, TX_INTERFACE_VERSION:int):
+    if(not WLAN_SIMULATION): # not sending anything in simulation
+        URL = "https://widmedia.ch/wmeter/getRX1.php?TX=pico&TXVER="+str(TX_INTERFACE_VERSION)
+
+        
+        someDataToSend = dict([('val0','something with spaces'),('val1','some other value')])
 
 # constants
 LENGTHS = [10,10,3,3,3,6,6,6] # HT, NT, 3 x voltages, 3 x currents
