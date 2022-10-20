@@ -71,7 +71,7 @@ C.5.0(0400)
 0.2.0(M23)
 16.7(000.00*kW)
 ```  
-
+1. parameters explained here [e350 data sheet](http://www.smartenergy.com.ua/files/D000027979%20E350%20ZxF100Ax%20Cx%20series%202%20User%20Manual.pdf)
 1. use main.py for the pico side
 1. TODO: solder documentation, setup pictures
 
