@@ -33,7 +33,7 @@ def uart_ir_e350(DEBUG_SETTINGS:dict, uart_ir):
         print('Warning: UART buffer was not empty at first read')
     uart_ir.write('\x2F\x3F\x21\x0D\x0A') # in characters: '/?!\r\n'
     sleep(1) # need to make sure it has been sent but not wait more than 2 secs. TODO: maybe use uart_ir.flush()
-    uart_str_id = uart_ir.read() # should be b'/LGZ4ZMF100AC.M26\r\n'
+    uart_str_id = uart_ir.read() # should be b'/LGZ4ZMF100AC.M26\r\n' (this part is not being transmitted)
     uart_ir.write('\x06\x30\x30\x30\x0D\x0A') # in characters: ACK000\r\n
     sleep(2) 
     uart_str_values_0 = uart_ir.read()
@@ -44,12 +44,12 @@ def uart_ir_e350(DEBUG_SETTINGS:dict, uart_ir):
         print('Warning: UART buffer is not empty after two reads')
         
     if ((uart_str_id == None) or (uart_str_values_0 == None) or (uart_str_values_1 == None)):
-        return('uart communication did not work')
+        return('uart communication did not work') # still a string, will not be transmitted ()
     else:
-        return(uart_str_id.decode()+uart_str_values_0.decode()+uart_str_values_1.decode())
+        return(uart_str_values_0.decode()+uart_str_values_1.decode())
 
 def invalidUartStr(uart_received_str:str):
-    return(len(uart_received_str) < 20) # TODO: expected length?
+    return(len(uart_received_str) < 40) # catches the (one-of-the UART receives has been None) but does not catch whether all params have been transmitted (might vary from device to device)
 
 def get_wlan_ok(DEBUG_SETTINGS:dict, wlan):
     if(DEBUG_SETTINGS["wlan_sim"]):
@@ -93,9 +93,9 @@ def send_message_and_wait_post(DEBUG_SETTINGS:dict, message:dict, wait_time:int,
     led_onboard.toggle() # signal success
 
 
-## constants
 # debug stuff
 DEBUG_SETTINGS = my_config.get_debug_settings()
+LOOP_WAIT_TIME = 40
 
 # pins
 led_onboard = Pin("LED", Pin.OUT)
@@ -123,17 +123,15 @@ while True:
     # print(uart_received_str)
     enable3v3_pin.off() # power down IR head
 
-    # find parameters
+    # basic check, based on string length
     if (invalidUartStr(uart_received_str=uart_received_str)):
         print('Warning: uart string not as expected')
-        debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS, time=10)
+        debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS, time=LOOP_WAIT_TIME)
         continue
-
     
     message = dict([('device',my_config.get_device_name()),('ir_answer',uart_received_str)])
-    debug_print(DEBUG_SETTINGS=DEBUG_SETTINGS, text=str(message))
+    # debug_print(DEBUG_SETTINGS=DEBUG_SETTINGS, text=str(message))
     
     wlan_connect(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan, tim=tim, led_onboard=led_onboard) # try to connect to the WLAN. Hangs there if no connection can be made
-
-    send_message_and_wait_post(DEBUG_SETTINGS=DEBUG_SETTINGS, message=message, wait_time=10, led_onboard=led_onboard, TX_INTERFACE_VERSION=TX_INTERFACE_VERSION) # does not send anything when in simulation
+    send_message_and_wait_post(DEBUG_SETTINGS=DEBUG_SETTINGS, message=message, wait_time=LOOP_WAIT_TIME, led_onboard=led_onboard, TX_INTERFACE_VERSION=TX_INTERFACE_VERSION) # does not send anything when in simulation
 # end while
