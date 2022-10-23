@@ -82,7 +82,7 @@ def urlencode(dictionary:dict):
 
 def send_message_and_wait_post(DEBUG_SETTINGS:dict, message:dict, wait_time:int, led_onboard, TX_INTERFACE_VERSION:int):
     if(not DEBUG_SETTINGS["wlan_sim"]): # not sending anything in simulation
-        URL = "https://widmedia.ch/wmeter/getRX1.php?TX=pico&TXVER="+str(TX_INTERFACE_VERSION)
+        URL = "https://widmedia.ch/wmeter/getRX.php?TX=pico&TXVER="+str(TX_INTERFACE_VERSION)
         HEADERS = {'Content-Type':'application/x-www-form-urlencoded'}
 
         urlenc = urlencode(message)
