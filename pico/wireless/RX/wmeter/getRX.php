@@ -71,6 +71,9 @@
             if ($values[0]) {
                 $total_consumption = $values[1];
                 $total_generation = $values[2];
+                // TODO: insert also the 'diff to the last inserted value, both for consumption/generation but also for the date! Diff in Watt and in seconds.
+
+
                 if ($result = $dbConn->query('INSERT INTO `wmeter` (`device`, `consumption`, `generation`) VALUES ("'.$deviceName.'", "'.$total_consumption.'", "'.$total_generation.'")')) {
                     echo 'inserting ok'; // no real html, just for debugging
                 } else { 
