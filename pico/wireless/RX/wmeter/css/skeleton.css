@@ -371,55 +371,7 @@ hr {
   padding: 2px 5px;
   border-radius: 4px;  
 }
-.overlayMessage {
-  width: 100%; 
-  margin: auto; 
-  top: 2rem; 
-  min-height: 38px;
-  padding: 0 20px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 38px;
-  letter-spacing: .1rem;
-  text-transform: uppercase;
-  text-decoration: none;  
-  border-radius: 4px;
-  box-sizing: border-box;   
-  border: none;  
-  position: relative; 
-  display: block; 
-}
-.userStatBar {
-  display: inline-block; 
-  padding: 0 8px;
-  margin: 10px 0;
-  border-radius: 3px; 
-  border: 1px solid;  
-  white-space: nowrap;
-  min-height: 20px;
-  float: left; 
-  text-align: left;
-}
 .imgBorder { border: 1px solid; }
-.tooltip { position: relative; display: inline-block; }
-.tooltip .tooltiptext {   
-  visibility: hidden;
-  width: 180px;
-  line-height: normal;
-  text-transform: none;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 4px;
-  position: absolute;
-  z-index: 1;
-  bottom: 100%;
-  left: 10%;
-  margin-left: -60px;
-  opacity: 0;
-  transition: opacity 0.3s;
-}  
-.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; } 
 
 #menuToggle {
   display: block;
