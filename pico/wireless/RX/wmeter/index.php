@@ -19,8 +19,7 @@ function printBeginOfPage_index(bool $enableAutoload):void {
   </head><body>
   <div class="section noBottom">
   <div class="container">
-  <h3>Wmeter</h3>
-  <p>&nbsp;</p>';
+  <h3>Wmeter</h3>';
   return;
 }
 
@@ -93,17 +92,17 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
       const data = {
         labels: labels,
         datasets: [{
-          label: "Verbrauch total [kWh]",
-          data: '.$val_y0_consumption.',
+          label: "Verbrauch [W]",
+          data: '.$val_y1_watt.',
           yAxisID: "yleft",
-          backgroundColor: "rgb(255, 99, 132)",
+          backgroundColor: "rgb(25, 99, 132)",
           showLine: false
         },
         {
-          label: "Verbrauch [W]",
-          data: '.$val_y1_watt.',
+          label: "Verbrauch total [kWh]",
+          data: '.$val_y0_consumption.',
           yAxisID: "yright",
-          backgroundColor: "rgb(25, 99, 132)",
+          backgroundColor: "rgba(255, 99, 132, 0.4)",
           showLine: false
         }
       ],
@@ -114,8 +113,8 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
         options: {
           scales: {
             x: { type: "linear", position: "bottom", title: { display: true, text: "Stunden" } },
-            yleft: { type: "linear", position: "left", ticks: {color: "rgb(255, 99, 132)"} },
-            yright: { type: "linear",  position: "right", ticks: {color: "rgb(25, 99, 132)"}, grid: {drawOnChartArea: false} }
+            yleft: { type: "linear", position: "left", ticks: {color: "rgb(25, 99, 132)"} },
+            yright: { type: "linear",  position: "right", ticks: {color: "rgba(255, 99, 132, 0.8)"}, grid: {drawOnChartArea: false} }
           }
         }
       };

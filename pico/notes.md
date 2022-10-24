@@ -37,7 +37,16 @@
      * pin02=RX
 1. maybe: use an example from the sdk, switch to c-buildchain instead of micropython
 1. TODO: look at picosleep to reduce power consumption [picosleep](https://ghubcoder.github.io/posts/deep-sleeping-the-pico-micropython/)
-
+1. display on raspi: nano ~/.config/autostart/chromiumstart.desktop. Inhalt: 
+```
+[Desktop Entry]
+Type=Application
+Hidden=false
+X-GNOME-Autostart-enabled=true
+Comment=Start des Cromium Browsers
+Name=chromiumstart
+Exec=/usr/bin/chromium-browser --noerrdialogs --disable-session-crashed-bubble --disable-infobars --start-fullscreen https://widmedia.ch/wmeter/index.php?do=2
+```
 
 ### Volkszähler info
 
