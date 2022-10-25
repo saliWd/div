@@ -41,14 +41,6 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
   $result = $dbConn->query($sql);
   $queryCount = $result->num_rows; // this may be 0 ( = need to exclude from logic), or < graph-limit ( = display at least the newest) or >= graph-limit ( = all good)
 
-  $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `wmeter` WHERE `device` = "austr10";');
-  $rowTotal = $resultCnt->fetch_assoc(); // returns one row only
-  
-  echo '<div class="row">
-          <div class="six columns">Insgesamt '.$rowTotal['total'].' Einträge</div>
-          <div class="six columns"><div class="button"><a href="index.php">neu laden</a></div></div>
-        </div>'; 
-
   if ($queryCount > 0) { // have at least one. Can display the newest
     $row_newest = $result->fetch_assoc();
     $consumption_new = $row_newest['consumption'];
@@ -57,24 +49,38 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
     } else {$newestConsumption = 0.0; }
     $date_new = date_create($row_newest['date']);
 
-    echo '<div class="row twelve columns"><hr>Verbrauch: <b>'.$newestConsumption.'W</b> um '.$date_new->format('Y-m-d H:i:s').'<hr></div>';
+    $dateString = 'um '.$date_new->format('Y-m-d H:i:s');
+    if (date('Y-m-d') === $date_new->format('Y-m-d')) { // same day
+      $dateString = 'heute um '.$date_new->format('H:i:s');  
+    }
+    echo '<div class="row twelve columns"><hr>Verbrauch: <b>'.$newestConsumption.'W</b> '.$dateString.'<hr></div>';
 
     if ($queryCount >= $GRAPH_LIMIT) {
       $axis_x = ''; // rightmost value comes first. Remove something again after the while loop
       $val_y0_consumption = '';
       $val_y1_watt = '';
       
+      $TRY_NEW_DATE = FALSE;
+
       while ($row = $result->fetch_assoc()) { // did already fetch the newest one. At least 2 remaining
-        $dateDiff = date_diff($date_new, date_create($row['date'])); // will be negative
-        $dateHours = ($dateDiff->d * -24) - ($dateDiff->h) - ($dateDiff->i / 60) - ($dateDiff->s / 3600); // values are negative
+        if ($TRY_NEW_DATE) {
+          $hoursMinutes = date_create($row['date']);
+        } else {
+          $dateDiff = date_diff($date_new, date_create($row['date'])); // will be negative
+          $dateHours = ($dateDiff->d * -24) - ($dateDiff->h) - ($dateDiff->i / 60) - ($dateDiff->s / 3600); // values are negative
+        } 
 
         $consumption = $row['consumption'] - $consumption_new; // will be 0 or negative
         if ($row['movAveDateDiff'] > 0) { // divide by 0 exception
-          $watt = round($row['movAveConsDiff']*3600*1000 / $row['movAveDateDiff']);
+          $watt = max(round($row['movAveConsDiff']*3600*1000 / $row['movAveDateDiff']), 1.0); // max(val,1.0) because 0 in log will not be displayed correctly
         } else { $watt = 0; }
         
         // revert the ordering
-        $axis_x = $dateHours.', '.$axis_x; 
+        if ($TRY_NEW_DATE) {
+          $axis_x = $hoursMinutes->format('U').', '.$axis_x; // TODO: *1000 because js uses milliseconds and not seconds
+        } else {
+          $axis_x = $dateHours.', '.$axis_x;
+        }        
         $val_y0_consumption = $consumption.', '.$val_y0_consumption;
         $val_y1_watt = $watt.', '.$val_y1_watt;
       } // while 
@@ -112,8 +118,20 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
         data: data,
         options: {
           scales: {
-            x: { type: "linear", position: "bottom", title: { display: true, text: "Stunden" } },
-            yleft: { type: "linear", position: "left", ticks: {color: "rgb(25, 99, 132)"} },
+            '; 
+            if ($TRY_NEW_DATE) {
+              echo 'x: { type: "time", 
+                time: {
+                  unit: "seconds"
+                }, 
+                position: "bottom", title: { display: true, text: "Stunden" } },';
+            } else {
+              echo 'x: { type: "linear", position: "bottom", title: { display: true, text: "Stunden" } },';
+            }
+            
+            
+            echo '
+            yleft: { type: "logarithmic", position: "left", ticks: {color: "rgb(25, 99, 132)"} },
             yright: { type: "linear",  position: "right", ticks: {color: "rgba(255, 99, 132, 0.8)"}, grid: {drawOnChartArea: false} }
           }
         }
@@ -126,7 +144,14 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
   } else {
     echo '<div class="row twelve columns"> - noch keine Einträge - </div>';
   }
-  echo '<div class="row twelve columns"><hr><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>';
+
+  $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `wmeter` WHERE `device` = "austr10";');
+  $rowTotal = $resultCnt->fetch_assoc(); // returns one row only  
+  echo '<div class="row">
+          <div class="four columns"><div class="button"><a href="index.php">neu laden</a></div></div>
+          <div class="four columns">Insgesamt '.$rowTotal['total'].' Einträge</div>
+          <div class="four columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
+        </div>'; 
 } elseif ($doSafe === 1) { // delete all entries, then go back to default page
   printBeginOfPage_index(FALSE);
   $result = $dbConn->query('DELETE FROM `wmeter` WHERE 1'); // `device` = "home"); // MAYBE: want to delete only some things
@@ -139,4 +164,5 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
   echo '<div class="row twelve columns">...something went wrong (undefined do-variable)...</div>';
 }
 ?>
+<div class="row twelve columns">&nbsp;</div>
 </div></div></body></html>
