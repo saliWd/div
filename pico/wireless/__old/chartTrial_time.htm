@@ -1,0 +1,86 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8" />
+<title>Wmeter</title>
+<meta name="description" content="a page displaying the smart meter value" />  
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../RX/wmeter/css/font.css" type="text/css" />
+<link rel="stylesheet" href="../RX/wmeter/css/normalize.css" type="text/css" />
+<link rel="stylesheet" href="../RX/wmeter/css/skeleton.css" type="text/css" />
+<script src="../RX/wmeter/script/chart.min.js"></script>
+<script src="../RX/wmeter/script/moment-with-locales.min.js"></script>
+<script src="../RX/wmeter/script/chartjs-adapter-moment.js"></script>
+</head><body>
+<div class="section noBottom">
+<div class="container">
+<h3>Wmeter</h3>
+<p>&nbsp;</p>
+
+
+<canvas id="myChart" width="600" height="300"></canvas>
+<script>
+const data = [
+  {x:moment(new Date(1666620452*1000)).format('YYYY-MM-DD'),y:400},
+  {x:moment(new Date(1666620516*1000)).format('YYYY-MM-DD'),y:402},
+  {x:moment(new Date(1666620578*1000)).format('YYYY-MM-DD'),y:405},
+  {x:moment(new Date(1666620642*1000)).format('YYYY-MM-DD'),y:412}
+];
+data.forEach((o) => o.x *= 1000); 
+
+new Chart(document.getElementById("myChart"), {
+  type: 'scatter',
+  data: {
+    datasets: [{
+      label: "Humidity 1",
+      pointStyle: 'line',
+      showLine: true,
+      fill: false,
+      borderColor: '#0000FF',
+      pointRadius: 0,
+      data: data 
+    }]
+  },
+  options: {
+    responsive: false,
+    legend: {
+      position: 'bottom',
+      labels: {
+        usePointStyle: true
+      }
+    },
+    scales: {
+      xAxes: [{
+        type: 'time',        
+        time: {
+          unit: 'minute',
+          displayFormats: {
+            minute: 'HH:mm'
+          },
+          tooltipFormat: 'HH:mm'
+        },
+        scaleLabel: {
+          display: true,
+          labelString: 'Timestamp'
+        }
+      }],
+      yAxes: [{
+        display: true,
+        ticks: {
+          beginAtZero: true,
+          steps: 10,
+          stepValue: 5,
+          min: 0
+        },
+        scaleLabel: {
+          display: true,
+          labelString: 'Humidity [%]'
+        }
+      }]
+    },
+    title: {
+      display: true,
+      text: 'Filament hub 1'
+    }
+  }
+});
+</script>
+</div></div></body></html>
