@@ -7,8 +7,8 @@
 <link rel="stylesheet" href="../RX/wmeter/css/normalize.css" type="text/css" />
 <link rel="stylesheet" href="../RX/wmeter/css/skeleton.css" type="text/css" />
 <script src="../RX/wmeter/script/chart.min.js"></script>
-<script src="../RX/wmeter/script/moment.min.js"></script>
-<script src="../RX/wmeter/script/my_chartjs-adapter-moment.js"></script>
+<script src="../RX/wmeter/script/moment.min.mine.js"></script>
+<script src="../RX/wmeter/script/chartjs-adapter-moment.mine.js"></script>
 </head><body>
 <div class="section noBottom">
 <div class="container">
@@ -16,7 +16,7 @@
       <script>
         // changing the adapter itself actually works, can define there the formats as I like. Other stuff does not work so far
       const ctx = document.getElementById("myChart");
-      const labels = [ new Date("2020-01-01 12:00:12"), new Date("2020-01-01 13:00:01"), new Date("2020-01-01 14:00:45"), new Date("2020-01-01 18:20:30")];
+      const labels = [ new Date("2020-03-01 12:00:12"), new Date("2020-03-01 13:00:01"), new Date("2020-03-01 14:00:45"), new Date("2020-03-08 18:20:30")];
       const data = {
         labels: labels,
         datasets: [{
@@ -40,7 +40,12 @@
         data: data,
         options: {
           scales: {               
-            x: { type: "time" },
+            x: { type: "time",
+              time: {
+                      unit: 'day'
+                      
+              }
+            },
             yleft: { type: "logarithmic", position: "left", ticks: {color: "rgb(25, 99, 132)"} },
             yright: { type: "linear",  position: "right", ticks: {color: "rgba(255, 99, 132, 0.8)"}, grid: {drawOnChartArea: false} }
           }
