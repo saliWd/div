@@ -2,7 +2,7 @@
 require_once('functions.php');
 $dbConn = initialize();
 
-function printBeginOfPage_index(bool $enableAutoload):void {
+function printBeginOfPage_index(bool $enableAutoReload):void {
   echo '<!DOCTYPE html><html><head>
   <meta charset="utf-8" />
   <title>Wmeter</title>
@@ -14,8 +14,8 @@ function printBeginOfPage_index(bool $enableAutoload):void {
   <script src="script/chart.min.js"></script>
   <script src="script/moment.min.mine.js"></script>
   <script src="script/chartjs-adapter-moment.mine.js"></script>';
-  if ($enableAutoload) {
-    echo '<meta http-equiv="refresh" content="40; url=https://widmedia.ch/wmeter/index.php?do=2">';
+  if ($enableAutoReload) {
+    echo '<meta http-equiv="refresh" content="40; url=https://widmedia.ch/wmeter/index.php?autoreload=1">';
   }
   echo '
   </head><body>
@@ -28,9 +28,11 @@ function printBeginOfPage_index(bool $enableAutoload):void {
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
 // do = 0: entry point, display graph and stuff
 // do = 1: delete all entries in DB
-// do = 2: enable autoload
-if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
-  printBeginOfPage_index(($doSafe === 2)); // autoload is enabled when do=2
+// do = 2: 
+$autoreload = safeIntFromExt('GET', 'autoreload', 1);
+$enableAutoReload = ($autoreload === 1);
+if ($doSafe === 0) { // entry point of this site
+  printBeginOfPage_index($enableAutoReload); // refreshes the page every x seconds
   $QUERY_LIMIT = 5000; // TODO: check js-performance for a meaningful value
   $GRAPH_LIMIT = 3; // does not make sense to display a graph otherwise
 
@@ -130,12 +132,15 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
   }
 
   $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `wmeter` WHERE `device` = "austr10";');
-  $rowTotal = $resultCnt->fetch_assoc(); // returns one row only  
-  echo '<div class="row">
-          <div class="four columns"><div class="button"><a href="index.php">neu laden</a></div></div>
+  $rowTotal = $resultCnt->fetch_assoc(); // returns one row only
+  $checkedText = '';
+  if($enableAutoReload) {
+    $checkedText = ' checked';
+  }  
+  echo '<div class="row"><form action="index.php" method="get">
+          <div class="eight columns"><input type="checkbox" id="autoreload" name="autoreload" value="1"'.$checkedText.'> auto reload <input name="submit" type="submit" id="reload" value="neu laden"></div>
           <div class="four columns">Insgesamt '.$rowTotal['total'].' Einträge</div>
-          <div class="four columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
-        </div>'; 
+        </form></div>'; // <div class="four columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
 } elseif ($doSafe === 1) { // delete all entries, then go back to default page
   printBeginOfPage_index(FALSE);
   $result = $dbConn->query('DELETE FROM `wmeter` WHERE 1'); // `device` = "home"); // MAYBE: want to delete only some things
