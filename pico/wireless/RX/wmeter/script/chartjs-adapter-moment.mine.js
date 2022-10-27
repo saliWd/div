@@ -8,10 +8,10 @@
 const a={
 	datetime:"DD.MM.YYYY, HH:mm:ss",
 	millisecond:"HH:mm:ss.SSS",
-	second:"HH:mm:ss a",
+	second:"HH:mm:ss",
 	minute:"HH:mm",
-	hour:"H",
-	day:"DD.MMM.",
+	hour:"DD.MMM, HH:mm",
+	day:"DD. MMM",
 	week:"ll",
 	month:"MM.YYYY",
 	quarter:"[Q]Q - YYYY",year:"YYYY"

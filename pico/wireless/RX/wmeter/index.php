@@ -11,7 +11,9 @@ function printBeginOfPage_index(bool $enableAutoload):void {
   <link rel="stylesheet" href="css/font.css" type="text/css" />
   <link rel="stylesheet" href="css/normalize.css" type="text/css" />
   <link rel="stylesheet" href="css/skeleton.css" type="text/css" />
-  <script src="script/chart.min.js"></script>';
+  <script src="script/chart.min.js"></script>
+  <script src="script/moment.min.mine.js"></script>
+  <script src="script/chartjs-adapter-moment.mine.js"></script>';
   if ($enableAutoload) {
     echo '<meta http-equiv="refresh" content="40; url=https://widmedia.ch/wmeter/index.php?do=2">';
   }
@@ -60,27 +62,14 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
       $val_y0_consumption = '';
       $val_y1_watt = '';
       
-      $TRY_NEW_DATE = FALSE;
-
-      while ($row = $result->fetch_assoc()) { // did already fetch the newest one. At least 2 remaining
-        if ($TRY_NEW_DATE) {
-          $hoursMinutes = date_create($row['date']);
-        } else {
-          $dateDiff = date_diff($date_new, date_create($row['date'])); // will be negative
-          $dateHours = ($dateDiff->d * -24) - ($dateDiff->h) - ($dateDiff->i / 60) - ($dateDiff->s / 3600); // values are negative
-        } 
-
+      while ($row = $result->fetch_assoc()) { // did already fetch the newest one. At least 2 remaining  
         $consumption = $row['consumption'] - $consumption_new; // will be 0 or negative
         if ($row['movAveDateDiff'] > 0) { // divide by 0 exception
           $watt = max(round($row['movAveConsDiff']*3600*1000 / $row['movAveDateDiff']), 1.0); // max(val,1.0) because 0 in log will not be displayed correctly
         } else { $watt = 0; }
         
         // revert the ordering
-        if ($TRY_NEW_DATE) {
-          $axis_x = $hoursMinutes->format('U').', '.$axis_x; // TODO: *1000 because js uses milliseconds and not seconds
-        } else {
-          $axis_x = $dateHours.', '.$axis_x;
-        }        
+        $axis_x = 'new Date("'.$row['date'].'"), '.$axis_x; // new Date("2020-03-01 12:00:12")
         $val_y0_consumption = $consumption.', '.$val_y0_consumption;
         $val_y1_watt = $watt.', '.$val_y1_watt;
       } // while 
@@ -89,7 +78,7 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
       $val_y0_consumption = '[ '.substr($val_y0_consumption, 0, -2).' ]';
       $val_y1_watt = '[ '.substr($val_y1_watt, 0, -2).' ]';
       
-      // TODO: add some text about the absolute value (of kWh and date)
+      // TODO: add some text about the absolute value (of kWh)
 
       echo '<div class="row twelve columns"><canvas id="myChart" width="600" height="300"></canvas></div>      
       <script>
@@ -119,17 +108,12 @@ if (($doSafe === 0) or ($doSafe === 2)) { // entry point of this site
         options: {
           scales: {
             '; 
-            if ($TRY_NEW_DATE) {
-              echo 'x: { type: "time", 
-                time: {
-                  unit: "seconds"
-                }, 
-                position: "bottom", title: { display: true, text: "Stunden" } },';
-            } else {
-              echo 'x: { type: "linear", position: "bottom", title: { display: true, text: "Stunden" } },';
-            }
-            
-            
+            // TODO: depending on the range, I need to specify the unit
+            echo 'x: { type: "time", 
+              time: {
+                unit: "hour"
+              }
+            },';
             echo '
             yleft: { type: "logarithmic", position: "left", ticks: {color: "rgb(25, 99, 132)"} },
             yright: { type: "linear",  position: "right", ticks: {color: "rgba(255, 99, 132, 0.8)"}, grid: {drawOnChartArea: false} }
