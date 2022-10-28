@@ -25,11 +25,22 @@ function printBeginOfPage_index(bool $enableAutoReload):void {
   return;
 }
 
+// returns the time range to be displayed as int. Possible values are: 1 (for last 1 hour), 6, 24, 25. 25 means: all data. Default is 24
+function getTimeRange():int {
+  $returnVal = 24;
+  if (isset($_GET['submit_1h'])) { $returnVal = 1; }
+  if (isset($_GET['submit_6h'])) { $returnVal = 6; }
+  if (isset($_GET['submit_24h'])) { $returnVal = 24; }
+  if (isset($_GET['submit_25h'])) { $returnVal = 25; } // this one has a special meaning: display all data
+  return $returnVal;
+}
+
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
 // do = 0: entry point, display graph and stuff
 // do = 1: delete all entries in DB
 // do = 2: 
 $autoreload = safeIntFromExt('GET', 'autoreload', 1);
+$timeSelected = getTimeRange();
 $enableAutoReload = ($autoreload === 1);
 if ($doSafe === 0) { // entry point of this site
   printBeginOfPage_index($enableAutoReload); // refreshes the page every x seconds
@@ -136,11 +147,26 @@ if ($doSafe === 0) { // entry point of this site
   $checkedText = '';
   if($enableAutoReload) {
     $checkedText = ' checked';
-  }  
-  echo '<div class="row"><form action="index.php" method="get">
-          <div class="eight columns"><input type="checkbox" id="autoreload" name="autoreload" value="1"'.$checkedText.'> auto reload <input name="submit" type="submit" id="reload" value="neu laden"></div>
-          <div class="four columns">Insgesamt '.$rowTotal['total'].' Einträge</div>
-        </form></div>'; // <div class="four columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
+  }
+  
+  // TODO: add icons, change design
+  $submitTexts = array (
+    '1' => array('1h','1 h',''),
+    '6' => array('6h','6 h',''),
+    '24' => array('24h','24 h',''),
+    '25' => array('25h','alles','')
+  );
+  $submitTexts[$timeSelected][2]  = ' class="active"'; // highlight the selected one
+  
+  echo '<div class="row twelve columns"><form action="index.php" method="get"><input type="checkbox" id="autoreload" name="autoreload" value="1"'.$checkedText.'> auto reload ';
+          foreach ($submitTexts as $submitText) {
+            echo '<input name="submit_'.$submitText[0].'" type="submit" id="submit_'.$submitText[0].'" value="'.$submitText[1].'"'.$submitText[2].'> ';
+          }
+          echo '</form></div>
+          <div class="row">
+            <div class="six columns">Insgesamt '.$rowTotal['total'].' Einträge</div>
+            <div class="six columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
+          </div>';
 } elseif ($doSafe === 1) { // delete all entries, then go back to default page
   printBeginOfPage_index(FALSE);
   $result = $dbConn->query('DELETE FROM `wmeter` WHERE 1'); // `device` = "home"); // MAYBE: want to delete only some things
