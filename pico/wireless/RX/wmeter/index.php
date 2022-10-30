@@ -2,7 +2,7 @@
 require_once('functions.php');
 $dbConn = initialize();
 
-function printBeginOfPage_index(bool $enableAutoReload):void {
+function printBeginOfPage_index(bool $enableAutoReload, string $timerange):void {
   echo '<!DOCTYPE html><html><head>
   <meta charset="utf-8" />
   <title>Wmeter</title>
@@ -15,7 +15,7 @@ function printBeginOfPage_index(bool $enableAutoReload):void {
   <script src="script/moment.min.mine.js"></script>
   <script src="script/chartjs-adapter-moment.mine.js"></script>';
   if ($enableAutoReload) {
-    echo '<meta http-equiv="refresh" content="40; url=https://widmedia.ch/wmeter/index.php?autoreload=1">';
+    echo '<meta http-equiv="refresh" content="40; url=https://widmedia.ch/wmeter/index.php?autoreload=1&'.$timerange.'">';
   }
   echo '
   </head><body>
@@ -51,7 +51,7 @@ if ($doSafe === 0) { // entry point of this site
   $rowFreshest = $resultFreshest->fetch_assoc(); // returns 0 or 1 row
   $totalCount = $rowCnt['total'];
 
-  printBeginOfPage_index($enableAutoReload);
+  printBeginOfPage_index($enableAutoReload, 'submit_'.$timeSelected.'h');
   $dateOldestString = '2020-01-01 08:00:00'; // some arbitrary date in the past
   if ($totalCount > 0) {// this may be 0. Can't 
     $dateNewest = date_create($rowFreshest['date']);    
@@ -134,14 +134,15 @@ if ($doSafe === 0) { // entry point of this site
         data: data,
         options: {
           scales: {
-            '; 
-            // TODO: depending on the range, I need to specify the unit
-            echo 'x: { type: "time", 
-              time: {
-                unit: "hour"
-              }
-            },';
-            echo '
+            x: { type: "time", 
+              time: { '; 
+            if ($timeSelected === 1) {
+              echo 'unit: "minute"';
+            } else {
+              echo 'unit: "hour"';
+            }
+            echo ' }
+               },
             yleft: { type: "logarithmic", position: "left", ticks: {color: "rgb(25, 99, 132)"} },
             yright: { type: "linear",  position: "right", ticks: {color: "rgba(255, 99, 132, 0.8)"}, grid: {drawOnChartArea: false} }
           }
@@ -170,11 +171,18 @@ if ($doSafe === 0) { // entry point of this site
     '25' => array('25h','alles','')
   );
   $submitTexts[$timeSelected][2]  = ' class="active"'; // highlight the selected one
-  
-  echo '<div class="row twelve columns"><form action="index.php" method="get"><input type="checkbox" id="autoreload" name="autoreload" value="1"'.$checkedText.'> auto reload ';
+  echo '<div class="row twelve columns"><form action="index.php" method="get"><input type="checkbox" id="autoreload" name="autoreload" value="1"'.$checkedText.' onChange="this.form.submit()" > reload ';
           foreach ($submitTexts as $submitText) {
             echo '<input name="submit_'.$submitText[0].'" type="submit" id="submit_'.$submitText[0].'" value="'.$submitText[1].'"'.$submitText[2].'> ';
           }
+/*
+echo '<div class="row twelve columns"><form action="index.php" method="get"><input type="checkbox" id="autoreload" name="autoreload" value="1"'.$checkedText.' onChange="this.form.submit()" > reload ';
+          foreach ($submitTexts as $submitText) {
+            echo '<button name="button_'.$submitText[0].'" id="button_'.$submitText[0].'" value="'.$submitText[1].'"'.$submitText[2].' onclick="document.getElementById(\'hiddenText\').value(\''.$submitText[0].'\')"> ';
+          }
+          echo '<input type="text" id="hiddenText" hidden name="timerange" value="'.$submitTexts[$timeSelected][0].'"></form></div>
+*/
+
           echo '</form></div>
           <div class="row">
             <div class="six columns">Insgesamt '.$totalCount.' Einträge</div>
