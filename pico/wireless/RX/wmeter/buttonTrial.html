@@ -1,0 +1,32 @@
+<!DOCTYPE html><html><head>
+  <meta charset="utf-8" />
+  <title>Wmeter</title>
+  <meta name="description" content="a page displaying the smart meter value" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/font.css" type="text/css" />
+  <link rel="stylesheet" href="css/normalize.css" type="text/css" />
+  <link rel="stylesheet" href="css/skeleton.css" type="text/css" />
+  <script src="script/chart.min.js"></script>
+  <script src="script/moment.min.mine.js"></script>
+  <script src="script/chartjs-adapter-moment.mine.js"></script>
+  </head><body>
+  <div class="section noBottom">
+  <div class="container">
+    <script>
+    function changeValue(o){
+        document.getElementById('hiddentext').value=o.innerHTML;
+        //document.getElementById('timerangeform').submit();
+      }
+      </script>
+  <h3>Wmeter</h3><div class="row twelve columns"><hr>Verbrauch: <b>114W</b> heute um 21:31:18<hr></div><div class="row twelve columns"><canvas id="myChart" width="600" height="300"></canvas></div>      
+      <div class="row twelve columns"><form id="timerangeform">
+        <input type="checkbox" id="autoreload" name="autoreload" value="1" > reload 
+        <button name="button_1h" id="button_1h" onclick="changeValue(this)">1 h</button>  
+        <button name="button_6h" id="button_6h" onclick="changeValue(this)">6 h</button> 
+        <input type="text" id="hiddentext" value="blabla">  
+       </form></div>
+          <div class="row">
+            <div class="six columns">Insgesamt 2061 Einträge</div>
+            <div class="six columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>
+          </div><div class="row twelve columns">&nbsp;</div>
+</div></div></body></html>
