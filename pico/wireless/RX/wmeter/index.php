@@ -9,13 +9,12 @@ function printBeginOfPage_index(bool $enableAutoReload, string $timerange):void 
   <meta name="description" content="a page displaying the smart meter value" />  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/font.css" type="text/css" />
-  <link rel="stylesheet" href="css/normalize.css" type="text/css" />
   <link rel="stylesheet" href="css/skeleton.css" type="text/css" />
   <script src="script/chart.min.js"></script>
   <script src="script/moment.min.mine.js"></script>
   <script src="script/chartjs-adapter-moment.mine.js"></script>';
   if ($enableAutoReload) {
-    echo '<meta http-equiv="refresh" content="40; url=https://widmedia.ch/wmeter/index.php?autoreload=1&'.$timerange.'">';
+    echo '<meta http-equiv="refresh" content="40; url=https://widmedia.ch/wmeter/index.php?autoreload=1'.$timerange.'">';
   }
   echo '
   </head><body>
@@ -27,11 +26,11 @@ function printBeginOfPage_index(bool $enableAutoReload, string $timerange):void 
 
 // returns the time range to be displayed as int. Possible values are: 1 (for last 1 hour), 6, 24, 25. 25 means: all data. Default is 24
 function getTimeRange():int {
-  $returnVal = 24;
-  if (isset($_GET['submit_1h'])) { $returnVal = 1; }
-  if (isset($_GET['submit_6h'])) { $returnVal = 6; }
-  if (isset($_GET['submit_24h'])) { $returnVal = 24; }
-  if (isset($_GET['submit_25h'])) { $returnVal = 25; } // this one has a special meaning: display all data
+  $returnVal = 24;  
+  $unsafeInt = safeIntFromExt('GET', 'rangeSelect', 2);
+  if (($unsafeInt === 1) or ($unsafeInt === 6) or ($unsafeInt === 24) or ($unsafeInt === 25)) {
+    $returnVal = $unsafeInt; 
+  }
   return $returnVal;
 }
 
@@ -51,7 +50,7 @@ if ($doSafe === 0) { // entry point of this site
   $rowFreshest = $resultFreshest->fetch_assoc(); // returns 0 or 1 row
   $totalCount = $rowCnt['total'];
 
-  printBeginOfPage_index($enableAutoReload, 'submit_'.$timeSelected.'h');
+  printBeginOfPage_index($enableAutoReload, '&rangeSelect='.$timeSelected);
   $dateOldestString = '2020-01-01 08:00:00'; // some arbitrary date in the past
   if ($totalCount > 0) {// this may be 0. Can't 
     $dateNewest = date_create($rowFreshest['date']);    
@@ -138,9 +137,11 @@ if ($doSafe === 0) { // entry point of this site
               time: { '; 
             if ($timeSelected === 1) {
               echo 'unit: "minute"';
+            } elseif ($timeSelected === 25) {
+              echo 'unit: "day"';
             } else {
               echo 'unit: "hour"';
-            }
+            }            
             echo ' }
                },
             yleft: { type: "logarithmic", position: "left", ticks: {color: "rgb(25, 99, 132)"} },
@@ -162,28 +163,28 @@ if ($doSafe === 0) { // entry point of this site
     $checkedText = ' checked';
   }
   
-  // TODO: add icons, change design
+  // TODO: add icons, change design, spacing of buttons
   // TODO: depending on the number of entries, some ranges cannot be selected
   $submitTexts = array (
-    '1' => array('1h','1 h',''),
-    '6' => array('6h','6 h',''),
-    '24' => array('24h','24 h',''),
-    '25' => array('25h','alles','')
+    '1' => array('1','1 h',''),
+    '6' => array('6','6 h',''),
+    '24' => array('24','24 h',''),
+    '25' => array('25','alles','')
   );
   $submitTexts[$timeSelected][2]  = ' class="active"'; // highlight the selected one
-  echo '<div class="row twelve columns"><form action="index.php" method="get"><input type="checkbox" id="autoreload" name="autoreload" value="1"'.$checkedText.' onChange="this.form.submit()" > reload ';
+  echo '
+  <script>
+  function setValAndSubmit(valueString){
+      document.getElementById(\'hiddentext\').value=valueString;
+      document.getElementById(\'timerangeform\').submit();
+  }
+  </script>';
+  echo '<div class="row twelve columns"><form id="timerangeform" action="index.php" method="get">
+  <input type="checkbox" id="autoreload" name="autoreload" value="1" onChange="setValAndSubmit(\''.$timeSelected.'\')" '.$checkedText.'> reload';
           foreach ($submitTexts as $submitText) {
-            echo '<input name="submit_'.$submitText[0].'" type="submit" id="submit_'.$submitText[0].'" value="'.$submitText[1].'"'.$submitText[2].'> ';
+            echo '<button type="button" onclick="setValAndSubmit(\''.$submitText[0].'\')" '.$submitText[2].'>'.$submitText[1].'</button>';
           }
-/*
-echo '<div class="row twelve columns"><form action="index.php" method="get"><input type="checkbox" id="autoreload" name="autoreload" value="1"'.$checkedText.' onChange="this.form.submit()" > reload ';
-          foreach ($submitTexts as $submitText) {
-            echo '<button name="button_'.$submitText[0].'" id="button_'.$submitText[0].'" value="'.$submitText[1].'"'.$submitText[2].' onclick="document.getElementById(\'hiddenText\').value(\''.$submitText[0].'\')"> ';
-          }
-          echo '<input type="text" id="hiddenText" hidden name="timerange" value="'.$submitTexts[$timeSelected][0].'"></form></div>
-*/
-
-          echo '</form></div>
+          echo '<input type="text" id="hiddentext" name="rangeSelect" value="invalidRange" hidden></form></div>
           <div class="row">
             <div class="six columns">Insgesamt '.$totalCount.' Einträge</div>
             <div class="six columns"><div class="button"><a href="index.php?do=1">alle Einträge löschen</a></div></div>

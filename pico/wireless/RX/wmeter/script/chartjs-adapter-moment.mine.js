@@ -11,7 +11,7 @@ const a={
 	second:"HH:mm:ss",
 	minute:"HH:mm",
 	hour:"DD.MMM, HH:mm",
-	day:"DD. MMM",
+	day:"DD.MMM",
 	week:"ll",
 	month:"MM.YYYY",
 	quarter:"[Q]Q - YYYY",year:"YYYY"
