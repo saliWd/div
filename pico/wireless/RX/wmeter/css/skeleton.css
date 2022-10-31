@@ -134,9 +134,9 @@ p { margin-top: 0; }
 a {
   padding: 2px 4px 1px 1px;  
   text-decoration: none;
-  color: #8d3a53;
+  /*color: #8d3a53;
   background-color: rgba(180, 180, 180, 0.6);
-  transition: color 0.3s ease;
+  transition: color 0.3s ease;*/
 }
 
 
@@ -267,7 +267,8 @@ td:last-child {
 /* Spacing */
 button,
 .button {
-  margin-bottom: 1rem; }
+  margin: 0.5rem;
+  background-color: #cfcde1; }
 input,
 textarea,
 select,
@@ -453,7 +454,7 @@ hr {
   box-sizing: border-box;
 }
 .active {
-  background-color: #515151;
+  background-color: #ea5555;
   box-sizing: border-box;
 }
 .fade {

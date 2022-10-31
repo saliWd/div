@@ -32,6 +32,37 @@ function printErrorAndDie (string $heading, string $text): void {
   die();
 }
 
+function printNavMenu (string $siteSafe): void {   
+  $home   = ($siteSafe === 'index.php') ? '<li class="menuCurrentPage">Home</li>' : '<li><a href="index.php">Home</a></li>';
+  $links  = ($siteSafe === 'settings.php') ? '<li class="menuCurrentPage">Settings</li>' : '<li><a href="settings.php">Settings</a></li>';
+  
+  echo '
+  <nav style="width:400px">
+    <div id="menuToggle">
+      <input type="checkbox">
+      <span></span>
+      <span></span>
+      <span></span>
+      <ul id="menu">
+        '.$home.'
+        '.$links.'
+      </ul>
+    </div>
+  </nav>';
+}
+
+// returns the current site in the format 'about.php' in a safe way. Any do=xy parameters are obmitted
+function getCurrentSite (): string {  
+  $siteUnsafe = substr($_SERVER['SCRIPT_NAME'],7); // SERVER[...] is something like /start/links.php (without any parameters)   
+  if (
+      ($siteUnsafe === 'index.php') or 
+      ($siteUnsafe === 'settings.php')
+     ) {
+        return $siteUnsafe;
+      }
+  return ''; 
+}
+
 // returns a 'safe' integer. Return value is 0 if the checks did not work out
 function makeSafeInt ($unsafe, int $length): int {  
   $unsafe = filter_var(substr($unsafe, 0, $length), FILTER_SANITIZE_NUMBER_INT); // sanitize a length-limited variable
