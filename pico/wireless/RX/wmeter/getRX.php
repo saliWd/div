@@ -27,17 +27,13 @@
         }
     }
 
-    // I want to readout: total_consumption and total_generation. NB: phases do not help that much without cosphi                
-    function get_interesting_values (string $haystack, string $param_consumption, string $param_generation): array {
+    // I want to readout: total_consumption NB: phases do not help that much without cosphi                
+    function get_interesting_values (string $haystack, string $param_consumption): array {
         $return_array = array(FALSE, '',  ''); // valid/consumptio/generation
             $consumption_pos = strpos($haystack,$param_consumption);
             if ($consumption_pos) {
                 $return_array[1] = substr($haystack,$consumption_pos+6,10); // I know it's 10 characters long and starts after the bracket
-                $generation_pos = strpos($haystack,$param_generation); // search only if the first param has been found already
-                if ($consumption_pos) {
-                    $return_array[2] = substr($haystack,$generation_pos+6,10); // I know it's 10 characters long and starts after the bracket
-                    $return_array[0] = TRUE; // only true if both values have been found
-                }
+                $return_array[0] = TRUE; // only true if value haS been found                
             }
         return $return_array;
     }
@@ -47,7 +43,7 @@
     if (verifyGetParams()) { // now I can look the post variables        
         $unsafeDevice = safeStrFromExt('POST','device', 8); // maximum length of 8        
         if (($unsafeDevice ==='austr10') or ($unsafeDevice === 'austr8')) { // TODO: have the known-device-names from DB
-            $deviceName = $unsafeDevice;
+            $device = $unsafeDevice;
             $sqlSafe_ir_answer = sqlSafeStrFromPost($dbConn, 'ir_answer', 511); // safe to insert into sql (not to output on html)
             // process the whole IR string
             // \x02F.F(00)                     
@@ -76,28 +72,32 @@
             // x03\x01'
 
             // interested in those two params (unfortunately no 16.7 and no cosPhi param. So phase-values are just indicative)
-            $values = get_interesting_values($sqlSafe_ir_answer, "1.8.0(", "2.8.0(");
+            $values = get_interesting_values($sqlSafe_ir_answer, "1.8.0(");
             if ($values[0]) {
-                $total_consumption = $values[1];
-                $total_generation = $values[2];
-                if ($result = $dbConn->query('INSERT INTO `wmeter` (`device`, `consumption`, `generation`) VALUES ("'.$deviceName.'", "'.$total_consumption.'", "'.$total_generation.'")')) {
+                $total_consumption = $values[1];                
+                if ($result = $dbConn->query('INSERT INTO `wmeter` (`device`, `consumption`) VALUES ("'.$device.'", "'.$total_consumption.'")')) {
                     echo 'inserting ok'; // no real html, just for debugging
                     //NB: not using last inserted ID as other inserts may have happened in the meantime
-                    $result = $dbConn->query('SELECT * FROM `wmeter` WHERE `device` = "'.$deviceName.'" ORDER BY `id` DESC LIMIT 2');
+                    $result = $dbConn->query('SELECT * FROM `wmeter` WHERE `device` = "'.$device.'" ORDER BY `id` DESC LIMIT 2');
                     $queryCount = $result->num_rows; // this may be 1 or 2
                     if ($queryCount === 2) {
                         $row_now = $result->fetch_assoc();
                         $row_before = $result->fetch_assoc();
-                        $consDiff = $row_now['consumption'] - $row_before['consumption']; // 0 or positive
-                        $genDiff = $row_now['generation'] - $row_before['generation']; // 0 or positive
+                        $consDiff = $row_now['consumption'] - $row_before['consumption']; // 0 or positive                        
                         $dateDiff = date_diff(date_create($row_before['date']), date_create($row_now['date']));
                         $dateSecs = ($dateDiff->d * 24 * 3600) + ($dateDiff->h*3600) + ($dateDiff->i * 60) + ($dateDiff->s);
                         if ($dateSecs < 9000) { // doesn't make sense otherwise, too long between measurements
-                            if ($result = $dbConn->query('UPDATE `wmeter` SET `consDiff` = "'.$consDiff.'", `genDiff` = "'.$genDiff.'", `dateDiff` = "'.$dateSecs.'" WHERE `id` = "'.$row_now['id'].'"')) {
-                                echo 'diff update ok';
-                            } else {
-                                echo 'error: diff upated nok';
-                            }
+                            $result = $dbConn->query('UPDATE `wmeter` SET `consDiff` = "'.$consDiff.'", `dateDiff` = "'.$dateSecs.'" WHERE `id` = "'.$row_now['id'].'"');
+                            // let sql calculate the moving average over 5 entries and then store that in the table
+                            $sql = 'SELECT `id`, ';
+                            $sql = $sql.'avg(`consDiff`) OVER(ORDER BY `date` DESC ROWS BETWEEN 5 PRECEDING AND CURRENT ROW ) as `movAveConsDiff`, ';
+                            $sql = $sql.'avg(`dateDiff`) OVER(ORDER BY `date` DESC ROWS BETWEEN 5 PRECEDING AND CURRENT ROW ) as `movAveDateDiff` ';
+                            $sql = $sql.'from `wmeter` WHERE `device` = "'.$device.'" ';
+                            $sql = $sql.'ORDER BY `date` DESC LIMIT 6;';
+                            $result = $dbConn->query($sql);
+                            $row = $result->fetch_assoc();
+                            $result = $dbConn->query('UPDATE `wmeter` SET `aveConsDiff` = "'.$row['movAveConsDiff'].'", `aveDateDiff` = "'.$row['movAveDateDiff'].'" WHERE `id` = "'.$row['id'].'"');
+                            echo 'update ok';                            
                         } else {
                             echo 'previous data too old'; // not an error
                         } 

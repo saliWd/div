@@ -13,10 +13,10 @@ CREATE TABLE `wmeter` (
   `device` varchar(8) DEFAULT NULL,
   `consumption` decimal(10,3) NOT NULL,
   `consDiff` decimal(10,3) NOT NULL,
-  `generation` decimal(10,3) NOT NULL,
-  `genDiff` decimal(10,3) NOT NULL,
+  `aveConsDiff` double NOT NULL,
   `date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `dateDiff` int(11) NOT NULL
+  `dateDiff` int(11) NOT NULL,
+  `aveDateDiff` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

@@ -62,13 +62,17 @@ if ($totalCount > 0) {// this may be 0. Can't
   $QUERY_LIMIT = 5000; // TODO: check js-performance for a meaningful value (could omit it all together?)
   $GRAPH_LIMIT = 3; // does not make sense to display a graph otherwise
 
-  $sql = 'SELECT `consumption`, `date`, '; // TODO: maybe add generation
+  $sql = 'SELECT `consumption`, `date`, ';
   $sql = $sql.'avg(`consDiff`) OVER(ORDER BY `date` DESC ROWS BETWEEN 5 PRECEDING AND CURRENT ROW ) as `movAveConsDiff`, ';
   $sql = $sql.'avg(`dateDiff`) OVER(ORDER BY `date` DESC ROWS BETWEEN 5 PRECEDING AND CURRENT ROW ) as `movAveDateDiff` ';
   $sql = $sql.'from `wmeter` WHERE `device` = "'.$device.'" AND `date` > "'.$dateOldestString.'" ';
   $sql = $sql.'ORDER BY `date` DESC LIMIT '.$QUERY_LIMIT.';';    
 
   $result = $dbConn->query($sql);
+  $result->data_seek($result->num_rows - 1); // skip to the last entry of the rows
+  $rowOldest = $result->fetch_assoc();
+  $result->data_seek(0); // go back to the first row
+
   $rowNewest = $result->fetch_assoc(); // need to do this again to get the moving average stuff
   $queryCount = $result->num_rows; // this may be < graph-limit ( = display at least the newest) or >= graph-limit ( = all good)
 
@@ -78,7 +82,7 @@ if ($totalCount > 0) {// this may be 0. Can't
   
   $dateString = 'um '.$dateNewest->format('Y-m-d H:i:s');
   if (date('Y-m-d') === $dateNewest->format('Y-m-d')) { // same day
-    $dateString = 'heute um '.$dateNewest->format('H:i:s');  
+    $dateString = 'heute um '.$dateNewest->format('H:i:s');
   }
   echo '<div class="row twelve columns"><hr>Verbrauch: <b>'.$newestConsumption.'W</b> '.$dateString.'<hr></div>';
 
@@ -88,7 +92,7 @@ if ($totalCount > 0) {// this may be 0. Can't
     $val_y1_watt = '';
     
     while ($row = $result->fetch_assoc()) { // did already fetch the newest one. At least 2 remaining  
-      $consumption = $row['consumption'] - $rowNewest['consumption']; // will be 0 or negative
+      $consumption = $row['consumption'] - $rowOldest['consumption']; // to get a relative value (and not some huge numbers)
       if ($row['movAveDateDiff'] > 0) { // divide by 0 exception
         $watt = max(round($row['movAveConsDiff']*3600*1000 / $row['movAveDateDiff']), 1.0); // max(val,1.0) because 0 in log will not be displayed correctly
       } else { $watt = 0; }
