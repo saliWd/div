@@ -35,7 +35,7 @@ if ($doSafe === 0) { // entry point of this site
             <div class="button"><a href="settings.php?do=1">alle Einträge löschen</a></div>
         </div>';
 } elseif ($doSafe === 1) { // delete all entries, then go back to default page
-  printBeginOfPage_index(FALSE);
+  printBeginOfPage_settings();
   $result = $dbConn->query('DELETE FROM `wmeter` WHERE `device` = "'.$device.'"');
   if ($result) {
     echo '<div class="row twelve columns">...alle Einträge gelöscht. <a href="index.php">zurück</a>...</div>';

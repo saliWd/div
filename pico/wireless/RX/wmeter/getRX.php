@@ -93,10 +93,12 @@
                             $sql = $sql.'avg(`consDiff`) OVER(ORDER BY `date` DESC ROWS BETWEEN 5 PRECEDING AND CURRENT ROW ) as `movAveConsDiff`, ';
                             $sql = $sql.'avg(`dateDiff`) OVER(ORDER BY `date` DESC ROWS BETWEEN 5 PRECEDING AND CURRENT ROW ) as `movAveDateDiff` ';
                             $sql = $sql.'from `wmeter` WHERE `device` = "'.$device.'" ';
-                            $sql = $sql.'ORDER BY `date` DESC LIMIT 6;';
-                            $result = $dbConn->query($sql);
-                            $row = $result->fetch_assoc();
-                            $result = $dbConn->query('UPDATE `wmeter` SET `aveConsDiff` = "'.$row['movAveConsDiff'].'", `aveDateDiff` = "'.$row['movAveDateDiff'].'" WHERE `id` = "'.$row['id'].'"');
+                            $sql = $sql.'ORDER BY `date` DESC LIMIT 3;';
+                            $result = $dbConn->query($sql); // gets me at least one result
+                            // update the last 3 ones (moving average for the newest does not differ)
+                            while ($row = $result->fetch_assoc()) {  
+                                $dbConn->query('UPDATE `wmeter` SET `aveConsDiff` = "'.$row['movAveConsDiff'].'", `aveDateDiff` = "'.$row['movAveDateDiff'].'" WHERE `id` = "'.$row['id'].'"');
+                            }
                             echo 'update ok';                            
                         } else {
                             echo 'previous data too old'; // not an error

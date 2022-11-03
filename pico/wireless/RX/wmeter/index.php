@@ -50,34 +50,33 @@ $rowFreshest = $resultFreshest->fetch_assoc(); // returns 0 or 1 row
 $totalCount = $rowCnt['total'];
 
 printBeginOfPage_index($enableAutoReload, '&rangeSelect='.$timeSelected);
-$dateOldestString = '2020-01-01 08:00:00'; // some arbitrary date in the past
 if ($totalCount > 0) {// this may be 0. Can't 
   $dateNewest = date_create($rowFreshest['date']);    
   if ($timeSelected < 25) {
     $dateOldest = date_create($rowFreshest['date']);
     $dateOldest->modify('-'.$timeSelected.' hours');
     $dateOldestString = $dateOldest->format('Y-m-d H:i:s');
+  } else {
+    $dateOldestString = '2020-01-01 08:00:00'; // some arbitrary date in the past
   }
 
   $QUERY_LIMIT = 5000; // TODO: check js-performance for a meaningful value (could omit it all together?)
   $GRAPH_LIMIT = 3; // does not make sense to display a graph otherwise
 
-  $sql = 'SELECT `consumption`, `date`, ';
-  $sql = $sql.'avg(`consDiff`) OVER(ORDER BY `date` DESC ROWS BETWEEN 5 PRECEDING AND CURRENT ROW ) as `movAveConsDiff`, ';
-  $sql = $sql.'avg(`dateDiff`) OVER(ORDER BY `date` DESC ROWS BETWEEN 5 PRECEDING AND CURRENT ROW ) as `movAveDateDiff` ';
-  $sql = $sql.'from `wmeter` WHERE `device` = "'.$device.'" AND `date` > "'.$dateOldestString.'" ';
-  $sql = $sql.'ORDER BY `date` DESC LIMIT '.$QUERY_LIMIT.';';    
+  $sql = 'SELECT `consumption`, `date`, `aveConsDiff`, `aveDateDiff` ';
+  $sql .= 'from `wmeter` WHERE `device` = "'.$device.'" AND `date` > "'.$dateOldestString.'" ';
+  $sql .= 'ORDER BY `date` DESC LIMIT '.$QUERY_LIMIT.';';    
 
   $result = $dbConn->query($sql);
   $result->data_seek($result->num_rows - 1); // skip to the last entry of the rows
   $rowOldest = $result->fetch_assoc();
   $result->data_seek(0); // go back to the first row
 
-  $rowNewest = $result->fetch_assoc(); // need to do this again to get the moving average stuff
+  $rowNewest = $result->fetch_assoc(); // TODO: could maybe remove this now (combine freshest and newest)
   $queryCount = $result->num_rows; // this may be < graph-limit ( = display at least the newest) or >= graph-limit ( = all good)
 
-  if ($rowNewest['movAveDateDiff'] > 0) { // divide by 0 exception
-      $newestConsumption = round($rowNewest['movAveConsDiff']*3600*1000 / $rowNewest['movAveDateDiff']); // kWh compared to seconds
+  if ($rowNewest['aveDateDiff'] > 0) { // divide by 0 exception
+      $newestConsumption = round($rowNewest['aveConsDiff']*3600*1000 / $rowNewest['aveDateDiff']); // kWh compared to seconds
   } else { $newestConsumption = 0.0; }
   
   $dateString = 'um '.$dateNewest->format('Y-m-d H:i:s');
@@ -93,8 +92,8 @@ if ($totalCount > 0) {// this may be 0. Can't
     
     while ($row = $result->fetch_assoc()) { // did already fetch the newest one. At least 2 remaining  
       $consumption = $row['consumption'] - $rowOldest['consumption']; // to get a relative value (and not some huge numbers)
-      if ($row['movAveDateDiff'] > 0) { // divide by 0 exception
-        $watt = max(round($row['movAveConsDiff']*3600*1000 / $row['movAveDateDiff']), 1.0); // max(val,1.0) because 0 in log will not be displayed correctly
+      if ($row['aveDateDiff'] > 0) { // divide by 0 exception
+        $watt = max(round($row['aveConsDiff']*3600*1000 / $row['aveDateDiff']), 1.0); // max(val,1.0) because 0 in log will not be displayed correctly
       } else { $watt = 0; }
       
       // revert the ordering
