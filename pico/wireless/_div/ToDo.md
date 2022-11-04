@@ -14,21 +14,20 @@
 4. index.php
    1. ~~user database~~
    2. device as variable
-   3. number of data points visible
+   3. ~~number of data points visible -> db_thinning~~
    4. ~~generation selection?~~
    5. ~~Positive numbers instead of negative ones~~
    6. design
    7. range selection, disable non-available ones
-   8. password
-   9. raw-output
+   8. password   
 5. getRX.php
    1. ~~moving average at insert~~
 6. green light when 0W
-   1. second main.py
+   1. ~~second main.py~~
+   2. ~~raw-output~~
 7. db
    1. data thinning for older time ranges: 
       * 24h plus: only 4 per hour (from about 60)
-8. tools
-   1. device simulator (post)
 
-Next: 4.8 / 6.1 / 
+
+Next: 7.1 / 
