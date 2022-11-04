@@ -25,8 +25,7 @@ function printErrorAndDie (string $heading, string $text): void {
     <title>Error page</title>
     <meta name="description" content="a generic error page" />  
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="css/font.css" type="text/css" />
-    <link rel="stylesheet" href="css/normalize.css" type="text/css" />
+    <link rel="stylesheet" href="css/font.css" type="text/css" />    
     <link rel="stylesheet" href="css/skeleton.css" type="text/css" />';    
   echo '</head><body><div class="row twelve columns textBox"><h4>'.$heading.'</h4><p>'.$text.'</p></div></body></html>';
   die();
@@ -78,6 +77,15 @@ function makeSafeStr ($unsafe, int $length): string {
   return (htmlentities(substr($unsafe, 0, $length))); // length-limited variable, HTML encoded
 }
 
+// returns a 'safe' character-as-hex value
+function makeSafeHex ($unsafe, int $length): string {  
+  $unsafe = substr($unsafe, 0, $length); // length-limited variable  
+  if (ctype_xdigit($unsafe)) {
+    return (string)$unsafe;
+  } else {
+    return '0';
+  }
+}
 
 // checks whether a get/post/cookie variable exists and makes it safe if it does. If not, returns 0
 function safeIntFromExt (string $source, string $varName, int $length): int {
@@ -92,7 +100,18 @@ function safeIntFromExt (string $source, string $varName, int $length): int {
   }
 }
 
-// same as hex above...
+function safeHexFromExt (string $source, string $varName, int $length): string {
+  if (($source === 'GET') and (isset($_GET[$varName]))) {
+     return makeSafeHex($_GET[$varName], $length);
+   } elseif (($source === 'POST') and (isset($_POST[$varName]))) {
+     return makeSafeHex($_POST[$varName], $length);
+   } elseif (($source === 'COOKIE') and (isset($_COOKIE[$varName]))) {
+     return makeSafeHex($_COOKIE[$varName], $length);
+   } else {
+     return '0';
+   }
+ }
+
 function safeStrFromExt (string $source, string $varName, int $length): string {
   if (($source === 'GET') and (isset($_GET[$varName]))) {
      return makeSafeStr($_GET[$varName], $length);

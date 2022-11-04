@@ -2,12 +2,12 @@ import network # type: ignore (this is a pylance ignore warning directive)
 import urequests # type: ignore
 from time import sleep
 from machine import Pin, Timer, UART # type: ignore
+from hashlib import sha256
+from binascii import hexlify
+from random import randint
+
 # my own files
 import my_config
-
-# 0 is doing GET-communication
-# 1 uses post. transmits a identifier, values as blob, sends to RX1.php
-TX_INTERFACE_VERSION = 1 # integer (range 0 to 9), just increasing when there is a change on the transmitted value format 
 
 
 def debug_print(DEBUG_SETTINGS:dict, text:str):
@@ -80,9 +80,12 @@ def urlencode(dictionary:dict):
     urlenc = urlenc[:-1] # gets me something like 'val0=23&val1=bla space'
     return(urlenc)
 
-def send_message_and_wait_post(DEBUG_SETTINGS:dict, message:dict, wait_time:int, led_onboard, TX_INTERFACE_VERSION:int):
+def send_message_and_wait_post(DEBUG_SETTINGS:dict, message:dict, wait_time:int, led_onboard):
+    # about TXVER: integer (range 0 to 9), increases when there is a change on the transmitted value format 
+    # 0 is doing GET-communication, 1 uses post to transmit an identifier, values as blob
+    # 2 uses authentification with a hash when sending
     if(not DEBUG_SETTINGS["wlan_sim"]): # not sending anything in simulation
-        URL = "https://widmedia.ch/wmeter/getRX.php?TX=pico&TXVER="+str(TX_INTERFACE_VERSION)
+        URL = "https://widmedia.ch/wmeter/rx_v2.php?TX=pico&TXVER=2"
         HEADERS = {'Content-Type':'application/x-www-form-urlencoded'}
 
         urlenc = urlencode(message)
@@ -116,6 +119,8 @@ wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 sleep(3)
 
+device_config = my_config.get_device_config()
+
 while True:
     enable3v3_pin.on() # power on IR head
     debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS, time=2) # make sure 3.3V power is stable
@@ -129,9 +134,18 @@ while True:
         debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS, time=LOOP_WAIT_TIME)
         continue
     
-    message = dict([('device',my_config.get_device_name()),('ir_answer',uart_received_str)])
+    rand_num = randint(1, 10000)
+    myhash = sha256(str(rand_num)+device_config['post_key'])
+    hashString = hexlify(myhash.digest())
+    
+    message = dict([
+        ('device', device_config['device_name']),
+        ('ir_answer', uart_received_str),
+        ('randNum', rand_num),
+        ('hash', hashString.decode())
+        ])
     # debug_print(DEBUG_SETTINGS=DEBUG_SETTINGS, text=str(message))
     
     wlan_connect(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan, tim=tim, led_onboard=led_onboard) # try to connect to the WLAN. Hangs there if no connection can be made
-    send_message_and_wait_post(DEBUG_SETTINGS=DEBUG_SETTINGS, message=message, wait_time=LOOP_WAIT_TIME, led_onboard=led_onboard, TX_INTERFACE_VERSION=TX_INTERFACE_VERSION) # does not send anything when in simulation
+    send_message_and_wait_post(DEBUG_SETTINGS=DEBUG_SETTINGS, message=message, wait_time=LOOP_WAIT_TIME, led_onboard=led_onboard) # does not send anything when in simulation
 # end while
