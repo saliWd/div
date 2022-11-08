@@ -30,7 +30,7 @@
     }
 
     // I want to readout: total_consumption NB: phases do not help that much without cosphi                
-    function get_interesting_values (string $haystack, string $param_consumption): array {        
+    function getInterestingValues (string $haystack, string $param_consumption): array {        
         // process the whole IR string
         // \x02F.F(00)                     
         // 0.0(          120858)
@@ -97,6 +97,41 @@
         }
     }
     
+    function doDbThinning($dbConn, string $device):void {
+        $sqlWhereDeviceThin = '`device` = "'.$device.'" AND `thin` = "0"';
+        $sql = 'SELECT `date` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' ORDER BY `id` ASC LIMIT 1;';
+        $result = $dbConn->query($sql);
+        $row = $result->fetch_assoc();
+        // get the time, add 15 minutes  
+        $dateToThin = date_create($row['date']);
+        $dateToThin->modify('+ 15 minutes');
+        $dateToThinString = $dateToThin->format('Y-m-d H:i:s');
+        
+        $dateMinus24h = date_create("yesterday");
+        if ($dateToThin >= $dateMinus24h) {  // if this time is more then 24h old, proceed. Otherwise stop
+          return;
+        }
+        // get the last one where thinning was not yet applied
+        $sql = 'SELECT `id` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'" ORDER BY `id` ASC LIMIT 1;';
+        $result = $dbConn->query($sql);
+        $row = $result->fetch_assoc();   // -> gets me the ID I want to update with the next commands
+        $idToUpdate = $row['id'];
+        
+        $sql = 'SELECT SUM(`aveConsDiff`) as `sumAveConsDiff`, SUM(`aveDateDiff`) as `sumAveDateDiff` FROM `wmeter`';
+        $sql = $sql. ' WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'";';
+        $result = $dbConn->query($sql);
+        $row = $result->fetch_assoc(); 
+      
+        // now do the update and then delete the others. Number 15 means: a ratio of about 1/15 was implemented 
+        $sql = 'UPDATE `wmeter` SET `aveConsDiff` = "'.$row['sumAveConsDiff'].'", `aveDateDiff` = "'.$row['sumAveDateDiff'].'", `thin` = 15 WHERE `id` = "'.$idToUpdate.'";';
+        $result = $dbConn->query($sql);
+        
+        $sql = 'DELETE FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'";';
+        $result = $dbConn->query($sql);
+        echo $dbConn->affected_rows.' entries have been deleted';
+      }      
+
+
     // no meaningful (=HTML) output is generated. Use index.php to monitor the value itself
     // db structure is stored in wmeter.sql-file
     if (! verifyGetParams()) { // now I can look the post variables        
@@ -114,7 +149,7 @@
 
     $sqlSafe_ir_answer = sqlSafeStrFromPost($dbConn, 'ir_answer', 511); // safe to insert into sql (not to output on html)   
     // interested in total_consumption param (unfortunately no 16.7 and no cosPhi param. So phase-values are just indicative)
-    $values = get_interesting_values($sqlSafe_ir_answer, "1.8.0(");
+    $values = getInterestingValues($sqlSafe_ir_answer, "1.8.0(");
     if (! $values[0]) {
         printRawErrorAndDie('Error', 'values not found');
     }
@@ -147,7 +182,10 @@
             while ($row = $result->fetch_assoc()) {  
                 $dbConn->query('UPDATE `wmeter` SET `aveConsDiff` = "'.$row['movAveConsDiff'].'", `aveDateDiff` = "'.$row['movAveDateDiff'].'" WHERE `id` = "'.$row['id'].'"');
             }
-            echo 'update ok';                            
+            echo 'update ok';
+            
+            doDbThinning($dbConn, $device); // this doesn't need to run every time but doesn't hurt either
+
         } else {
             echo 'previous data too old'; // not an error
         } 

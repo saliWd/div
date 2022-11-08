@@ -25,10 +25,10 @@
 6. green light when 0W
    1. ~~second main.py~~
    2. ~~raw-output~~
+   3. pimorini display
 7. db
-   1. data thinning for older time ranges: 
-      * 24h plus: only 4 per hour (from about 60)
-      * 6h plus: 1/4th 
+   1. ~~data thinning for older time ranges:~~ 
+      * ~~24h plus: only 4 per hour (from about 60)~~ 
 
 
-Next: 7.1 / 
+Next:  switch to rx_v2
