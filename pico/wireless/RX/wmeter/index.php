@@ -60,7 +60,7 @@ if ($totalCount > 0) {// this may be 0. Can't
     $dateOldestString = '2020-01-01 08:00:00'; // some arbitrary date in the past
   }
 
-  $QUERY_LIMIT = 5000; // TODO: check js-performance for a meaningful value (could omit it all together?)
+  $QUERY_LIMIT = 10000; // have some upper limit, both for js and db-performance
   $GRAPH_LIMIT = 3; // does not make sense to display a graph otherwise
 
   $sql = 'SELECT `consumption`, `date`, `aveConsDiff`, `aveDateDiff` ';

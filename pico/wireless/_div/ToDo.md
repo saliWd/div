@@ -28,6 +28,7 @@
 7. db
    1. data thinning for older time ranges: 
       * 24h plus: only 4 per hour (from about 60)
+      * 6h plus: 1/4th 
 
 
 Next: 7.1 / 
