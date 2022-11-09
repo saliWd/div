@@ -110,7 +110,7 @@ function safeHexFromExt (string $source, string $varName, int $length): string {
    } else {
      return '0';
    }
- }
+}
 
 function safeStrFromExt (string $source, string $varName, int $length): string {
   if (($source === 'GET') and (isset($_GET[$varName]))) {
@@ -122,5 +122,49 @@ function safeStrFromExt (string $source, string $varName, int $length): string {
    } else {
      return '';
    }
- }
+}
+
+function doDbThinning($dbConn, string $device, bool $talkative):void {
+  $sqlWhereDeviceThin = '`device` = "'.$device.'" AND `thin` = "0"';
+  $sql = 'SELECT `date` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' ORDER BY `id` ASC LIMIT 1;';
+  $result = $dbConn->query($sql);
+  $row = $result->fetch_assoc();
+  // get the time, add 15 minutes  
+  $dateToThin = date_create($row['date']);
+  $dateToThin->modify('+ 15 minutes');
+  $dateToThinString = $dateToThin->format('Y-m-d H:i:s');
+  
+  $dateMinus24h = date_create("now");
+  $dateMinus24h->modify('- 24 hours');
+  if ($dateToThin >= $dateMinus24h) {  // if this time is more then 24h old, proceed. Otherwise stop
+    if($talkative) {
+      echo 'keine Einträge, die genügend alt sind';
+    }
+    return;
+  }
+  // get the last one where thinning was not yet applied
+  $sql = 'SELECT `id` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'" ORDER BY `id` ASC LIMIT 16;';
+  $result = $dbConn->query($sql);
+  if ($result->num_rows < 15) { // otherwise I can't really compact stuff
+    if($talkative) {
+      echo 'weniger als 15 Einträge';
+    }
+    return;
+  }
+  $row = $result->fetch_assoc();   // -> gets me the ID I want to update with the next commands
+  $idToUpdate = $row['id'];
+  
+  $sql = 'SELECT SUM(`aveConsDiff`) as `sumAveConsDiff`, SUM(`aveDateDiff`) as `sumAveDateDiff` FROM `wmeter`';
+  $sql = $sql. ' WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'";';
+  $result = $dbConn->query($sql);
+  $row = $result->fetch_assoc(); 
+
+  // now do the update and then delete the others. Number 15 means: a ratio of about 1/15 was implemented 
+  $sql = 'UPDATE `wmeter` SET `aveConsDiff` = "'.$row['sumAveConsDiff'].'", `aveDateDiff` = "'.$row['sumAveDateDiff'].'", `thin` = 15 WHERE `id` = "'.$idToUpdate.'";';
+  $result = $dbConn->query($sql);
+  
+  $sql = 'DELETE FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'";';
+  $result = $dbConn->query($sql);
+  echo $dbConn->affected_rows.' entries have been deleted';
+}      
  
