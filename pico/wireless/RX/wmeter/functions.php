@@ -137,19 +137,23 @@ function doDbThinning($dbConn, string $device, bool $talkative):void {
   $dateMinus24h = date_create("now");
   $dateMinus24h->modify('- 24 hours');
   if ($dateToThin >= $dateMinus24h) {  // if this time is more then 24h old, proceed. Otherwise stop
-    if($talkative) {
-      echo 'keine Einträge, die genügend alt sind';
-    }
+    if($talkative) { echo 'keine Einträge, die genügend alt sind'; }
     return;
   }
   // get the last one where thinning was not yet applied
-  $sql = 'SELECT `id` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'" ORDER BY `id` ASC LIMIT 16;';
+  $sql = 'SELECT `id` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'" ORDER BY `id` ASC LIMIT 15;';
   $result = $dbConn->query($sql);
-  if ($result->num_rows < 15) { // otherwise I can't really compact stuff
-    if($talkative) {
-      echo 'weniger als 15 Einträge';
+  if ($result->num_rows < 14) { // otherwise I can't really compact stuff
+    // I have an issue when there are gaps in the entries. I then have less than 14 entries per 15 minutes
+    $dateMinus25h = date_create("now");
+    $dateMinus25h->modify('- 25 hours');
+    if ($dateToThin < $dateMinus25h) {
+      // proceed normally
+      if($talkative) { echo '...prozessiere '.$result->num_rows.' Einträge (weniger als 14 aber mehr als 25h alt) seit '.$dateToThinString; }
+    } else {
+      if($talkative) { echo 'nur '.$result->num_rows.' Einträge (weniger als 14) seit '.$dateToThinString; }
+      return;
     }
-    return;
   }
   $row = $result->fetch_assoc();   // -> gets me the ID I want to update with the next commands
   $idToUpdate = $row['id'];

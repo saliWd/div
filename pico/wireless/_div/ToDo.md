@@ -4,7 +4,7 @@
    1. website / wordpress and stuff for it
    2. re-org of git repo
 2. current consumption
-   1. monitor
+   1. monitor: about 26 mA (10 Ah = 3 days)
    2. check solar panel setup
 3. main.py
    1. stability?
@@ -25,10 +25,10 @@
 6. green light when 0W
    1. ~~second main.py~~
    2. ~~raw-output~~
-   3. pimorini display
+   3. display. mpy with pimoroni support: [pimoroni-picow-vXX.uf2](https://github.com/pimoroni/pimoroni-pico/releases/latest/)
 7. db
    1. ~~data thinning for older time ranges:~~ 
-      * ~~24h plus: only 4 per hour (from about 60)~~ 
+      * ~~24h plus: only 4 per hour (from about 60)~~
 
 
-Next:  switch to rx_v2
+Next:  6.3 / 
