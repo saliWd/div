@@ -14,9 +14,9 @@ CREATE TABLE `wmeter` (
   `consumption` decimal(10,3) NOT NULL,
   `consDiff` decimal(10,3) NOT NULL,
   `aveConsDiff` double NOT NULL,
-  `date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `dateDiff` int(11) NOT NULL,
-  `aveDateDiff` double NOT NULL,
+  `zeit` timestamp NOT NULL DEFAULT current_timestamp(),
+  `zeitDiff` int(11) NOT NULL,
+  `aveZeitDiff` double NOT NULL,
   `thin` tinyint(3) UNSIGNED NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

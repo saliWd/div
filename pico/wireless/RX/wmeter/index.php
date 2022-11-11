@@ -43,7 +43,7 @@ $enableAutoReload = ($autoreload === 1);
 $device = 'austr10'; // TODO: device as variable
 
 $resultCnt = $dbConn->query('SELECT COUNT(*) as `total` FROM `wmeter` WHERE `device` = "'.$device.'" LIMIT 1;'); // guaranteed to return one row
-$resultFreshest = $dbConn->query('SELECT `date` FROM `wmeter` WHERE `device` = "'.$device.'" ORDER BY `date` DESC LIMIT 1;'); // cannot combine those two
+$resultFreshest = $dbConn->query('SELECT `zeit` FROM `wmeter` WHERE `device` = "'.$device.'" ORDER BY `zeit` DESC LIMIT 1;'); // cannot combine those two
 
 $rowCnt = $resultCnt->fetch_assoc(); // returns one row only
 $rowFreshest = $resultFreshest->fetch_assoc(); // returns 0 or 1 row
@@ -51,21 +51,21 @@ $totalCount = $rowCnt['total'];
 
 printBeginOfPage_index($enableAutoReload, '&rangeSelect='.$timeSelected);
 if ($totalCount > 0) {// this may be 0. Can't 
-  $dateNewest = date_create($rowFreshest['date']);    
+  $zeitNewest = date_create($rowFreshest['zeit']);    
   if ($timeSelected < 25) {
-    $dateOldest = date_create($rowFreshest['date']);
-    $dateOldest->modify('-'.$timeSelected.' hours');
-    $dateOldestString = $dateOldest->format('Y-m-d H:i:s');
+    $zeitOldest = date_create($rowFreshest['zeit']);
+    $zeitOldest->modify('-'.$timeSelected.' hours');
+    $zeitOldestString = $zeitOldest->format('Y-m-d H:i:s');
   } else {
-    $dateOldestString = '2020-01-01 08:00:00'; // some arbitrary date in the past
+    $zeitOldestString = '2020-01-01 08:00:00'; // some arbitrary date in the past
   }
 
   $QUERY_LIMIT = 10000; // have some upper limit, both for js and db-performance
   $GRAPH_LIMIT = 3; // does not make sense to display a graph otherwise
 
-  $sql = 'SELECT `consumption`, `date`, `aveConsDiff`, `aveDateDiff` ';
-  $sql .= 'from `wmeter` WHERE `device` = "'.$device.'" AND `date` > "'.$dateOldestString.'" ';
-  $sql .= 'ORDER BY `date` DESC LIMIT '.$QUERY_LIMIT.';';    
+  $sql = 'SELECT `consumption`, `zeit`, `aveConsDiff`, `aveZeitDiff` ';
+  $sql .= 'from `wmeter` WHERE `device` = "'.$device.'" AND `zeit` > "'.$zeitOldestString.'" ';
+  $sql .= 'ORDER BY `zeit` DESC LIMIT '.$QUERY_LIMIT.';';    
 
   $result = $dbConn->query($sql);
   $result->data_seek($result->num_rows - 1); // skip to the last entry of the rows
@@ -75,15 +75,15 @@ if ($totalCount > 0) {// this may be 0. Can't
   $rowNewest = $result->fetch_assoc(); // TODO: could maybe remove this now (combine freshest and newest)
   $queryCount = $result->num_rows; // this may be < graph-limit ( = display at least the newest) or >= graph-limit ( = all good)
 
-  if ($rowNewest['aveDateDiff'] > 0) { // divide by 0 exception
-      $newestConsumption = round($rowNewest['aveConsDiff']*3600*1000 / $rowNewest['aveDateDiff']); // kWh compared to seconds
+  if ($rowNewest['aveZeitDiff'] > 0) { // divide by 0 exception
+      $newestConsumption = round($rowNewest['aveConsDiff']*3600*1000 / $rowNewest['aveZeitDiff']); // kWh compared to seconds
   } else { $newestConsumption = 0.0; }
   
-  $dateString = 'um '.$dateNewest->format('Y-m-d H:i:s');
-  if (date('Y-m-d') === $dateNewest->format('Y-m-d')) { // same day
-    $dateString = 'heute um '.$dateNewest->format('H:i:s');
+  $zeitString = 'um '.$zeitNewest->format('Y-m-d H:i:s');
+  if (date('Y-m-d') === $zeitNewest->format('Y-m-d')) { // same day
+    $zeitString = 'heute um '.$zeitNewest->format('H:i:s');
   }
-  echo '<div class="row twelve columns"><hr>Verbrauch: <b>'.$newestConsumption.'W</b> '.$dateString.'<hr></div>';
+  echo '<div class="row twelve columns"><hr>Verbrauch: <b>'.$newestConsumption.'W</b> '.$zeitString.'<hr></div>';
 
   if ($queryCount >= $GRAPH_LIMIT) {
     $axis_x = ''; // rightmost value comes first. Remove something again after the while loop
@@ -92,12 +92,12 @@ if ($totalCount > 0) {// this may be 0. Can't
     
     while ($row = $result->fetch_assoc()) { // did already fetch the newest one. At least 2 remaining  
       $consumption = $row['consumption'] - $rowOldest['consumption']; // to get a relative value (and not some huge numbers)
-      if ($row['aveDateDiff'] > 0) { // divide by 0 exception
-        $watt = max(round($row['aveConsDiff']*3600*1000 / $row['aveDateDiff']), 1.0); // max(val,1.0) because 0 in log will not be displayed correctly
+      if ($row['aveZeitDiff'] > 0) { // divide by 0 exception
+        $watt = max(round($row['aveConsDiff']*3600*1000 / $row['aveZeitDiff']), 1.0); // max(val,1.0) because 0 in log will not be displayed correctly
       } else { $watt = 0; }
       
       // revert the ordering
-      $axis_x = 'new Date("'.$row['date'].'"), '.$axis_x; // new Date("2020-03-01 12:00:12")
+      $axis_x = 'new Date("'.$row['zeit'].'"), '.$axis_x; // new Date("2020-03-01 12:00:12")
       $val_y0_consumption = $consumption.', '.$val_y0_consumption;
       $val_y1_watt = $watt.', '.$val_y1_watt;
     } // while 

@@ -126,48 +126,48 @@ function safeStrFromExt (string $source, string $varName, int $length): string {
 
 function doDbThinning($dbConn, string $device, bool $talkative):void {
   $sqlWhereDeviceThin = '`device` = "'.$device.'" AND `thin` = "0"';
-  $sql = 'SELECT `date` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' ORDER BY `id` ASC LIMIT 1;';
+  $sql = 'SELECT `zeit` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' ORDER BY `id` ASC LIMIT 1;';
   $result = $dbConn->query($sql);
   $row = $result->fetch_assoc();
   // get the time, add 15 minutes  
-  $dateToThin = date_create($row['date']);
-  $dateToThin->modify('+ 15 minutes');
-  $dateToThinString = $dateToThin->format('Y-m-d H:i:s');
+  $zeitToThin = date_create($row['zeit']);
+  $zeitToThin->modify('+ 15 minutes');
+  $zeitToThinString = $zeitToThin->format('Y-m-d H:i:s');
   
-  $dateMinus24h = date_create("now");
-  $dateMinus24h->modify('- 24 hours');
-  if ($dateToThin >= $dateMinus24h) {  // if this time is more then 24h old, proceed. Otherwise stop
+  $zeitMinus24h = date_create("now");
+  $zeitMinus24h->modify('- 24 hours');
+  if ($zeitToThin >= $zeitMinus24h) {  // if this time is more then 24h old, proceed. Otherwise stop
     if($talkative) { echo 'keine Einträge, die genügend alt sind'; }
     return;
   }
   // get the last one where thinning was not yet applied
-  $sql = 'SELECT `id` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'" ORDER BY `id` ASC LIMIT 15;';
+  $sql = 'SELECT `id` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `zeit` < "'.$zeitToThinString.'" ORDER BY `id` ASC LIMIT 15;';
   $result = $dbConn->query($sql);
   if ($result->num_rows < 14) { // otherwise I can't really compact stuff
     // I have an issue when there are gaps in the entries. I then have less than 14 entries per 15 minutes
-    $dateMinus25h = date_create("now");
-    $dateMinus25h->modify('- 25 hours');
-    if ($dateToThin < $dateMinus25h) {
+    $zeitMinus25h = date_create("now");
+    $zeitMinus25h->modify('- 25 hours');
+    if ($zeitToThin < $zeitMinus25h) {
       // proceed normally
-      if($talkative) { echo '...prozessiere '.$result->num_rows.' Einträge (weniger als 14 aber mehr als 25h alt) seit '.$dateToThinString; }
+      if($talkative) { echo '...prozessiere '.$result->num_rows.' Einträge (weniger als 14 aber mehr als 25h alt) seit '.$zeitToThinString; }
     } else {
-      if($talkative) { echo 'nur '.$result->num_rows.' Einträge (weniger als 14) seit '.$dateToThinString; }
+      if($talkative) { echo 'nur '.$result->num_rows.' Einträge (weniger als 14) seit '.$zeitToThinString; }
       return;
     }
   }
   $row = $result->fetch_assoc();   // -> gets me the ID I want to update with the next commands
   $idToUpdate = $row['id'];
   
-  $sql = 'SELECT SUM(`aveConsDiff`) as `sumAveConsDiff`, SUM(`aveDateDiff`) as `sumAveDateDiff` FROM `wmeter`';
-  $sql = $sql. ' WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'";';
+  $sql = 'SELECT SUM(`aveConsDiff`) as `sumAveConsDiff`, SUM(`aveZeitDiff`) as `sumAveZeitDiff` FROM `wmeter`';
+  $sql = $sql. ' WHERE '.$sqlWhereDeviceThin.' AND `zeit` < "'.$zeitToThinString.'";';
   $result = $dbConn->query($sql);
   $row = $result->fetch_assoc(); 
 
   // now do the update and then delete the others. Number 15 means: a ratio of about 1/15 was implemented 
-  $sql = 'UPDATE `wmeter` SET `aveConsDiff` = "'.$row['sumAveConsDiff'].'", `aveDateDiff` = "'.$row['sumAveDateDiff'].'", `thin` = 15 WHERE `id` = "'.$idToUpdate.'";';
+  $sql = 'UPDATE `wmeter` SET `aveConsDiff` = "'.$row['sumAveConsDiff'].'", `aveZeitDiff` = "'.$row['sumAveZeitDiff'].'", `thin` = 15 WHERE `id` = "'.$idToUpdate.'";';
   $result = $dbConn->query($sql);
   
-  $sql = 'DELETE FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `date` < "'.$dateToThinString.'";';
+  $sql = 'DELETE FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `zeit` < "'.$zeitToThinString.'";';
   $result = $dbConn->query($sql);
   echo $dbConn->affected_rows.' entries have been deleted';
 }      

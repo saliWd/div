@@ -82,13 +82,13 @@
         printRawErrorAndDie('Error', 'no data');
     } 
     $row = $result->fetch_assoc();
-    if ($row['aveDateDiff'] > 0) { // divide by 0 exception
-        $newestConsumption = round($row['aveConsDiff']*3600*1000 / $row['aveDateDiff']); // kWh compared to seconds
+    if ($row['aveZeitDiff'] > 0) { // divide by 0 exception
+        $newestConsumption = round($row['aveConsDiff']*3600*1000 / $row['aveZeitDiff']); // kWh compared to seconds
     } else { $newestConsumption = 0.0; }
-    $dateNewest = date_create($row['date']);
-    $dateString = 'um '.$dateNewest->format('Y-m-d H:i:s');
-    if (date('Y-m-d') === $dateNewest->format('Y-m-d')) { // same day
-      $dateString = 'heute um '.$dateNewest->format('H:i:s');
+    $zeitNewest = date_create($row['zeit']);
+    $zeitString = 'um '.$zeitNewest->format('Y-m-d H:i:s');
+    if (date('Y-m-d') === $zeitNewest->format('Y-m-d')) { // same day
+      $zeitString = 'heute um '.$zeitNewest->format('H:i:s');
     }
-    echo $newestConsumption.' W '.$dateString;    
+    echo $newestConsumption.' W '.$zeitString;    
 ?>

@@ -1,11 +1,12 @@
 # Wmeter TODOs
 
-1. different name
+1. different name: StromMesser (cut your energy consumption)
    1. website / wordpress and stuff for it
    2. re-org of git repo
 2. current consumption
    1. monitor: about 26 mA (10 Ah = 3 days)
    2. check solar panel setup
+   3. try frequency reduction, deepsleep again, ir-disable / wlan disable
 3. main.py
    1. stability?
       1. monitor
@@ -18,17 +19,24 @@
    4. ~~generation selection?~~
    5. ~~Positive numbers instead of negative ones~~
    6. design
+      * full width for canvas
+      * check on mobile
+      * css clean-up
    7. range selection, disable non-available ones
    8. password   
 5. getRX.php
    1. ~~moving average at insert~~
+   2. ~~rename date column: zeit~~
 6. green light when 0W
    1. ~~second main.py~~
    2. ~~raw-output~~
-   3. display. mpy with pimoroni support: [pimoroni-picow-vXX.uf2](https://github.com/pimoroni/pimoroni-pico/releases/latest/)
+   3. ~~display. mpy with pimoroni support: [pimoroni-picow-vXX.uf2](https://github.com/pimoroni/pimoroni-pico/releases/latest/)~~
+      * works, have a nicer output...
 7. db
    1. ~~data thinning for older time ranges:~~ 
       * ~~24h plus: only 4 per hour (from about 60)~~
+      * 3 days plus: 1 value per 3 hours (180)
+      * maybe archive db?: 1 value per day?
 
 
-Next:  6.3 / 
+Next:  6.3refine / 1.1.
