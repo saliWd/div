@@ -30,7 +30,8 @@ def wlan_connect(DEBUG_SETTINGS:dict, wlan, tim, led_onboard):
     if(wlan_ok):
         return() # nothing to do
     else:
-        tim.init(freq=4.0, mode=Timer.PERIODIC, callback=blink) # signals I'm searching for WLAN    
+        if(led_onboard): # pimoroni does not have the led_onboard
+            tim.init(freq=4.0, mode=Timer.PERIODIC, callback=blink) # signals I'm searching for WLAN    
         while not wlan_ok:
             config_wlan = my_config.get_wlan_config() # stored in external file
             wlan.connect(config_wlan['ssid'], config_wlan['pw'])
@@ -39,8 +40,9 @@ def wlan_connect(DEBUG_SETTINGS:dict, wlan, tim, led_onboard):
             print("WLAN connected? "+str(wlan_ok)) # debug output
 
         # signals wlan connection is ok
-        tim.deinit()
-        led_onboard.on()
+        if(led_onboard): # pimoroni does not have the led_onboard
+            tim.deinit()
+            led_onboard.on()
 
 def urlencode(dictionary:dict):
     urlenc = ""

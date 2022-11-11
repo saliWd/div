@@ -1,7 +1,6 @@
 import network # type: ignore (this is a pylance ignore warning directive)
 import urequests # type: ignore
 from time import sleep
-from machine import Pin, Timer # type: ignore
 from pimoroni import RGBLED  # type: ignore
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY  # type: ignore
 
@@ -28,17 +27,8 @@ def send_message_get_response(DEBUG_SETTINGS:dict, message:dict):
 DEBUG_SETTINGS = my_config.get_debug_settings()
 LOOP_WAIT_TIME = 40
 
-# pins
-led_onboard = Pin("LED", Pin.OUT)
-
-# machine specific stuff
-tim = Timer() # no need to specify a number on pico, all SW timers
-
 # normal variables
 wlan_ok = False
-
-## program starts here
-led_onboard.off()
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
@@ -46,24 +36,20 @@ sleep(3)
 
 device_config = my_config.get_device_config()
 
-# trial stuff
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
 led = RGBLED(6, 7, 8)
 display.set_backlight(0.5)
+# display.set_font("sans")
 WIDTH, HEIGHT = display.get_bounds()
 BLACK = display.create_pen(0, 0, 0)
 WHITE = display.create_pen(255, 255, 255)
-temp_min = 0
-temp_max = 300
+VALUE_MAX = 300 # TODO: this value
 bar_width = 5
 wattValues = []
 colors = [(0, 0, 255), (0, 255, 0), (255, 255, 0), (255, 0, 0)]
 
-def value_to_color(temp):
-    temp = min(temp, temp_max)
-    temp = max(temp, temp_min)
-
-    f_index = float(temp - temp_min) / float(temp_max - temp_min)
+def value_to_color(value): # value must be between 0 and VALUE_MAX
+    f_index = float(value) / float(VALUE_MAX)
     f_index *= len(colors) - 1
     index = int(f_index)
 
@@ -88,12 +74,11 @@ while True:
         ('hash', randNum_hash['hash'])
         ])
         
-    wlan_connect(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan, tim=tim, led_onboard=led_onboard) # try to connect to the WLAN. Hangs there if no connection can be made
+    wlan_connect(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan, tim=False, led_onboard=False) # try to connect to the WLAN. Hangs there if no connection can be made
     wattValueString = send_message_get_response(DEBUG_SETTINGS=DEBUG_SETTINGS, message=message) # does not send anything when in simulation
 
     debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS,time=LOOP_WAIT_TIME)
-    led_onboard.toggle() # signal success
-
+    
     position = wattValueString.find("W") # guaranteed to have only one W
     if (position > 0):
         wattValue = wattValueString[0:position-1]
@@ -101,13 +86,17 @@ while True:
     else:
         wattValue = 99
 
+    # normalize the value
+    wattValue = min(wattValue, VALUE_MAX)
+    wattValue = max(wattValue, 0)
+
     print("watt value: "+str(wattValue))
 
     # fills the screen with black
     display.set_pen(BLACK)
     display.clear()
 
-    wattValues.append(wattValue)    
+    wattValues.append(wattValue)
     if len(wattValues) > WIDTH // bar_width: # shifts the wattValues history to the left by one sample
         wattValues.pop(0)
 
@@ -115,7 +104,7 @@ while True:
     for t in wattValues:        
         VALUE_COLOUR = display.create_pen(*value_to_color(t))
         display.set_pen(VALUE_COLOUR)
-        display.rectangle(i, HEIGHT - (round(t) * 4), bar_width, HEIGHT)
+        display.rectangle(i, HEIGHT - t, bar_width, HEIGHT) # TODO: height-t needs to match with min/max scaling
         i += bar_width
 
     # lets also set the LED to match
@@ -127,7 +116,7 @@ while True:
 
     # writes the reading as text in the white rectangle
     display.set_pen(BLACK)
-    display.text("{:.2f}".format(wattValue) + "W", 3, 3, 0, 3)
+    display.text("{:>d}".format(wattValue) + "W", 3, 3, 0, 3)
 
     # update the display
     display.update()
