@@ -6,7 +6,7 @@ from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY  # type: ignore
 
 # my own files
 import my_config
-from my_functions import debug_sleep, wlan_connect, urlencode, get_randNum_hash
+from my_functions import debug_print, debug_sleep, wlan_connect, urlencode, get_randNum_hash
 
 
 def send_message_get_response(DEBUG_SETTINGS:dict, message:dict):    
@@ -18,14 +18,14 @@ def send_message_get_response(DEBUG_SETTINGS:dict, message:dict):
 
     urlenc = urlencode(message)
     response = urequests.post(URL, data=urlenc, headers=HEADERS)
-    print(response.text)
+    debug_print(DEBUG_SETTINGS, response.text)
     returnText = response.text    
     response.close() # this is needed, I'm getting outOfMemory exception otherwise after 4 loops
     return(returnText)
 
 # debug stuff
 DEBUG_SETTINGS = my_config.get_debug_settings()
-LOOP_WAIT_TIME = 40
+LOOP_WAIT_TIME = 60
 
 # normal variables
 wlan_ok = False
@@ -39,7 +39,7 @@ device_config = my_config.get_device_config()
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
 led = RGBLED(6, 7, 8)
 display.set_backlight(0.5)
-# display.set_font("sans")
+display.set_font("sans")
 WIDTH, HEIGHT = display.get_bounds() # 240x135
 BLACK = display.create_pen(0, 0, 0)
 WHITE = display.create_pen(255, 255, 255)
@@ -77,8 +77,6 @@ while True:
     wlan_connect(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan, tim=False, led_onboard=False) # try to connect to the WLAN. Hangs there if no connection can be made
     wattValueString = send_message_get_response(DEBUG_SETTINGS=DEBUG_SETTINGS, message=message) # does not send anything when in simulation
 
-    debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS,time=LOOP_WAIT_TIME)
-    
     position = wattValueString.find("W") # guaranteed to have only one W
     if (position > 0):
         wattValue = wattValueString[0:position-1]
@@ -91,7 +89,7 @@ while True:
     wattValue = min(wattValue, VALUE_MAX)
     wattValue = max(wattValue, 0)
 
-    print("watt value: "+str(wattValue))
+    debug_print(DEBUG_SETTINGS, "watt value: "+str(wattValue))
 
     # fills the screen with black
     display.set_pen(BLACK)
@@ -111,16 +109,25 @@ while True:
     # lets also set the LED to match
     led.set_rgb(*value_to_color(wattValue))
 
-    # draws a white background for the text
     display.set_pen(WHITE)
-    display.rectangle(1, 1, 100, 25)
+    display.rectangle(1, 1, 137, 41) # draws a white background for the text
+
+    expand = "" # align right does not work
+    if wattValueNonMaxed < 1000:
+        expand = " "
+    if wattValueNonMaxed < 100:
+        expand = "  "
+
 
     # writes the reading as text in the white rectangle
     display.set_pen(BLACK)
-    display.text("{:>d}".format(wattValueNonMaxed) + "W", 3, 3, 0, 3) # align right does not work
+    display.text(expand+str(wattValueNonMaxed), 7, 23, wordwrap=100, scale=1.1) # format does not work correctly
+    display.text(expand+str(wattValueNonMaxed), 8, 23, wordwrap=100, scale=1.1) # make it 'bold'
 
-    # update the display
+    display.text("W", 104, 23, wordwrap=100, scale=1.1)
+    display.text("W", 105, 23, wordwrap=100, scale=1.1)
+
     display.update()
 
-    # waits for 5 seconds
-    sleep(5)
+    debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS,time=LOOP_WAIT_TIME)
+    
