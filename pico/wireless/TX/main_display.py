@@ -40,10 +40,10 @@ display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
 led = RGBLED(6, 7, 8)
 display.set_backlight(0.5)
 # display.set_font("sans")
-WIDTH, HEIGHT = display.get_bounds()
+WIDTH, HEIGHT = display.get_bounds() # 240x135
 BLACK = display.create_pen(0, 0, 0)
 WHITE = display.create_pen(255, 255, 255)
-VALUE_MAX = 300 # TODO: this value
+VALUE_MAX = 3 * HEIGHT # 405
 bar_width = 5
 wattValues = []
 colors = [(0, 0, 255), (0, 255, 0), (255, 255, 0), (255, 0, 0)]
@@ -87,6 +87,7 @@ while True:
         wattValue = 99
 
     # normalize the value
+    wattValueNonMaxed = wattValue
     wattValue = min(wattValue, VALUE_MAX)
     wattValue = max(wattValue, 0)
 
@@ -104,7 +105,7 @@ while True:
     for t in wattValues:        
         VALUE_COLOUR = display.create_pen(*value_to_color(t))
         display.set_pen(VALUE_COLOUR)
-        display.rectangle(i, HEIGHT - t, bar_width, HEIGHT) # TODO: height-t needs to match with min/max scaling
+        display.rectangle(i, int(HEIGHT - (float(t) / 3.0)), bar_width, HEIGHT) # TODO: height-t needs to match with min/max scaling
         i += bar_width
 
     # lets also set the LED to match
@@ -116,7 +117,7 @@ while True:
 
     # writes the reading as text in the white rectangle
     display.set_pen(BLACK)
-    display.text("{:>d}".format(wattValue) + "W", 3, 3, 0, 3)
+    display.text("{:>d}".format(wattValueNonMaxed) + "W", 3, 3, 0, 3) # align right does not work
 
     # update the display
     display.update()
