@@ -1,6 +1,7 @@
 import network # type: ignore (this is a pylance ignore warning directive)
 import urequests # type: ignore
 from time import sleep
+from machine import Timer # type: ignore
 from pimoroni import RGBLED  # type: ignore
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY  # type: ignore
 
@@ -11,7 +12,7 @@ from my_functions import debug_print, debug_sleep, wlan_connect, urlencode, get_
 
 def send_message_get_response(DEBUG_SETTINGS:dict, message:dict):    
     if (DEBUG_SETTINGS["wlan_sim"]):
-        return("57 W heute um 11:04:59") # attention: `heute` may also be a date like `2022-11-10`
+        return("1|57") # valid|57W
     
     URL = "https://widmedia.ch/wmeter/getRaw.php?TX=pico&TXVER=2"
     HEADERS = {'Content-Type':'application/x-www-form-urlencoded'}
@@ -33,11 +34,12 @@ wlan_ok = False
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 sleep(3)
+tim_rgb = Timer() # no need to specify a number on pico, all SW timers       
 
 device_config = my_config.get_device_config()
 
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
-led = RGBLED(6, 7, 8)
+on = True
 display.set_backlight(0.5)
 display.set_font("sans")
 WIDTH, HEIGHT = display.get_bounds() # 240x135
@@ -46,7 +48,44 @@ WHITE = display.create_pen(255, 255, 255)
 VALUE_MAX = 3 * HEIGHT # 405
 bar_width = 5
 wattValues = []
-colors = [(0, 0, 255), (0, 255, 0), (255, 255, 0), (255, 0, 0)]
+RGB_BRIGHTNESS = 80
+colors = [(0, 0, RGB_BRIGHTNESS), (0, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, 0, 0)]
+
+class RgbControl(object):
+
+    def __init__(self):
+        self.tick = True
+        self.led_rgb = RGBLED(6, 7, 8)
+        self.timer_rgb = Timer()
+
+    def pulse_red_cb(self, noIdeaWhyThisIsNeeded):
+        if self.tick:
+            self.led_rgb.set_rgb(*(0, 0, 0))
+        else:
+            self.led_rgb.set_rgb(*(255, 0, 0))
+        self.tick = not(self.tick)
+
+    def pulse_green_cb(self, noIdeaWhyThisIsNeeded):
+        if self.tick:
+            self.led_rgb.set_rgb(*(0, 0, 0))
+        else:
+            self.led_rgb.set_rgb(*(0, 127, 0))
+        self.tick = not(self.tick)    
+
+    def start_pulse(self,green:bool):
+        if green:
+            self.timer_rgb.init(freq=2, callback=self.pulse_green_cb)
+        else:
+            self.timer_rgb.init(freq=2, callback=self.pulse_red_cb)
+
+    def stop_pulse(self):
+        self.timer_rgb.deinit()
+        self.led_rgb.set_rgb(*(0, 0, 0))
+
+    def set_const_color(self, color):
+        self.timer_rgb.deinit() # not always needed
+        self.led_rgb.set_rgb(*color)
+
 
 def value_to_color(value): # value must be between 0 and VALUE_MAX
     f_index = float(value) / float(VALUE_MAX)
@@ -74,16 +113,8 @@ def right_align(value):
         expand = "   "
     return expand
 
-def blink_led(led, red:bool): # TODO: this takes about seconds to run
-    color = (0, 127, 0) # green, but not as bright as possible
-    if (red):
-        color = (255, 0, 0) # red, as bright as possible
-    for i in range(19):
-        led.set_rgb(*color)
-        sleep(1)
-        led.set_rgb(*(0, 0, 0))
-        sleep(1)
-    return -38
+
+rgb_control = RgbControl()
 
 while True:
     randNum_hash = get_randNum_hash(device_config)
@@ -144,12 +175,12 @@ while True:
     display.update()
 
     # lets also set the LED to match
-    if (valid == 1):
-        led.set_rgb(*value_to_color(wattValue))
-        if (wattValueNonMaxed == 0):
-            waitTimeAdjust = blink_led(led, red=False)
+    if (valid == 0):
+        rgb_control.start_pulse(False)
     else:
-        waitTimeAdjust = blink_led(led, red=True)
-
+        rgb_control.set_const_color(value_to_color(wattValue))
+        if (wattValueNonMaxed == 0):
+            rgb_control.start_pulse(True)
+    
     debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS,time=LOOP_WAIT_TIME+waitTimeAdjust)
     
