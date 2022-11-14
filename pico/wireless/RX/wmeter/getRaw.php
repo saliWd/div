@@ -62,7 +62,6 @@
     }
     
     // no meaningful (=HTML) output is generated. Use index.php to monitor the value itself
-    // db structure is stored in wmeter.sql-file
     if (! verifyGetParams()) { // now I can look the post variables        
         printRawErrorAndDie('Error', 'invalid params');
     }
@@ -86,9 +85,12 @@
         $newestConsumption = round($row['aveConsDiff']*3600*1000 / $row['aveZeitDiff']); // kWh compared to seconds
     } else { $newestConsumption = 0.0; }
     $zeitNewest = date_create($row['zeit']);
-    $zeitString = 'um '.$zeitNewest->format('Y-m-d H:i:s');
-    if (date('Y-m-d') === $zeitNewest->format('Y-m-d')) { // same day
-      $zeitString = 'heute um '.$zeitNewest->format('H:i:s');
+    $zeitNow = date_create("now");
+    $zeitNow->modify('- 5 minutes'); // latest entry must be newer than '5 minutes ago'
+    if ($zeitNewest > $zeitNow) {
+        $valid = 1;
+    } else {
+        $valid = 0;
     }
-    echo $newestConsumption.' W '.$zeitString;    
+    echo $valid.'|'.$newestConsumption;    
 ?>
