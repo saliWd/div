@@ -26,23 +26,28 @@ def blink(led_onboard):
     led_onboard.toggle()
 
 def wlan_connect(DEBUG_SETTINGS:dict, wlan, tim, led_onboard):
-    wlan_ok = get_wlan_ok(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan)
-    if(wlan_ok):
+    wlan_ok_flag = get_wlan_ok(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan)        
+    if(wlan_ok_flag):
         return() # nothing to do
-    else:
+    else: # wlan is not ok
         if(led_onboard): # pimoroni does not have the led_onboard
             tim.init(freq=4.0, mode=Timer.PERIODIC, callback=blink) # signals I'm searching for WLAN    
-        while not wlan_ok:
+    
+        for i in range(10): # set the time out
             config_wlan = my_config.get_wlan_config() # stored in external file
             wlan.connect(config_wlan['ssid'], config_wlan['pw'])
             sleep(3)
-            wlan_ok = get_wlan_ok(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan)
-            print("WLAN connected? "+str(wlan_ok)) # debug output
+            wlan_ok_flag = get_wlan_ok(DEBUG_SETTINGS=DEBUG_SETTINGS, wlan=wlan)
+            print("WLAN connected? "+str(wlan_ok_flag)+", loop var: "+str(i)) # debug output
+            if (wlan_ok_flag):
+                if(led_onboard): # pimoroni does not have the led_onboard
+                    tim.deinit()
+                    led_onboard.on()
+                return 
+        # timeout, did not manage to get a working WLAN
+        from machine import deepsleep # type: ignore
+        deepsleep(5000) # sleep and do a reboot. NB: connection to whatever device is getting lost. complicates debugging
 
-        # signals wlan connection is ok
-        if(led_onboard): # pimoroni does not have the led_onboard
-            tim.deinit()
-            led_onboard.on()
 
 def urlencode(dictionary:dict):
     urlenc = ""

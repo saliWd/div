@@ -11,6 +11,7 @@
    1. stability?
       1. monitor
       2. remove sleeps on UART, replace with poll-commands
+      3. enhance WLAN connection with disable/enable after x-tries
 4. index.php
    1. device as variable
    1. design
@@ -22,7 +23,7 @@
 5. rx_v2.php
 6. green light when 0W
    1. ~~display. mpy with pimoroni support: [pimoroni-picow-vXX.uf2](https://github.com/pimoroni/pimoroni-pico/releases/latest/)~~
-      * works, have a nicer output...
+   1. [case?](https://www.thingiverse.com/thing:4767008)
 7. db
    1. ~~data thinning for older time ranges:~~ 
       * 3 days plus: 1 value per 3 hours (180)

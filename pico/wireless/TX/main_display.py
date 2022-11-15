@@ -28,29 +28,29 @@ def send_message_get_response(DEBUG_SETTINGS:dict, message:dict):
 DEBUG_SETTINGS = my_config.get_debug_settings()
 LOOP_WAIT_TIME = 60
 
-# normal variables
-wlan_ok = False
-
 wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-sleep(3)
+wlan.active(True) # activate it. NB: disabling does not work correctly
+sleep(1)
+
 tim_rgb = Timer() # no need to specify a number on pico, all SW timers       
 
 device_config = my_config.get_device_config()
 
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
-on = True
-display.set_backlight(0.5)
+display.set_backlight(0.6)
 display.set_font("sans")
 WIDTH, HEIGHT = display.get_bounds() # 240x135
 BLACK = display.create_pen(0, 0, 0)
 WHITE = display.create_pen(255, 255, 255)
 VALUE_MAX = 3 * HEIGHT # 405
-bar_width = 5
+bar_width = 4
 wattValues = []
 RGB_BRIGHTNESS = 80
 colors = [(0, 0, RGB_BRIGHTNESS), (0, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, 0, 0)]
-
+# fills the screen with black
+display.set_pen(BLACK)
+display.clear()
+display.update()
 class RgbControl(object):
 
     def __init__(self):
@@ -115,6 +115,7 @@ def right_align(value):
 
 
 rgb_control = RgbControl()
+rgb_control.start_pulse(green=False) # signal startup
 
 while True:
     randNum_hash = get_randNum_hash(device_config)
@@ -176,11 +177,11 @@ while True:
 
     # lets also set the LED to match
     if (valid == 0):
-        rgb_control.start_pulse(False)
+        rgb_control.start_pulse(green=False)
     else:
         rgb_control.set_const_color(value_to_color(wattValue))
         if (wattValueNonMaxed == 0):
-            rgb_control.start_pulse(True)
+            rgb_control.start_pulse(green=True)
     
     debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS,time=LOOP_WAIT_TIME+waitTimeAdjust)
     
