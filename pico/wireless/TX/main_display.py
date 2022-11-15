@@ -45,8 +45,10 @@ WHITE = display.create_pen(255, 255, 255)
 VALUE_MAX = 3 * HEIGHT # 405
 bar_width = 4
 wattValues = []
-RGB_BRIGHTNESS = 80
-colors = [(0, 0, RGB_BRIGHTNESS), (0, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, 0, 0)]
+RGB_BRIGHTNESS = 80 # TODO: adjust this according to the time of the day...
+COLORS_LED = [(0, 0, RGB_BRIGHTNESS), (0, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, 0, 0)]
+COLORS_DISP = [(0, 0, 255), (0, 255, 0), (255, 255, 0), (255, 0, 0)]
+# colors = [(0, 0, RGB_BRIGHTNESS), (0, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, 0, 0)]
 # fills the screen with black
 display.set_pen(BLACK)
 display.clear()
@@ -87,7 +89,11 @@ class RgbControl(object):
         self.led_rgb.set_rgb(*color)
 
 
-def value_to_color(value): # value must be between 0 and VALUE_MAX
+def value_to_color(value, disp:bool): # value must be between 0 and VALUE_MAX
+    if disp:
+        colors = COLORS_DISP
+    else:
+        colors = COLORS_LED
     f_index = float(value) / float(VALUE_MAX)
     f_index *= len(colors) - 1
     index = int(f_index)
@@ -154,7 +160,7 @@ while True:
 
     i = 0
     for t in wattValues:        
-        VALUE_COLOUR = display.create_pen(*value_to_color(t))
+        VALUE_COLOUR = display.create_pen(*value_to_color(t,disp=True))
         display.set_pen(VALUE_COLOUR)
         display.rectangle(i, int(HEIGHT - (float(t) / 3.0)), bar_width, HEIGHT) # TODO: height-t needs to match with min/max scaling
         i += bar_width
@@ -179,7 +185,7 @@ while True:
     if (valid == 0):
         rgb_control.start_pulse(green=False)
     else:
-        rgb_control.set_const_color(value_to_color(wattValue))
+        rgb_control.set_const_color(value_to_color(wattValue,disp=False))
         if (wattValueNonMaxed == 0):
             rgb_control.start_pulse(green=True)
     
