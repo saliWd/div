@@ -37,18 +37,17 @@ tim_rgb = Timer() # no need to specify a number on pico, all SW timers
 device_config = my_config.get_device_config()
 
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
-display.set_backlight(0.6)
+display.set_backlight(0.5)
 display.set_font("sans")
 WIDTH, HEIGHT = display.get_bounds() # 240x135
 BLACK = display.create_pen(0, 0, 0)
 WHITE = display.create_pen(255, 255, 255)
 VALUE_MAX = 3 * HEIGHT # 405
-bar_width = 4
+BAR_WIDTH = 5
 wattValues = []
 RGB_BRIGHTNESS = 80 # TODO: adjust this according to the time of the day...
 COLORS_LED = [(0, 0, RGB_BRIGHTNESS), (0, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, 0, 0)]
 COLORS_DISP = [(0, 0, 255), (0, 255, 0), (255, 255, 0), (255, 0, 0)]
-# colors = [(0, 0, RGB_BRIGHTNESS), (0, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, RGB_BRIGHTNESS, 0), (RGB_BRIGHTNESS, 0, 0)]
 # fills the screen with black
 display.set_pen(BLACK)
 display.clear()
@@ -110,15 +109,13 @@ def value_to_color(value, disp:bool): # value must be between 0 and VALUE_MAX
     return [int((a[i] * blend_a) + (b[i] * blend_b)) for i in range(3)]
 
 def right_align(value):
-    expand = ""
-    if value < 1000:
-        expand = " "
-    if value < 100:
-        expand = "  "
     if value < 10:
-        expand = "   "
-    return expand
-
+        return "   "
+    if value < 100:
+        return "  "
+    if value < 1000:
+        return " "
+    return ""
 
 rgb_control = RgbControl()
 rgb_control.start_pulse(green=False) # signal startup
@@ -155,15 +152,15 @@ while True:
     display.clear()
 
     wattValues.append(wattValue)
-    if len(wattValues) > WIDTH // bar_width: # shifts the wattValues history to the left by one sample
+    if len(wattValues) > WIDTH // BAR_WIDTH: # shifts the wattValues history to the left by one sample
         wattValues.pop(0)
 
     i = 0
     for t in wattValues:        
         VALUE_COLOUR = display.create_pen(*value_to_color(t,disp=True))
         display.set_pen(VALUE_COLOUR)
-        display.rectangle(i, int(HEIGHT - (float(t) / 3.0)), bar_width, HEIGHT) # TODO: height-t needs to match with min/max scaling
-        i += bar_width
+        display.rectangle(i, int(HEIGHT - (float(t) / 3.0)), BAR_WIDTH, HEIGHT) # TODO: height-t needs to match with min/max scaling
+        i += BAR_WIDTH
 
     display.set_pen(WHITE)
     display.rectangle(1, 1, 137, 41) # draws a white background for the text
