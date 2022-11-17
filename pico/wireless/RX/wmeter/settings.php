@@ -35,14 +35,17 @@ if ($doSafe === 0) { // entry point of this site
         <div class="row twelve columns"><div class="button"><a href="settings.php?do=3">alte Einträge reduzieren: 1/240 Faktor (manuell, einmalig)</a></div></div>
         <div class="row twelve columns">&nbsp;</div>
         <div class="row twelve columns"><div class="button"><a href="settings.php?do=1">alle Einträge löschen</a></div></div>';
-} elseif ($doSafe === 1) { // delete all entries, then go back to default page
+} elseif ($doSafe === 1) { // delete all entries
   printBeginOfPage_settings();
+  echo '<div class="row twelve columns">Sorry, diese Funktion ist aktuell deaktiviert... <a href="settings.php">zurück</a>...</div>';
+  /*
   $result = $dbConn->query('DELETE FROM `wmeter` WHERE `device` = "'.$device.'"');
   if ($result) {
     echo '<div class="row twelve columns">...alle Einträge gelöscht. <a href="settings.php">zurück</a>...</div>';
   } else {
     echo '<div class="row twelve columns">...something went wrong when deleting all entries...</div>';
   }
+  */
 } elseif ($doSafe === 2) { // data thinning for older entries
   printBeginOfPage_settings();
   doDbThinning($dbConn, $device, TRUE, 15);
