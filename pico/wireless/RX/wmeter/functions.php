@@ -124,32 +124,46 @@ function safeStrFromExt (string $source, string $varName, int $length): string {
    }
 }
 
-function doDbThinning($dbConn, string $device, bool $talkative):void {
-  $sqlWhereDeviceThin = '`device` = "'.$device.'" AND `thin` = "0"';
+function doDbThinning($dbConn, string $device, bool $talkative, int $timeRangeMins):void {
+  // 24h-old: thin with a rate of 1 entry per 15 minutes (about a 1/15 rate)
+  // 72h-old: thin with a rate of 1 entry per 4 hours (about a 1/240 rate), resulting in 6 entries per day  
+  if (($timeRangeMins !== 15) and ($timeRangeMins !== 240)) { // $timeRangeMins is either 15 or 240
+    return;
+  }
+
+  $sqlWhereDeviceThin = '`device` = "'.$device.'" AND `thin` < "15"';
+  if ($timeRangeMins === 240) {
+    $sqlWhereDeviceThin = '`device` = "'.$device.'" AND `thin` < "240"';
+  }
   $sql = 'SELECT `zeit` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' ORDER BY `id` ASC LIMIT 1;';
   $result = $dbConn->query($sql);
   $row = $result->fetch_assoc();
   // get the time, add 15 minutes  
   $zeitToThin = date_create($row['zeit']);
-  $zeitToThin->modify('+ 15 minutes');
+  $zeitToThin->modify('+ '.$timeRangeMins.' minutes');
   $zeitToThinString = $zeitToThin->format('Y-m-d H:i:s');
   
-  $zeitMinus24h = date_create("now");
-  $zeitMinus24h->modify('- 24 hours');
-  if ($zeitToThin >= $zeitMinus24h) {  // if this time is more then 24h old, proceed. Otherwise stop
+  $zeitThinStart = date_create("now");
+  if ($timeRangeMins === 15) {
+    $zeitThinStart->modify('- 24 hours');
+  } else {
+    $zeitThinStart->modify('- 72 hours');
+  }
+  
+  if ($zeitToThin >= $zeitThinStart) {  // if this time is more then 24h old, proceed. Otherwise stop
     if($talkative) { echo 'keine Einträge, die genügend alt sind'; }
     return;
   }
   // get the last one where thinning was not yet applied
-  $sql = 'SELECT `id` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `zeit` < "'.$zeitToThinString.'" ORDER BY `id` ASC LIMIT 15;';
+  $sql = 'SELECT `id` FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `zeit` < "'.$zeitToThinString.'" ORDER BY `id` ASC LIMIT 240;';
   $result = $dbConn->query($sql);
   if ($result->num_rows < 14) { // otherwise I can't really compact stuff
     // I have an issue when there are gaps in the entries. I then have less than 14 entries per 15 minutes
-    $zeitMinus25h = date_create("now");
-    $zeitMinus25h->modify('- 25 hours');
-    if ($zeitToThin < $zeitMinus25h) {
+    $zeitThinStartWithMargin = zeitThinStart;
+    $zeitThinStartWithMargin->modify('- 2 hours');
+    if ($zeitToThin < $zeitThinStartWithMargin) {
       // proceed normally
-      if($talkative) { echo '...prozessiere '.$result->num_rows.' Einträge (weniger als 14 aber mehr als 25h alt) seit '.$zeitToThinString; }
+      if($talkative) { echo '...prozessiere '.$result->num_rows.' Einträge (weniger als 14 aber schon alt) seit '.$zeitToThinString; }
     } else {
       if($talkative) { echo 'nur '.$result->num_rows.' Einträge (weniger als 14) seit '.$zeitToThinString; }
       return;
@@ -164,7 +178,7 @@ function doDbThinning($dbConn, string $device, bool $talkative):void {
   $row = $result->fetch_assoc(); 
 
   // now do the update and then delete the others. Number 15 means: a ratio of about 1/15 was implemented 
-  $sql = 'UPDATE `wmeter` SET `aveConsDiff` = "'.$row['sumAveConsDiff'].'", `aveZeitDiff` = "'.$row['sumAveZeitDiff'].'", `thin` = 15 WHERE `id` = "'.$idToUpdate.'";';
+  $sql = 'UPDATE `wmeter` SET `aveConsDiff` = "'.$row['sumAveConsDiff'].'", `aveZeitDiff` = "'.$row['sumAveZeitDiff'].'", `thin` = "'.$timeRangeMins.'" WHERE `id` = "'.$idToUpdate.'";';
   $result = $dbConn->query($sql);
   
   $sql = 'DELETE FROM `wmeter` WHERE '.$sqlWhereDeviceThin.' AND `zeit` < "'.$zeitToThinString.'";';

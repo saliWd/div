@@ -24,19 +24,17 @@ function printBeginOfPage_settings():void {
 $doSafe = safeIntFromExt('GET', 'do', 2); // this is an integer (range 1 to 99) or non-existing
 // do = 0: entry point
 // do = 1: delete all entries in DB
-// do = 2: data thinning for older entries (TODO: remove this again from this side, it's integrated into rx page now)
+// do = 2: data thinning for older entries with  15mins timerange (TODO: remove this again from this side, it's integrated into rx page now)
+// do = 3: data thinning for older entries with 240mins timerange (TODO: remove this again from this side, it's integrated into rx page now)
 $device = 'austr10'; // TODO: device as variable
 
 if ($doSafe === 0) { // entry point of this site
     printBeginOfPage_settings();
     echo '          
-        <div class="row twelve columns">
-            <div class="button"><a href="settings.php?do=2">alte Einträge reduzieren (manuell, einmalig)</a></div>
-        </div>
+        <div class="row twelve columns"><div class="button"><a href="settings.php?do=2">alte Einträge reduzieren: 1/15 Faktor (manuell, einmalig)</a></div></div>
+        <div class="row twelve columns"><div class="button"><a href="settings.php?do=3">alte Einträge reduzieren: 1/240 Faktor (manuell, einmalig)</a></div></div>
         <div class="row twelve columns">&nbsp;</div>
-        <div class="row twelve columns">
-            <div class="button"><a href="settings.php?do=1">alle Einträge löschen</a></div>
-        </div>';
+        <div class="row twelve columns"><div class="button"><a href="settings.php?do=1">alle Einträge löschen</a></div></div>';
 } elseif ($doSafe === 1) { // delete all entries, then go back to default page
   printBeginOfPage_settings();
   $result = $dbConn->query('DELETE FROM `wmeter` WHERE `device` = "'.$device.'"');
@@ -47,7 +45,10 @@ if ($doSafe === 0) { // entry point of this site
   }
 } elseif ($doSafe === 2) { // data thinning for older entries
   printBeginOfPage_settings();
-  doDbThinning($dbConn, $device, TRUE);
+  doDbThinning($dbConn, $device, TRUE, 15);
+} elseif ($doSafe === 3) { // data thinning for older entries
+  printBeginOfPage_settings();
+  doDbThinning($dbConn, $device, TRUE, 240);
 } else { // should never happen
   echo '<div class="row twelve columns">...something went wrong (undefined do-variable)...</div>';
 }

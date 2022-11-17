@@ -149,8 +149,9 @@
             }
             echo 'update ok';
             
-            doDbThinning($dbConn, $device, FALSE); // this doesn't need to run every time but doesn't hurt either
-
+            // dbThinnings: do not need to run every time but it doesn't hurt either
+            doDbThinning($dbConn, $device, FALSE, 15);
+            doDbThinning($dbConn, $device, FALSE, 240);
         } else {
             echo 'previous data too old'; // not an error
         } 
