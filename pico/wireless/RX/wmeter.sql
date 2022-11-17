@@ -17,16 +17,28 @@ CREATE TABLE `wmeter` (
   `zeit` timestamp NOT NULL DEFAULT current_timestamp(),
   `zeitDiff` int(11) NOT NULL,
   `aveZeitDiff` double NOT NULL,
-  `thin` tinyint(3) UNSIGNED NOT NULL DEFAULT 0
+  `thin` smallint(5) UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wmeter_user` (
+  `id` int(11) NOT NULL,
+  `device` varchar(8) NOT NULL,
+  `post_key` varchar(32) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 ALTER TABLE `wmeter`
   ADD PRIMARY KEY (`id`);
 
+ALTER TABLE `wmeter_user`
+  ADD PRIMARY KEY (`id`);
+
 
 ALTER TABLE `wmeter`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `wmeter_user`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

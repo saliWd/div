@@ -117,12 +117,15 @@ def right_align(value):
         return " "
     return ""
 
+def make_bold(display, text:str, x:int, y:int): # making it 'bold' by shifting it 1px right (not very nice hack)
+    display.text(text, x, y, scale=1.1)
+    display.text(text, x+1, y, scale=1.1)
+
 rgb_control = RgbControl()
 rgb_control.start_pulse(green=False) # signal startup
 
 while True:
     randNum_hash = get_randNum_hash(device_config)
-    waitTimeAdjust = 0
     
     message = dict([
         ('device', device_config['device_name']),
@@ -170,21 +173,18 @@ while True:
 
     # writes the reading as text in the white rectangle
     display.set_pen(BLACK)
-    display.text(expand+str(wattValueNonMaxed), 7, 23, wordwrap=100, scale=1.1) # format does not work correctly
-    display.text(expand+str(wattValueNonMaxed), 8, 23, wordwrap=100, scale=1.1) # making it 'bold' by shifting it 1px right (not very nice hack)
-
-    display.text("W", 104, 23, wordwrap=100, scale=1.1)
-    display.text("W", 105, 23, wordwrap=100, scale=1.1)
+    make_bold(display, expand+str(wattValueNonMaxed), 7, 23) # str.format does not work as intended
+    make_bold(display, "W", 104, 23) 
 
     display.update()
 
     # lets also set the LED to match
     if (valid == 0):
-        rgb_control.start_pulse(green=False)
+        rgb_control.start_pulse(green=False) # pulsate red
     else:
         rgb_control.set_const_color(value_to_color(wattValue,disp=False))
         if (wattValueNonMaxed == 0):
             rgb_control.start_pulse(green=True)
     
-    debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS,time=LOOP_WAIT_TIME+waitTimeAdjust)
+    debug_sleep(DEBUG_SETTINGS=DEBUG_SETTINGS,time=LOOP_WAIT_TIME)
     
