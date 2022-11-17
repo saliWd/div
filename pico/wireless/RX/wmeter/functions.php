@@ -159,7 +159,7 @@ function doDbThinning($dbConn, string $device, bool $talkative, int $timeRangeMi
   $result = $dbConn->query($sql);
   if ($result->num_rows < 14) { // otherwise I can't really compact stuff
     // I have an issue when there are gaps in the entries. I then have less than 14 entries per 15 minutes
-    $zeitThinStartWithMargin = zeitThinStart;
+    $zeitThinStartWithMargin = $zeitThinStart;
     $zeitThinStartWithMargin->modify('- 2 hours');
     if ($zeitToThin < $zeitThinStartWithMargin) {
       // proceed normally
