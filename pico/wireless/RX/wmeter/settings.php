@@ -5,8 +5,8 @@ $dbConn = initialize();
 function printBeginOfPage_settings():void {
   echo '<!DOCTYPE html><html><head>
   <meta charset="utf-8" />
-  <title>Wmeter Settings</title>
-  <meta name="description" content="a page displaying the smart meter value" />  
+  <title>StromMesser Einstellungen</title>
+  <meta name="description" content="zeigt deinen Energieverbrauch" />  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/font.css" type="text/css" />
   <link rel="stylesheet" href="css/skeleton.css" type="text/css" />
@@ -15,7 +15,7 @@ function printBeginOfPage_settings():void {
   echo '
   <div class="section noBottom">
   <div class="container">
-  <h3>Wmeter Settings</h3>
+  <h3>StromMesser Einstellungen</h3>
   <p>&nbsp;</p>
   <hr>';
   return;
