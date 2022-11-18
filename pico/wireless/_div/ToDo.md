@@ -19,8 +19,8 @@
          1. monitor: about 26 mA (10 Ah = 3 days)? 5Ah did also work for 3 days?
          2. check solar panel setup: 40 mA issue?
          3. try frequency reduction, deepsleep again, ir-disable / wlan disable
-      1. stability?
-         1. monitor
+      1. stability
+         1. check with WD feature
    1. disp
       1. [case?](https://www.thingiverse.com/thing:4767008)
 4. div
@@ -28,4 +28,4 @@
    1. db
 
 
-Next:  3.1.2 
+Next:  4.1 
