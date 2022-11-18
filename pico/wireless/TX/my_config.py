@@ -20,6 +20,7 @@ def get_debug_settings():
         ("print",True),
         ("ir_sim",True),
         ("wlan_sim",False),
-        ("sleep",True)
+        ("sleep",True),
+        ("wdt_dis", True)
     ])
     return(debug_settings)
