@@ -1,0 +1,2 @@
+# need to install the .net sdk 10 onto the machine
+dotnet .\standalone.cs
