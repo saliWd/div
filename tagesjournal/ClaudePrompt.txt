@@ -1,0 +1,1 @@
+Need an android app for android 16 and newer. It shall store data in a sqlite db which is encrypted and unlocks with fingerprint
