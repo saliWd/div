@@ -22,41 +22,57 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:weightSum="100"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/note_title"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapSentences"
-                android:maxLines="2" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
+        <!-- Container for the 90% content -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="12dp"
-            android:layout_weight="1"
-            android:hint="@string/note_content"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            android:layout_weight="90"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_content"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:inputType="textMultiLine|textCapSentences"
-                android:gravity="top"
-                android:scrollbars="vertical" />
+                android:layout_height="wrap_content"
+                android:hint="@string/note_title"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:maxLines="2" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="12dp"
+                android:layout_weight="1"
+                android:hint="@string/note_content"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:gravity="top"
+                    android:scrollbars="vertical" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <!-- Spacer for the bottom 10% -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="10" />
 
     </LinearLayout>
 
