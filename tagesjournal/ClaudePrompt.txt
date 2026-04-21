@@ -1,7 +1,10 @@
-Need an android app for android 16 and newer for the newest Android Studio (Panda 3). It shall store personal data in a sqlite db which is encrypted and unlocks with fingerprint.
+Need an android app for API level 36 and newer for the newest Android Studio (Panda 3), minSdk is 36, no legacy versions need to be supported. 
+It shall store personal data in a sqlite db which is encrypted and unlocks with fingerprint.
 It shall use the latest kotlin and gradle version and use as few dependencies as possible.
-Needs means to add an entry with date, title and text field. Entries can also be deleted.
-The whole database can be exported onto local file system, export file needs to be encrypted with a password. This password itself shall be stored in secure location and export needs to be unlocked with fingerprint as well
+It needs functions to add an entry with date, title and text field. Entries can also be deleted.
+The whole database can be exported onto local file system, export file needs to be encrypted with a password.
+This password itself shall be stored in secure location.
+Also an import function for such a file is required.
 Leave 100 pixel at the bottom of the screen empty on all views.
-Generate as few files as possible.
-Name of the app is "TagesBericht", namespace is ch.widmedia.tagesbericht
+Generate as few files as possible, use the newest versions where possible (dependencies and JVM and so forth).
+Name of the app is "Eintrag", namespace is ch.widmedia.Eintrag
