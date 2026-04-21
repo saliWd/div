@@ -9,3 +9,4 @@ Leave 10% at the bottom of the screen empty on all views.
 Use the newest versions where possible (dependencies and JVM and so forth).
 Name of the app is "Eintrag", namespace is ch.widmedia.Eintrag
 The texts of the app shall be in German.
+Make it visually appealing.
