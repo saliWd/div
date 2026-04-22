@@ -1,12 +1,14 @@
-Need an android app for API level 36 and newer for the newest Android Studio (Panda 3), minSdk is 36, no legacy versions need to be supported. 
+Need an android app for API level 36 and newer for the newest Android Studio (2025.3, Panda 4), minSdk is 36, no legacy versions need to be supported. 
 It shall store personal data in a sqlite db which is encrypted and unlocks with fingerprint.
-It shall use the latest kotlin and AGP 9.1.1 (or newer) version and use as few dependencies as possible.
-It needs functions to add an entry with date, title and text field. Entries can also be deleted.
+It shall use the latest kotlin and AGP 9.2.0 (or newer) version and use as few dependencies as possible.
+It needs functions to add an entry with date, a rating field (integer number between 1 and 10, use a slider for input) and text field. Entries can also be deleted.
+Display also a calender (above the existing entries) for the last 14 days. The days where an entry exists in the db (use the date field) need to have a different color than the days where no entry exists. 
 The whole database can be exported onto local file system, export file needs to be encrypted with a password.
 This password itself shall be stored in secure location.
 Also an import function for such a file is required.
 Leave 10% at the bottom of the screen empty on all views.
 Use the newest versions where possible (dependencies and JVM and so forth).
-Name of the app is "Eintrag", namespace is ch.widmedia.Eintrag
+Name of the app is "Daily", namespace is ch.widmedia.Daily
 The texts of the app shall be in German.
-Make it visually appealing.
+Make it visually appealing, use a font like Raleway-Regular or a non-serif font
+

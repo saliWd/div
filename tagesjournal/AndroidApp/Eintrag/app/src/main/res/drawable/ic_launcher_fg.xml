@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Background fill handled by adaptive icon background -->
+
+    <!-- Decorative top-left corner line -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#C9943A"
+        android:strokeWidth="2"
+        android:pathData="M20,20 L20,30 M20,20 L30,20" />
+
+    <!-- Decorative bottom-right corner line -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#C9943A"
+        android:strokeWidth="2"
+        android:pathData="M88,88 L88,78 M88,88 L78,88" />
+
+    <!-- Bold serif E letterform -->
+    <!-- Vertical stroke -->
+    <path
+        android:fillColor="#F0EAD6"
+        android:pathData="M32,28 h6 v52 h-6 z" />
+    <!-- Top horizontal -->
+    <path
+        android:fillColor="#F0EAD6"
+        android:pathData="M32,28 h38 v6 h-38 z" />
+    <!-- Middle horizontal (shorter, gold) -->
+    <path
+        android:fillColor="#C9943A"
+        android:pathData="M32,51 h30 v5 h-30 z" />
+    <!-- Bottom horizontal -->
+    <path
+        android:fillColor="#F0EAD6"
+        android:pathData="M32,74 h38 v6 h-38 z" />
+
+</vector>
