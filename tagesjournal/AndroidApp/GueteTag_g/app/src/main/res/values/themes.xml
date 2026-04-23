@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.GueteTag" parent="Theme.MaterialComponents.Light" />
+</resources>
