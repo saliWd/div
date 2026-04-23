@@ -2,7 +2,7 @@
 Lists the prompts for different AIs. This is the starting point for the app
 
 ## Claude
-chat id: TBD  
+chat id: https://claude.ai/chat/01e2853d-c9af-48ae-aa64-68805f0c8e48  
 model: Sonnet 4.6  
 
 ### initial description:
