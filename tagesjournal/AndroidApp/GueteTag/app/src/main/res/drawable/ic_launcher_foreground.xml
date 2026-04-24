@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Outer glow circle -->
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M54,18 A36,36 0 1,1 54,90 A36,36 0 1,1 54,18 Z"/>
+
+    <!-- Inner white circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 A30,30 0 1,1 54,84 A30,30 0 1,1 54,24 Z"/>
+
+    <!-- Letter G in DeepForest green -->
+    <path
+        android:fillColor="#1A3A2E"
+        android:pathData="M54,36 C44.06,36 36,44.06 36,54 C36,63.94 44.06,72 54,72
+                          C60.5,72 66.2,68.6 69.4,63.5 L57,63.5 L57,56.5 L76,56.5
+                          L76,54 C76,42.95 67.05,34 54,36 Z
+                          M54,42 C63.94,42 72,50.06 72,58 L63,58 L63,63.5
+                          C61.0,65.6 57.7,67 54,67 C47.37,67 42,61.63 42,55
+                          C42,48.37 47.37,43 54,43 Z"/>
+
+    <!-- Simplified bold G letterform -->
+    <path
+        android:fillColor="#1A3A2E"
+        android:pathData="
+          M54,33
+          C42.4,33 33,42.4 33,54
+          C33,65.6 42.4,75 54,75
+          C61.2,75 67.5,71.4 71.2,65.8
+          L58,65.8 L58,58 L74,58
+          L74,54
+          C74,43.5 65.2,34.2 54,33 Z
+        "/>
+
+    <!-- Clean G shape -->
+    <path
+        android:fillColor="#4A7C59"
+        android:pathData="M54,30 C40.75,30 30,40.75 30,54 C30,67.25 40.75,78 54,78
+                          C62.5,78 70,73.6 74.2,66.8 L59,66.8 L59,57.5 L77.5,57.5
+                          L77.5,54 C77.5,41.6 68.4,31.2 54,30 Z"/>
+
+</vector>
