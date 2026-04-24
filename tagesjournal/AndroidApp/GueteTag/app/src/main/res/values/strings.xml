@@ -2,21 +2,24 @@
 <resources>
     <string name="app_name">GueteTag</string>
     <string name="app_title">GueteTag</string>
-    <string name="app_subtitle">Wie war der Tag</string>
+    <string name="app_subtitle">Wie war dein Tag?</string>
 
     <!-- Auth -->
     <string name="auth_title">Entsperren</string>
-    <string name="auth_subtitle">Bitte Fingerabdruck scannen</string>
+    <string name="auth_subtitle"> </string>
     <string name="auth_prompt">Authentifizierung erforderlich</string>
-    <string name="auth_description">Entsperren mit deinem Fingerabdruck</string>
     <string name="auth_cancel">Abbrechen</string>
     <string name="auth_failed">Authentifizierung fehlgeschlagen</string>
     <string name="auth_error">Fehler bei der Authentifizierung</string>
     <string name="auth_no_biometric">Kein Fingerabdruck eingerichtet. Bitte in den Einstellungen konfigurieren.</string>
+    <string name="auth_waiting">Tippe zum Entsperren</string>
+    <string name="auth_welcome">Willkommen zurück! ✓</string>
+    <string name="auth_retry">Nicht erkannt. Erneut versuchen.</string>
+    <string name="auth_fingerprint">Fingerabdruck</string>
 
     <!-- Main -->
     <string name="today">Heute</string>
-    <string name="no_entries">Noch keine Einträge vorhanden</string>
+    <string name="no_entries">Noch keine Einträge</string>
     <string name="no_entries_hint">Tippe auf ein Datum im Kalender</string>
     <string name="entries_title">Einträge</string>
     <string name="calendar_title">Kalender</string>
@@ -29,7 +32,8 @@
     <string name="entry_rating">Bewertung</string>
     <string name="entry_rating_label">Wie war dein Tag? (%d/10)</string>
     <string name="entry_text">Notizen</string>
-    <string name="entry_text_hint">Tagesbericht</string>
+    <string name="entry_text_hint">Was hat diesen Tag besonders gemacht?</string>
+    <string name="back">Zurück</string>
     <string name="save">Speichern</string>
     <string name="cancel">Abbrechen</string>
     <string name="delete">Löschen</string>
@@ -40,15 +44,16 @@
 
     <!-- Export / Import -->
     <string name="export_title">Datenbank exportieren</string>
-    <string name="export_description">Exportiert alle Einträge als verschlüsselte Datei</string>
+    <string name="export_description">Alle Einträge als verschlüsselte Datei exportieren</string>
     <string name="export_password">Export-Passwort</string>
     <string name="export_password_hint">Passwort für die Exportdatei</string>
     <string name="export_confirm">Exportieren</string>
+    <string name="export_chooser_title">Export speichern</string>
     <string name="export_success">Export erfolgreich gespeichert</string>
     <string name="export_error">Fehler beim Exportieren</string>
 
     <string name="import_title">Datenbank importieren</string>
-    <string name="import_description">Importiert Einträge aus einer verschlüsselten Datei</string>
+    <string name="import_description">Einträge aus einer verschlüsselten Datei importieren</string>
     <string name="import_password">Import-Passwort</string>
     <string name="import_password_hint">Passwort der Importdatei</string>
     <string name="import_confirm">Importieren</string>

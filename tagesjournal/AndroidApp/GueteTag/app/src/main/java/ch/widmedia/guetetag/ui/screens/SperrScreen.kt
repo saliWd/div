@@ -16,10 +16,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ch.widmedia.guetetag.R
 import ch.widmedia.guetetag.ui.theme.*
 
 enum class AuthStatus { WAITING, SCANNING, SUCCESS, FAILED, ERROR }
@@ -83,13 +85,13 @@ fun SperrScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "GueteTag",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.displayLarge,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Dein tägliches Wohlbefinden",
+                    text = stringResource(R.string.app_subtitle),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White.copy(alpha = 0.7f),
                     textAlign = TextAlign.Center
@@ -116,7 +118,7 @@ fun SperrScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Fingerprint,
-                        contentDescription = "Fingerabdruck",
+                        contentDescription = stringResource(R.string.auth_fingerprint),
                         tint = iconColor,
                         modifier = Modifier.size(56.dp)
                     )
@@ -132,11 +134,11 @@ fun SperrScreen(
                 label = "statusText"
             ) { status ->
                 val (text, color) = when (status) {
-                    AuthStatus.WAITING  -> "Tippe zum Entsperren" to Color.White.copy(alpha = 0.75f)
-                    AuthStatus.SCANNING -> "Fingerabdruck scannen..." to GoldAmber
-                    AuthStatus.SUCCESS  -> "Willkommen zurück! ✓" to SageGreen
-                    AuthStatus.FAILED   -> "Nicht erkannt. Erneut versuchen." to ErrorRed
-                    AuthStatus.ERROR    -> (fehlermeldung ?: "Fehler") to ErrorRed
+                    AuthStatus.WAITING  -> stringResource(R.string.auth_waiting) to Color.White.copy(alpha = 0.75f)
+                    AuthStatus.SCANNING -> stringResource(R.string.auth_subtitle) to GoldAmber
+                    AuthStatus.SUCCESS  -> stringResource(R.string.auth_welcome) to SageGreen
+                    AuthStatus.FAILED   -> stringResource(R.string.auth_retry) to ErrorRed
+                    AuthStatus.ERROR    -> (fehlermeldung ?: stringResource(R.string.auth_error)) to ErrorRed
                 }
                 Text(
                     text = text,
@@ -162,7 +164,7 @@ fun SperrScreen(
                 enabled = authStatus != AuthStatus.SCANNING && authStatus != AuthStatus.SUCCESS
             ) {
                 Text(
-                    text = "Entsperren",
+                    text = stringResource(R.string.auth_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp

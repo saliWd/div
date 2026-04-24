@@ -12,7 +12,7 @@ The whole database can be exported onto local file system, export file needs to 
 This password itself shall be stored in secure location.  
 Also an import function for such a file is required.  
 It needs functions to add an entry with date, a rating field (integer number between 1 and 10, use a slider for input) and text field. Entries can also be deleted.  
-On the main view: display a calender for at least the last 14 days. The calender display starts with Monday but only the last 14 days are clickable and lead to the view where I can edit or create a database entry.  
+On the main view: display a calender for at least the last 7 days. The calender display starts with Monday but only the last 7 days are clickable and lead to the view where I can edit or create a database entry.  
 The days where an entry exists in the db (use the date field) need to have a different color than the days where no entry exists.  
 Below this calender (calender display takes about 40% of the available height) show a list of existing entries.  
 Clicking on a date on the calender opens either the existing entry for editing or creates a new entry for this day if none exists yet.  

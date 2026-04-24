@@ -8,8 +8,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.repeatOnLifecycle
 import ch.widmedia.guetetag.data.db.GueteTagDatabase
 import ch.widmedia.guetetag.data.repository.EintragRepository
 import ch.widmedia.guetetag.security.BiometricHelper
@@ -55,9 +59,9 @@ class MainActivity : FragmentActivity() {
             authStatus = AuthStatus.SCANNING
             BiometricHelper.showBiometricPrompt(
                 activity = this,
-                title = "Authentifizierung erforderlich",
-                subtitle = "Entsperre GueteTag mit deinem Fingerabdruck",
-                cancelText = "Abbrechen",
+                title = getString(R.string.auth_prompt),
+                subtitle = getString(R.string.auth_subtitle),
+                cancelText = getString(R.string.auth_cancel),
                 onSuccess = {
                     authStatus = AuthStatus.SUCCESS
                 },
@@ -72,12 +76,32 @@ class MainActivity : FragmentActivity() {
         }
 
         // Auto-trigger on first launch if biometric is available
-        LaunchedEffect(Unit) {
-            if (BiometricHelper.isBiometricAvailable(this@MainActivity)) {
-                triggerAuth()
-            } else {
-                // No biometrics: skip lock screen (or show error)
-                entsperrt = true
+        val lifecycleOwner = LocalLifecycleOwner.current
+        
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_STOP) {
+                    entsperrt = false
+                    authStatus = AuthStatus.WAITING
+                    fehlermeldung = null
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        LaunchedEffect(lifecycleOwner) {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                if (!entsperrt && authStatus == AuthStatus.WAITING) {
+                    if (BiometricHelper.isBiometricAvailable(this@MainActivity)) {
+                        triggerAuth()
+                    } else {
+                        // No biometrics: skip lock screen (or show error)
+                        entsperrt = true
+                    }
+                }
             }
         }
 

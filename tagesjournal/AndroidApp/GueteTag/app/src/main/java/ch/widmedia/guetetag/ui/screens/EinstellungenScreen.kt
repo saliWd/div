@@ -23,12 +23,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import ch.widmedia.guetetag.R
 import ch.widmedia.guetetag.security.SecurityManager
 import ch.widmedia.guetetag.ui.MainViewModel
 import ch.widmedia.guetetag.ui.theme.*
@@ -61,11 +63,12 @@ fun EinstellungenScreen(
     ) { uri ->
         uri?.let {
             importUri = it
+            val dateiAusgewaehltText = context.getString(R.string.import_file_select)
             importDateiName = context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
                 val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
                 cursor.moveToFirst()
                 cursor.getString(nameIndex)
-            } ?: "Datei ausgewählt"
+            } ?: dateiAusgewaehltText
         }
     }
 
@@ -113,12 +116,12 @@ fun EinstellungenScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Zurück",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color.White
                         )
                     }
                     Text(
-                        text = "Einstellungen",
+                        text = stringResource(R.string.settings_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -138,12 +141,12 @@ fun EinstellungenScreen(
                 Spacer(Modifier.height(8.dp))
 
                 // Section: Datenverwaltung
-                SektionsKopf(text = "Datenverwaltung", icon = Icons.Filled.Storage)
+                SektionsKopf(text = stringResource(R.string.data_management), icon = Icons.Filled.Storage)
 
                 // Export Card
                 EinstellungsKarte(
-                    titel = "Exportieren",
-                    beschreibung = "Alle Einträge als verschlüsselte Datei exportieren",
+                    titel = stringResource(R.string.export_confirm),
+                    beschreibung = stringResource(R.string.export_description),
                     icon = Icons.Filled.Upload,
                     iconFarbe = SageGreen
                 ) {
@@ -151,7 +154,7 @@ fun EinstellungenScreen(
                         PasswortFeld(
                             wert = exportPasswort,
                             onWertChange = { exportPasswort = it },
-                            label = "Export-Passwort",
+                            label = stringResource(R.string.export_password),
                             sichtbar = exportPasswortSichtbar,
                             onSichtbarToggle = { exportPasswortSichtbar = !exportPasswortSichtbar }
                         )
@@ -176,7 +179,7 @@ fun EinstellungenScreen(
                                             putExtra(Intent.EXTRA_STREAM, uri)
                                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                         }
-                                        context.startActivity(Intent.createChooser(shareIntent, "Export speichern"))
+                                        context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.export_chooser_title)))
                                     },
                                     onError = { error ->
                                         exportLaeuft = false
@@ -199,7 +202,7 @@ fun EinstellungenScreen(
                             } else {
                                 Icon(Icons.Filled.Upload, null, Modifier.size(18.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("Exportieren")
+                                Text(stringResource(R.string.export_confirm))
                             }
                         }
                     }
@@ -207,8 +210,8 @@ fun EinstellungenScreen(
 
                 // Import Card
                 EinstellungsKarte(
-                    titel = "Importieren",
-                    beschreibung = "Einträge aus einer verschlüsselten Datei importieren",
+                    titel = stringResource(R.string.import_confirm),
+                    beschreibung = stringResource(R.string.import_description),
                     icon = Icons.Filled.Download,
                     iconFarbe = Terracotta
                 ) {
@@ -224,14 +227,14 @@ fun EinstellungenScreen(
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = if (importDateiName.isNotBlank()) importDateiName
-                                       else "Datei auswählen"
+                                       else stringResource(R.string.import_file_select)
                             )
                         }
 
                         PasswortFeld(
                             wert = importPasswort,
                             onWertChange = { importPasswort = it },
-                            label = "Import-Passwort",
+                            label = stringResource(R.string.import_password),
                             sichtbar = importPasswortSichtbar,
                             onSichtbarToggle = { importPasswortSichtbar = !importPasswortSichtbar }
                         )
@@ -255,7 +258,7 @@ fun EinstellungenScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Text(
-                                    text = "Alle bestehenden Einträge werden überschrieben.",
+                                    text = stringResource(R.string.import_overwrite_warning),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = SlateGray
                                 )
@@ -298,7 +301,7 @@ fun EinstellungenScreen(
                             } else {
                                 Icon(Icons.Filled.Download, null, Modifier.size(18.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("Importieren")
+                                Text(stringResource(R.string.import_confirm))
                             }
                         }
                     }
@@ -399,7 +402,8 @@ fun PasswortFeld(
                 Icon(
                     imageVector = if (sichtbar) Icons.Filled.VisibilityOff
                                   else Icons.Filled.Visibility,
-                    contentDescription = if (sichtbar) "Verbergen" else "Anzeigen",
+                    contentDescription = if (sichtbar) stringResource(R.string.password_hide)
+                                          else stringResource(R.string.password_show),
                     tint = SlateGray
                 )
             }

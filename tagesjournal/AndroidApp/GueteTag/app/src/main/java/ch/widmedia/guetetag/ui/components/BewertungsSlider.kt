@@ -11,9 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ch.widmedia.guetetag.R
 import ch.widmedia.guetetag.ui.theme.*
 import kotlin.math.roundToInt
 
@@ -29,14 +31,6 @@ fun BewertungsSlider(
         label = "ratingColorAnim"
     )
 
-    val emoji = when {
-        bewertung <= 2 -> "😞"
-        bewertung <= 4 -> "😐"
-        bewertung <= 6 -> "🙂"
-        bewertung <= 8 -> "😊"
-        else           -> "🌟"
-    }
-
     Column(modifier = modifier) {
         // Label + value
         Row(
@@ -45,7 +39,7 @@ fun BewertungsSlider(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Wie war dein Tag?",
+                text = stringResource(R.string.app_subtitle),
                 style = MaterialTheme.typography.titleMedium,
                 color = DeepForest
             )
@@ -53,10 +47,6 @@ fun BewertungsSlider(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(
-                    text = emoji,
-                    fontSize = 20.sp
-                )
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier

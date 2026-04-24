@@ -20,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ch.widmedia.guetetag.R
 import ch.widmedia.guetetag.data.model.TagEintrag
 import ch.widmedia.guetetag.ui.MainViewModel
 import ch.widmedia.guetetag.ui.components.BewertungsSlider
@@ -60,14 +62,14 @@ fun EintragScreen(
             onDismissRequest = { showDeleteDialog = false },
             title = {
                 Text(
-                    text = "Eintrag löschen?",
+                    text = stringResource(R.string.delete_confirm_title),
                     style = MaterialTheme.typography.titleLarge,
                     color = DeepForest
                 )
             },
             text = {
                 Text(
-                    text = "Dieser Eintrag wird unwiderruflich gelöscht.",
+                    text = stringResource(R.string.delete_confirm_message),
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -79,12 +81,12 @@ fun EintragScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = ErrorRed)
                 ) {
-                    Text("Löschen")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 OutlinedButton(onClick = { showDeleteDialog = false }) {
-                    Text("Abbrechen")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             containerColor = Surface,
@@ -120,13 +122,13 @@ fun EintragScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Zurück",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color.White
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (isNew) "Neuer Eintrag" else "Eintrag bearbeiten",
+                            text = if (isNew) stringResource(R.string.new_entry) else stringResource(R.string.edit_entry),
                             style = MaterialTheme.typography.titleLarge,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
@@ -146,7 +148,7 @@ fun EintragScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
-                                contentDescription = "Löschen",
+                                contentDescription = stringResource(R.string.delete),
                                 tint = Color.White
                             )
                         }
@@ -199,7 +201,7 @@ fun EintragScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Notizen",
+                            text = stringResource(R.string.entry_text),
                             style = MaterialTheme.typography.titleMedium,
                             color = DeepForest
                         )
@@ -211,7 +213,7 @@ fun EintragScreen(
                                 .heightIn(min = 120.dp),
                             placeholder = {
                                 Text(
-                                    text = "Was hat diesen Tag besonders gemacht?",
+                                    text = stringResource(R.string.entry_text_hint),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = SlateGray.copy(alpha = 0.5f)
                                 )
@@ -256,7 +258,7 @@ fun EintragScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Speichern",
+                        text = stringResource(R.string.save),
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold

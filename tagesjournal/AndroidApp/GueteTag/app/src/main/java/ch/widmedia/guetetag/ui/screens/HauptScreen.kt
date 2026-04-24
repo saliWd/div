@@ -17,9 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ch.widmedia.guetetag.R
 import ch.widmedia.guetetag.ui.MainViewModel
 import ch.widmedia.guetetag.ui.components.EintragKarte
 import ch.widmedia.guetetag.ui.components.KalenderStreifen
@@ -98,7 +100,7 @@ fun HauptScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Einträge",
+                        text = stringResource(R.string.entries_title),
                         style = MaterialTheme.typography.headlineMedium,
                         color = DeepForest
                     )
@@ -171,13 +173,13 @@ fun AppHeader(onEinstellungen: () -> Unit) {
             ) {
                 Column {
                     Text(
-                        text = "GueteTag",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.displayMedium,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Dein tägliches Wohlbefinden",
+                        text = stringResource(R.string.app_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.75f)
                     )
@@ -190,7 +192,7 @@ fun AppHeader(onEinstellungen: () -> Unit) {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
-                        contentDescription = "Einstellungen",
+                        contentDescription = stringResource(R.string.settings_title),
                         tint = Color.White
                     )
                 }
@@ -212,13 +214,13 @@ fun LeererZustand(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Noch keine Einträge",
+            text = stringResource(R.string.no_entries),
             style = MaterialTheme.typography.titleMedium,
             color = SlateGray
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "Tippe auf ein Datum im Kalender\noder den + Button",
+            text = stringResource(R.string.no_entries_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = SlateGray.copy(alpha = 0.7f),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
