@@ -23,12 +23,12 @@ androidx-room-runtime               = { group = "androidx.room",             nam
 androidx-room-compiler              = { group = "androidx.room",             name = "room-compiler",                  version.ref = "room" }
 androidx-lifecycle-viewmodel        = { group = "androidx.lifecycle",        name = "lifecycle-viewmodel-compose",    version.ref = "lifecycle" }
 androidx-lifecycle-runtime          = { group = "androidx.lifecycle",        name = "lifecycle-runtime-ktx",          version.ref = "lifecycle" }
+androidx-lifecycle-process          = { group = "androidx.lifecycle",        name = "lifecycle-process",              version.ref = "lifecycle" }
 androidx-biometric                  = { group = "androidx.biometric",        name = "biometric",                      version.ref = "biometric" }
 sqlcipher                           = { group = "net.zetetic",               name = "android-database-sqlcipher",     version.ref = "sqlcipher" }
 
 [plugins]
 android-application = { id = "com.android.application",                  version.ref = "agp" }
-kotlin-android      = { id = "org.jetbrains.kotlin.android",              version.ref = "kotlin" }
 kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose",       version.ref = "kotlin" }
 ksp                 = { id = "com.google.devtools.ksp",                   version.ref = "ksp" }
 androidx-room       = { id = "androidx.room",                             version.ref = "room" }

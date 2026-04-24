@@ -1,7 +1,7 @@
 package ch.widmedia.guetetag
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
@@ -24,6 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ProcessLifecycleOwner
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import ch.widmedia.guetetag.data.AppDatabase
 import ch.widmedia.guetetag.security.BiometricHelper
@@ -42,7 +45,7 @@ private sealed interface AuthUiState {
     data class Ready(val db: AppDatabase) : AuthUiState
 }
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private var uiState by mutableStateOf<AuthUiState>(AuthUiState.Loading)
 
@@ -112,6 +115,22 @@ class MainActivity : ComponentActivity() {
         }
 
         startAuthFlow()
+
+        // Re-authenticate when app returns to foreground
+        ProcessLifecycleOwner.get().lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                // When app goes to background, lock it
+                if (uiState is AuthUiState.Ready) {
+                    AppDatabase.closeAndReset()
+                    uiState = AuthUiState.Loading
+                }
+            } else if (event == Lifecycle.Event.ON_START) {
+                // When app comes to foreground, trigger auth if not already ready
+                if (uiState !is AuthUiState.Ready) {
+                    startAuthFlow()
+                }
+            }
+        })
     }
 
     // ── Auth flow ─────────────────────────────────────────────────────────────
@@ -166,7 +185,6 @@ class MainActivity : ComponentActivity() {
                         PassphraseManager.retrievePassphrase(this, authenticatedCipher)
                     }
                     val db = AppDatabase.getInstance(this, passphrase)
-                    passphrase.fill(0) // zero out plaintext passphrase from memory
                     uiState = AuthUiState.Ready(db)
                 } catch (e: Exception) {
                     uiState = AuthUiState.Error(
@@ -188,5 +206,21 @@ class MainActivity : ComponentActivity() {
         KeystoreHelper.deleteKey()
         deleteDatabase("guetetag.db")
         startAuthFlow()
+
+        // Re-authenticate when app returns to foreground
+        ProcessLifecycleOwner.get().lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                // When app goes to background, lock it
+                if (uiState is AuthUiState.Ready) {
+                    AppDatabase.closeAndReset()
+                    uiState = AuthUiState.Loading
+                }
+            } else if (event == Lifecycle.Event.ON_START) {
+                // When app comes to foreground, trigger auth if not already ready
+                if (uiState !is AuthUiState.Ready) {
+                    startAuthFlow()
+                }
+            }
+        })
     }
 }

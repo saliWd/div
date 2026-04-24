@@ -1,17 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
 }
 
 android {
-    namespace  = "ch.widmedia.guetetag"
+    namespace  = "ch.widmedia.guetetag_o"
     compileSdk = 36
 
     defaultConfig {
-        applicationId   = "ch.widmedia.guetetag"
+        applicationId   = "ch.widmedia.guetetag_o"
         minSdk          = 36
         targetSdk       = 36
         versionCode     = 1
@@ -32,8 +31,9 @@ android {
         compose = true
     }
 
-    kotlin {
-        jvmToolchain(17)
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     room {
@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.process)
 
     // Compose BOM – all Compose versions controlled by BOM
     val composeBom = platform(libs.androidx.compose.bom)

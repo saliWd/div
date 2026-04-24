@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -90,6 +91,8 @@ fun MainScreen(
                 color     = MaterialTheme.colorScheme.outlineVariant,
                 thickness = 1.dp
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // ── Entry list – next 50 % ───────────────────────────────────
             Box(modifier = Modifier.fillMaxWidth().weight(0.50f)) {

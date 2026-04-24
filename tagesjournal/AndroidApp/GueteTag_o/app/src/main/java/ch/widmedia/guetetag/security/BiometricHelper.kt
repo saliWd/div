@@ -49,9 +49,9 @@ object BiometricHelper {
         }
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(activity.getString(ch.widmedia.guetetag.R.string.biometric_title))
-            .setSubtitle(activity.getString(ch.widmedia.guetetag.R.string.biometric_subtitle))
-            .setNegativeButtonText(activity.getString(ch.widmedia.guetetag.R.string.biometric_negative))
+            .setTitle(activity.getString(ch.widmedia.guetetag_o.R.string.biometric_title))
+            .setSubtitle(activity.getString(ch.widmedia.guetetag_o.R.string.biometric_subtitle))
+            .setNegativeButtonText(activity.getString(ch.widmedia.guetetag_o.R.string.biometric_negative))
             .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
             .build()
 
