@@ -13,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,49 +33,41 @@ fun EintragKarte(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(3.dp, RoundedCornerShape(18.dp), ambientColor = ratingCol.copy(alpha = 0.15f))
             .clickable { onClick() },
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = CardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(vertical = 8.dp, horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Rating circle
+            // Smaller Rating circle
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
-                    .background(ratingCol.copy(alpha = 0.12f))
+                    .background(ratingCol.copy(alpha = 0.1f))
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = eintrag.bewertung.toString(),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = ratingCol,
-                        fontSize = 22.sp
-                    )
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = ratingCol,
-                        modifier = Modifier.size(10.dp)
-                    )
-                }
+                Text(
+                    text = eintrag.bewertung.toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = ratingCol,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             }
 
-            // Left color bar
+            // Slimmer color bar
             Box(
                 modifier = Modifier
-                    .width(3.dp)
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(2.dp))
+                    .width(2.dp)
+                    .height(32.dp)
+                    .clip(RoundedCornerShape(1.dp))
                     .background(ratingCol)
             )
 
@@ -83,27 +75,27 @@ fun EintragKarte(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = DateUtil.lokalDatum(eintrag.datum),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = DeepForest
+                    style = MaterialTheme.typography.labelLarge,
+                    color = DeepForest,
+                    fontWeight = FontWeight.SemiBold
                 )
                 if (eintrag.notizen.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(3.dp))
                     Text(
                         text = eintrag.notizen,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = SlateGray,
-                        maxLines = 2,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
-            // Arrow indicator
+            // Arrow indicator (smaller)
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = DividerColor,
-                modifier = Modifier.size(20.dp)
+                tint = DividerColor.copy(alpha = 0.6f),
+                modifier = Modifier.size(18.dp)
             )
         }
     }

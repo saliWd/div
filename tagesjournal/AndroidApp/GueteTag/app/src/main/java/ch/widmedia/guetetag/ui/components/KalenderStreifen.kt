@@ -6,13 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,78 +32,102 @@ fun KalenderStreifen(
     val heute = remember { LocalDate.now() }
     val limit = remember(heute) { heute.minusDays(6) }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.padding(bottom = 16.dp)) {
         // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 4.dp),
+                .padding(horizontal = 24.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Wohlbefinden",
-                style = MaterialTheme.typography.titleLarge,
-                color = DeepForest
+                text = "Kalender",
+                style = MaterialTheme.typography.headlineSmall,
+                color = DeepForest,
+                fontWeight = FontWeight.Bold
             )
             // Legend
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 LegendePunkt(farbe = PaleGreen, label = "Eintrag")
-                LegendePunkt(farbe = LightChamois, label = "Kein Eintrag")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Grid-like display for 2 weeks
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // First week
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                tage.subList(0, 7).forEach { tag ->
-                    val isoDate = DateUtil.toIso(tag)
-                    val hatEintrag = isoDate in tageWithEintrag
-                    val istHeute = tag == heute
-                    val isClickable = !tag.isBefore(limit) && !tag.isAfter(heute)
-                    
-                    KalenderTag(
-                        datum = tag,
-                        hatEintrag = hatEintrag,
-                        istHeute = istHeute,
-                        isClickable = isClickable,
-                        onClick = { if (isClickable) onDatumKlick(isoDate) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-            // Second week
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                tage.subList(7, 14).forEach { tag ->
-                    val isoDate = DateUtil.toIso(tag)
-                    val hatEintrag = isoDate in tageWithEintrag
-                    val istHeute = tag == heute
-                    val isClickable = !tag.isBefore(limit) && !tag.isAfter(heute)
-
-                    KalenderTag(
-                        datum = tag,
-                        hatEintrag = hatEintrag,
-                        istHeute = istHeute,
-                        isClickable = isClickable,
-                        onClick = { if (isClickable) onDatumKlick(isoDate) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                LegendePunkt(farbe = LightChamois, label = "Leer")
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Month indicators under row
+        // Large Calendar Card
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = CardBg),
+            elevation = CardDefaults.cardElevation(2.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // First week
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    tage.subList(0, 7).forEach { tag ->
+                        val isoDate = DateUtil.toIso(tag)
+                        val hatEintrag = isoDate in tageWithEintrag
+                        val istHeute = tag == heute
+                        val isClickable = !tag.isBefore(limit) && !tag.isAfter(heute)
+                        
+                        KalenderTag(
+                            datum = tag,
+                            hatEintrag = hatEintrag,
+                            istHeute = istHeute,
+                            isClickable = isClickable,
+                            onClick = { if (isClickable) onDatumKlick(isoDate) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                
+                // Divider or Spacer between weeks
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                    color = DividerColor.copy(alpha = 0.5f),
+                    thickness = 0.5.dp
+                )
+
+                // Second week
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    tage.subList(7, 14).forEach { tag ->
+                        val isoDate = DateUtil.toIso(tag)
+                        val hatEintrag = isoDate in tageWithEintrag
+                        val istHeute = tag == heute
+                        val isClickable = !tag.isBefore(limit) && !tag.isAfter(heute)
+
+                        KalenderTag(
+                            datum = tag,
+                            hatEintrag = hatEintrag,
+                            istHeute = istHeute,
+                            isClickable = isClickable,
+                            onClick = { if (isClickable) onDatumKlick(isoDate) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Month indicators
         MonatsIndikator(tage = tage)
     }
 }
@@ -123,10 +143,10 @@ fun KalenderTag(
 ) {
     val targetBgColor = when {
         istHeute && hatEintrag -> SageGreen
-        istHeute              -> SageGreen.copy(alpha = 0.35f)
+        istHeute              -> SageGreen.copy(alpha = 0.25f)
         hatEintrag            -> PaleGreen
-        !isClickable         -> DividerColor.copy(alpha = 0.3f)
-        else                  -> LightChamois
+        !isClickable         -> DividerColor.copy(alpha = 0.2f)
+        else                  -> LightChamois.copy(alpha = 0.6f)
     }
     val bgColor by animateColorAsState(
         targetValue = targetBgColor,
@@ -138,7 +158,7 @@ fun KalenderTag(
         istHeute && hatEintrag -> Color.White
         istHeute              -> DeepForest
         hatEintrag            -> SageGreen
-        !isClickable         -> SlateGray.copy(alpha = 0.4f)
+        !isClickable         -> SlateGray.copy(alpha = 0.3f)
         else                  -> SlateGray
     }
 
@@ -150,30 +170,30 @@ fun KalenderTag(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
+            .aspectRatio(0.7f) // Even slightly taller
             .then(borderMod)
-            .shadow(if (istHeute) 4.dp else 0.5.dp, RoundedCornerShape(12.dp), ambientColor = SageGreen.copy(alpha = 0.1f))
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(bgColor)
             .then(if (isClickable) Modifier.clickable { onClick() } else Modifier)
-            .padding(vertical = 8.dp, horizontal = 2.dp)
+            .padding(vertical = 10.dp, horizontal = 2.dp)
     ) {
         Text(
             text = DateUtil.wochentag(datum),
             style = MaterialTheme.typography.labelSmall,
             color = textColor,
-            fontSize = 10.sp,
+            fontSize = 11.sp, // Slightly larger
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(6.dp)) // More spacing
         Text(
             text = datum.dayOfMonth.toString(),
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = if (istHeute) FontWeight.Bold else FontWeight.Medium,
+            fontWeight = if (istHeute) FontWeight.Bold else FontWeight.SemiBold,
             color = textColor,
-            fontSize = 15.sp
+            fontSize = 18.sp // Slightly larger
         )
         if (hatEintrag) {
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Box(
                 modifier = Modifier
                     .size(4.dp)

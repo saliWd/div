@@ -65,10 +65,10 @@ fun HauptScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Upper Part: Header and Calendar (approx 40%)
+            // Upper Part: Header and Calendar (approx 40%+)
             Box(
                 modifier = Modifier
-                    .weight(0.42f)
+                    .weight(0.48f)
                     .fillMaxWidth()
             ) {
                 Column {
@@ -89,10 +89,10 @@ fun HauptScreen(
                 thickness = 1.dp
             )
 
-            // Lower Part: Entries List (approx 60%)
+            // Lower Part: Entries List
             Box(
                 modifier = Modifier
-                    .weight(0.58f)
+                    .weight(0.52f)
                     .fillMaxWidth()
             ) {
                 if (alleEintraege.isEmpty()) {
@@ -159,7 +159,7 @@ fun AppHeader(onEinstellungen: () -> Unit) {
                     colors = listOf(DeepForest, SageGreen.copy(alpha = 0.85f))
                 )
             )
-            .padding(top = 48.dp, start = 24.dp, end = 16.dp, bottom = 24.dp)
+            .padding(top = 40.dp, start = 24.dp, end = 16.dp, bottom = 16.dp)
     ) {
         Column {
             Row(
