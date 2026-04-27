@@ -32,9 +32,9 @@ fun KalenderStreifen(
     onDatumKlick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tage = remember { DateUtil.letzte14Tage() }
+    val tage = remember { DateUtil.kalenderWochen() }
     val heute = remember { LocalDate.now() }
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = maxOf(0, tage.size - 7))
+    val limit = remember(heute) { heute.minusDays(6) }
 
     Column(modifier = modifier) {
         // Header
@@ -46,7 +46,7 @@ fun KalenderStreifen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Letzte 14 Tage",
+                text = "Wohlbefinden",
                 style = MaterialTheme.typography.titleLarge,
                 color = DeepForest
             )
@@ -60,27 +60,52 @@ fun KalenderStreifen(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        LazyRow(
-            state = listState,
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // Grid-like display for 2 weeks
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(tage) { tag ->
-                val isoDate = DateUtil.toIso(tag)
-                val hatEintrag = isoDate in tageWithEintrag
-                val istHeute = tag == heute
-                KalenderTag(
-                    datum = tag,
-                    hatEintrag = hatEintrag,
-                    istHeute = istHeute,
-                    onClick = { onDatumKlick(isoDate) }
-                )
+            // First week
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                tage.subList(0, 7).forEach { tag ->
+                    val isoDate = DateUtil.toIso(tag)
+                    val hatEintrag = isoDate in tageWithEintrag
+                    val istHeute = tag == heute
+                    val isClickable = !tag.isBefore(limit) && !tag.isAfter(heute)
+                    
+                    KalenderTag(
+                        datum = tag,
+                        hatEintrag = hatEintrag,
+                        istHeute = istHeute,
+                        isClickable = isClickable,
+                        onClick = { if (isClickable) onDatumKlick(isoDate) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            // Second week
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                tage.subList(7, 14).forEach { tag ->
+                    val isoDate = DateUtil.toIso(tag)
+                    val hatEintrag = isoDate in tageWithEintrag
+                    val istHeute = tag == heute
+                    val isClickable = !tag.isBefore(limit) && !tag.isAfter(heute)
+
+                    KalenderTag(
+                        datum = tag,
+                        hatEintrag = hatEintrag,
+                        istHeute = istHeute,
+                        isClickable = isClickable,
+                        onClick = { if (isClickable) onDatumKlick(isoDate) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Month indicators under row
         MonatsIndikator(tage = tage)
@@ -92,6 +117,7 @@ fun KalenderTag(
     datum: LocalDate,
     hatEintrag: Boolean,
     istHeute: Boolean,
+    isClickable: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -99,6 +125,7 @@ fun KalenderTag(
         istHeute && hatEintrag -> SageGreen
         istHeute              -> SageGreen.copy(alpha = 0.35f)
         hatEintrag            -> PaleGreen
+        !isClickable         -> DividerColor.copy(alpha = 0.3f)
         else                  -> LightChamois
     }
     val bgColor by animateColorAsState(
@@ -111,44 +138,45 @@ fun KalenderTag(
         istHeute && hatEintrag -> Color.White
         istHeute              -> DeepForest
         hatEintrag            -> SageGreen
+        !isClickable         -> SlateGray.copy(alpha = 0.4f)
         else                  -> SlateGray
     }
 
     val borderMod = if (istHeute)
-        Modifier.border(2.dp, SageGreen, RoundedCornerShape(14.dp))
+        Modifier.border(2.dp, SageGreen, RoundedCornerShape(12.dp))
     else
         Modifier
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .width(52.dp)
             .then(borderMod)
-            .shadow(if (istHeute) 4.dp else 1.dp, RoundedCornerShape(14.dp), ambientColor = SageGreen.copy(alpha = 0.15f))
-            .clip(RoundedCornerShape(14.dp))
+            .shadow(if (istHeute) 4.dp else 0.5.dp, RoundedCornerShape(12.dp), ambientColor = SageGreen.copy(alpha = 0.1f))
+            .clip(RoundedCornerShape(12.dp))
             .background(bgColor)
-            .clickable { onClick() }
-            .padding(vertical = 10.dp, horizontal = 6.dp)
+            .then(if (isClickable) Modifier.clickable { onClick() } else Modifier)
+            .padding(vertical = 8.dp, horizontal = 2.dp)
     ) {
         Text(
             text = DateUtil.wochentag(datum),
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelSmall,
             color = textColor,
-            fontSize = 11.sp
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = datum.dayOfMonth.toString(),
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = if (istHeute) FontWeight.Bold else FontWeight.SemiBold,
+            fontWeight = if (istHeute) FontWeight.Bold else FontWeight.Medium,
             color = textColor,
-            fontSize = 18.sp
+            fontSize = 15.sp
         )
         if (hatEintrag) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Box(
                 modifier = Modifier
-                    .size(5.dp)
+                    .size(4.dp)
                     .clip(CircleShape)
                     .background(if (istHeute) Color.White else SageGreen)
             )

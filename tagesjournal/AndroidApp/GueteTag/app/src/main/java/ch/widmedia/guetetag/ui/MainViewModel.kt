@@ -39,9 +39,9 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
     private fun ladeTageWithEintrag() {
         viewModelScope.launch {
             val heute = LocalDate.now()
-            val vor14 = heute.minusDays(13)
+            val von = heute.minusDays(20)
             val tage = repository.datumMitEintrag(
-                DateUtil.toIso(vor14),
+                DateUtil.toIso(von),
                 DateUtil.toIso(heute)
             )
             _uiState.value = _uiState.value.copy(tageWithEintrag = tage.toSet())

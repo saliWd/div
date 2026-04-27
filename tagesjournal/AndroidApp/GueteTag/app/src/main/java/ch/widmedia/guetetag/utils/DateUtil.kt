@@ -22,6 +22,14 @@ object DateUtil {
         return (13 downTo 0).map { today.minusDays(it.toLong()) }
     }
 
+    fun kalenderWochen(): List<LocalDate> {
+        val today = LocalDate.now()
+        val diff = today.dayOfWeek.value - 1
+        val currentMonday = today.minusDays(diff.toLong())
+        val lastMonday = currentMonday.minusDays(7)
+        return (0..13).map { lastMonday.plusDays(it.toLong()) }
+    }
+
     fun toIso(date: LocalDate): String = date.format(ISO_FORMAT)
 
     fun wochentag(date: LocalDate): String {

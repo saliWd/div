@@ -1,7 +1,5 @@
 package ch.widmedia.guetetag.ui.screens
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -62,91 +60,89 @@ fun HauptScreen(
         },
         containerColor = Chamois
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(bottom = 120.dp)  // 10% bottom
+                .padding(paddingValues)
         ) {
-            // App Header
-            item {
-                AppHeader(onEinstellungen = onEinstellungen)
-            }
-
-            // Kalender
-            item {
-                Spacer(Modifier.height(8.dp))
-                KalenderStreifen(
-                    tageWithEintrag = uiState.tageWithEintrag,
-                    onDatumKlick = onEintragKlick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                )
-            }
-
-            // Trennlinie + Einträge-Titel
-            item {
-                Spacer(Modifier.height(8.dp))
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    color = DividerColor,
-                    thickness = 1.dp
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.entries_title),
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = DeepForest
+            // Upper Part: Header and Calendar (approx 40%)
+            Box(
+                modifier = Modifier
+                    .weight(0.42f)
+                    .fillMaxWidth()
+            ) {
+                Column {
+                    AppHeader(onEinstellungen = onEinstellungen)
+                    Spacer(Modifier.height(8.dp))
+                    KalenderStreifen(
+                        tageWithEintrag = uiState.tageWithEintrag,
+                        onDatumKlick = onEintragKlick,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    if (alleEintraege.isNotEmpty()) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(SageGreen.copy(alpha = 0.15f))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = alleEintraege.size.toString(),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = SageGreen,
-                                fontSize = 13.sp
-                            )
-                        }
-                    }
                 }
-                Spacer(Modifier.height(12.dp))
             }
 
-            // Leer-Zustand
-            if (alleEintraege.isEmpty()) {
-                item {
+            // Separator
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                color = DividerColor,
+                thickness = 1.dp
+            )
+
+            // Lower Part: Entries List (approx 60%)
+            Box(
+                modifier = Modifier
+                    .weight(0.58f)
+                    .fillMaxWidth()
+            ) {
+                if (alleEintraege.isEmpty()) {
                     LeererZustand(
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                     )
-                }
-            }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 32.dp)
+                    ) {
+                        item {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.entries_title),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = DeepForest
+                                )
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(SageGreen.copy(alpha = 0.15f))
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = alleEintraege.size.toString(),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = SageGreen,
+                                        fontSize = 13.sp
+                                    )
+                                }
+                            }
+                        }
 
-            // Eintrags-Liste
-            itemsIndexed(
-                items = alleEintraege,
-                key = { _, eintrag -> eintrag.id }
-            ) { _, eintrag ->
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 2 }
-                ) {
-                    EintragKarte(
-                        eintrag = eintrag,
-                        onClick = { onEintragKlick(eintrag.datum) },
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
-                    )
+                        itemsIndexed(
+                            items = alleEintraege,
+                            key = { _, eintrag -> eintrag.id }
+                        ) { _, eintrag ->
+                            EintragKarte(
+                                eintrag = eintrag,
+                                onClick = { onEintragKlick(eintrag.datum) },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
