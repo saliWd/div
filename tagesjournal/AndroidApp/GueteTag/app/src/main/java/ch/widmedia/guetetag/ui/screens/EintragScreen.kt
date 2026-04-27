@@ -79,7 +79,10 @@ fun EintragScreen(
                         showDeleteDialog = false
                         eintrag?.let { viewModel.loeschen(it) { onZurueck() } }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = ErrorRed)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = Color.White
+                    )
                 ) {
                     Text(stringResource(R.string.delete))
                 }
@@ -249,7 +252,10 @@ fun EintragScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SageGreen)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Check,

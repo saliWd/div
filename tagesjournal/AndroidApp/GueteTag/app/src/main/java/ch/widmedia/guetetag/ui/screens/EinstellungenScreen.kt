@@ -191,19 +191,30 @@ fun EinstellungenScreen(
                                 .fillMaxWidth()
                                 .height(48.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = SageGreen),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
                             enabled = exportPasswort.isNotBlank() && !exportLaeuft
                         ) {
                             if (exportLaeuft) {
                                 CircularProgressIndicator(
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.size(20.dp),
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Icon(Icons.Filled.Upload, null, Modifier.size(18.dp))
+                                Icon(
+                                    imageVector = Icons.Filled.Upload,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
                                 Spacer(Modifier.width(6.dp))
-                                Text(stringResource(R.string.export_confirm))
+                                Text(
+                                    text = stringResource(R.string.export_confirm),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
                             }
                         }
                     }
@@ -290,19 +301,30 @@ fun EinstellungenScreen(
                                 .fillMaxWidth()
                                 .height(48.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Terracotta),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            ),
                             enabled = importUri != null && importPasswort.isNotBlank() && !importLaeuft
                         ) {
                             if (importLaeuft) {
                                 CircularProgressIndicator(
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onSecondary,
                                     modifier = Modifier.size(20.dp),
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Icon(Icons.Filled.Download, null, Modifier.size(18.dp))
+                                Icon(
+                                    imageVector = Icons.Filled.Download,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.onSecondary
+                                )
                                 Spacer(Modifier.width(6.dp))
-                                Text(stringResource(R.string.import_confirm))
+                                Text(
+                                    text = stringResource(R.string.import_confirm),
+                                    color = MaterialTheme.colorScheme.onSecondary
+                                )
                             }
                         }
                     }
