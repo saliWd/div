@@ -1,9 +1,6 @@
 package ch.widmedia.guetetag.ui.screens
 
-import android.content.Intent
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -29,11 +26,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import ch.widmedia.guetetag.MainActivity
 import ch.widmedia.guetetag.R
 import ch.widmedia.guetetag.security.SecurityManager
 import ch.widmedia.guetetag.ui.MainViewModel
 import ch.widmedia.guetetag.ui.theme.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +43,8 @@ fun EinstellungenScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val activity = context as? MainActivity
+    val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Export state
@@ -57,18 +59,39 @@ fun EinstellungenScreen(
     var importLaeuft by remember { mutableStateOf(false) }
     var importDateiName by remember { mutableStateOf("") }
 
-    // File picker for import
+    // File picker for import (GetContent is usually safer with FragmentActivity than CreateDocument)
     val dateiPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
             importUri = it
-            val dateiAusgewaehltText = context.getString(R.string.import_file_select)
             importDateiName = context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
                 val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                cursor.moveToFirst()
-                cursor.getString(nameIndex)
-            } ?: dateiAusgewaehltText
+                if (cursor.moveToFirst()) cursor.getString(nameIndex) else null
+            } ?: context.getString(R.string.import_file_select)
+        }
+    }
+
+    val onExportResult: (Uri?) -> Unit = { uri ->
+        uri?.let { targetUri ->
+            exportLaeuft = true
+            viewModel.getEncryptedExportData(context, exportPasswort) { data ->
+                if (data != null) {
+                    try {
+                        context.contentResolver.openOutputStream(targetUri)?.use { output ->
+                            output.write(data)
+                        }
+                        scope.launch {
+                            snackbarHostState.showSnackbar(context.getString(R.string.export_success))
+                        }
+                    } catch (_: Exception) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(context.getString(R.string.export_error))
+                        }
+                    }
+                }
+                exportLaeuft = false
+            }
         }
     }
 
@@ -161,30 +184,8 @@ fun EinstellungenScreen(
                         Button(
                             onClick = {
                                 if (exportPasswort.isBlank()) return@Button
-                                exportLaeuft = true
-                                viewModel.exportieren(
-                                    context = context,
-                                    password = exportPasswort,
-                                    onSuccess = { filePath ->
-                                        exportLaeuft = false
-                                        // Share the file
-                                        val file = java.io.File(filePath)
-                                        val uri = FileProvider.getUriForFile(
-                                            context,
-                                            "${context.packageName}.fileprovider",
-                                            file
-                                        )
-                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "application/octet-stream"
-                                            putExtra(Intent.EXTRA_STREAM, uri)
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                        context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.export_chooser_title)))
-                                    },
-                                    onError = { error ->
-                                        exportLaeuft = false
-                                    }
-                                )
+                                val fileName = "guetetag_export_${System.currentTimeMillis()}.gtb"
+                                activity?.launchFilePicker(fileName, onExportResult)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

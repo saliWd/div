@@ -1,5 +1,7 @@
 package ch.widmedia.guetetag
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,6 +29,7 @@ import ch.widmedia.guetetag.ui.theme.GueteTagTheme
 class MainActivity : FragmentActivity() {
 
     private lateinit var viewModel: MainViewModel
+    private var onPickerResult: ((Uri?) -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +49,27 @@ class MainActivity : FragmentActivity() {
             GueteTagTheme {
                 AppContent()
             }
+        }
+    }
+
+    /**
+     * Helper to launch file picker with a fixed request code to avoid FragmentActivity 16-bit crash
+     */
+    fun launchFilePicker(defaultFileName: String, callback: (Uri?) -> Unit) {
+        onPickerResult = callback
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/octet-stream"
+            putExtra(Intent.EXTRA_TITLE, defaultFileName)
+        }
+        startActivityForResult(intent, 0x1234)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 0x1234) {
+            onPickerResult?.invoke(if (resultCode == RESULT_OK) data?.data else null)
+            onPickerResult = null
         }
     }
 

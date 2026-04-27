@@ -6,7 +6,6 @@ import ch.widmedia.guetetag.data.model.TagEintrag
 import ch.widmedia.guetetag.security.SecurityManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.io.File
 
 object ExportImportUtil {
 
@@ -20,11 +19,11 @@ object ExportImportUtil {
         val eintraege: List<TagEintrag>
     )
 
-    fun exportieren(
+    fun getEncryptedExportData(
         context: Context,
         eintraege: List<TagEintrag>,
         password: String
-    ): File {
+    ): ByteArray {
         val exportData = ExportData(eintraege = eintraege)
         val json = gson.toJson(exportData)
         val jsonBytes = json.toByteArray(Charsets.UTF_8)
@@ -33,16 +32,7 @@ object ExportImportUtil {
         SecurityManager.saveExportPassword(context, password)
 
         // Encrypt with KeyStore key (password is used as IV seed)
-        val encrypted = SecurityManager.encryptExportData(jsonBytes, password)
-
-        val exportDir = File(context.filesDir, "exports")
-        exportDir.mkdirs()
-
-        val fileName = "guetetag_export_${System.currentTimeMillis()}.gtb"
-        val file = File(exportDir, fileName)
-        file.writeBytes(encrypted)
-
-        return file
+        return SecurityManager.encryptExportData(jsonBytes, password)
     }
 
     fun importieren(

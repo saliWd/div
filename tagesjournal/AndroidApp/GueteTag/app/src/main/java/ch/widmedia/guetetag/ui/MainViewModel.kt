@@ -71,14 +71,14 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
         }
     }
 
-    fun exportieren(context: Context, password: String, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+    fun getEncryptedExportData(context: Context, password: String, onResult: (ByteArray?) -> Unit) {
         viewModelScope.launch {
             try {
                 val eintraege = repository.alleEintraegeListe()
-                val file = ExportImportUtil.exportieren(context, eintraege, password)
-                onSuccess(file.absolutePath)
-            } catch (e: Exception) {
-                onError(e.message ?: "Unbekannter Fehler")
+                val data = ExportImportUtil.getEncryptedExportData(context, eintraege, password)
+                onResult(data)
+            } catch (_: Exception) {
+                onResult(null)
             }
         }
     }
