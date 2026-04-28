@@ -32,7 +32,7 @@ class MainActivity : FragmentActivity() {
     private var onPickerResult: ((Uri?) -> Unit)? = null
 
     private val filePickerLauncher = registerForActivityResult(
-        ActivityResultContracts.CreateDocument("application/octet-stream")
+        ActivityResultContracts.CreateDocument("application/octet-stream"),
     ) { uri ->
         onPickerResult?.invoke(uri)
         onPickerResult = null
@@ -69,9 +69,9 @@ class MainActivity : FragmentActivity() {
 
     @Composable
     private fun AppContent() {
-        var entsperrt by rememberSaveable { mutableStateOf(false) }
-        var authStatus by rememberSaveable { mutableStateOf(AuthStatus.WAITING) }
-        var fehlermeldung by rememberSaveable { mutableStateOf<String?>(null) }
+        var entsperrt by rememberSaveable { mutableStateOf(value = false) }
+        var authStatus by rememberSaveable { mutableStateOf(value = AuthStatus.WAITING) }
+        var fehlermeldung by rememberSaveable { mutableStateOf<String?>(value = null) }
 
         val triggerAuth: () -> Unit = {
             authStatus = AuthStatus.SCANNING
@@ -89,7 +89,7 @@ class MainActivity : FragmentActivity() {
                 },
                 onFailed = {
                     authStatus = AuthStatus.FAILED
-                }
+                },
             )
         }
 
@@ -98,7 +98,7 @@ class MainActivity : FragmentActivity() {
         
         LaunchedEffect(lifecycleOwner) {
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                if (!entsperrt && authStatus == AuthStatus.WAITING) {
+                if (!entsperrt && (authStatus == AuthStatus.WAITING)) {
                     if (BiometricHelper.isBiometricAvailable(this@MainActivity)) {
                         triggerAuth()
                     } else {

@@ -11,5 +11,5 @@ data class TagEintrag(
     val bewertung: Int,         // 1-10
     val notizen: String = "",
     val erstelltAm: Long = System.currentTimeMillis(),
-    val geaendertAm: Long = System.currentTimeMillis()
+    val geaendertAm: Long = System.currentTimeMillis(),
 )

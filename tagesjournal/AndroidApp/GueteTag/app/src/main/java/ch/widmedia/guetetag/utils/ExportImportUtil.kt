@@ -22,7 +22,7 @@ object ExportImportUtil {
     fun getEncryptedExportData(
         context: Context,
         eintraege: List<TagEintrag>,
-        password: String
+        password: String,
     ): ByteArray {
         val exportData = ExportData(eintraege = eintraege)
         val json = gson.toJson(exportData)

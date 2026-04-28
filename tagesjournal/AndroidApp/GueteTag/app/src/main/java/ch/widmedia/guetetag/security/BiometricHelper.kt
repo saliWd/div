@@ -11,7 +11,7 @@ object BiometricHelper {
     fun isBiometricAvailable(context: Context): Boolean {
         val manager = BiometricManager.from(context)
         return manager.canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG
+            BiometricManager.Authenticators.BIOMETRIC_STRONG,
         ) == BiometricManager.BIOMETRIC_SUCCESS
     }
 

@@ -23,7 +23,7 @@ import kotlin.math.roundToInt
 fun BewertungsSlider(
     bewertung: Int,
     onBewertungChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val ratingCol by animateColorAsState(
         targetValue = ratingColor(bewertung),

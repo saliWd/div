@@ -32,7 +32,7 @@ fun SperrScreen(
     onTriggerAuth: () -> Unit,
     authStatus: AuthStatus,
     fehlermeldung: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val pulse by rememberInfiniteTransition(label = "pulse").animateFloat(
         initialValue = 0.95f,
@@ -161,7 +161,7 @@ fun SperrScreen(
                     containerColor = Color.White.copy(alpha = 0.2f),
                     contentColor = Color.White
                 ),
-                enabled = authStatus != AuthStatus.SCANNING && authStatus != AuthStatus.SUCCESS
+                enabled = (authStatus != AuthStatus.SCANNING) && (authStatus != AuthStatus.SUCCESS)
             ) {
                 Text(
                     text = stringResource(R.string.auth_title),

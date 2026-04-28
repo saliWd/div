@@ -28,11 +28,6 @@ abstract class GueteTagDatabase : RoomDatabase() {
             }
         }
 
-        fun closeAndReset() {
-            INSTANCE?.close()
-            INSTANCE = null
-        }
-
         private fun buildDatabase(context: Context, passphrase: CharArray): GueteTagDatabase {
             System.loadLibrary("sqlcipher")
             val factory = SupportOpenHelperFactory(String(passphrase).toByteArray())
@@ -45,10 +40,6 @@ abstract class GueteTagDatabase : RoomDatabase() {
                 .openHelperFactory(factory)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
-        }
-
-        fun getDatabasePath(context: Context): String {
-            return context.getDatabasePath(DB_NAME).absolutePath
         }
     }
 }

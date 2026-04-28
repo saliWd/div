@@ -22,7 +22,7 @@ sealed class Ziel(val route: String) {
 @Composable
 fun GueteTagNavigation(
     viewModel: MainViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
 

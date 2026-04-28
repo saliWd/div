@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 fun EinstellungenScreen(
     viewModel: MainViewModel,
     onZurueck: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val activity = context as? MainActivity
@@ -49,19 +49,19 @@ fun EinstellungenScreen(
 
     // Export state
     var exportPasswort by remember { mutableStateOf(SecurityManager.getExportPassword(context) ?: "") }
-    var exportPasswortSichtbar by remember { mutableStateOf(false) }
-    var exportLaeuft by remember { mutableStateOf(false) }
+    var exportPasswortSichtbar by remember { mutableStateOf(value = false) }
+    var exportLaeuft by remember { mutableStateOf(value = false) }
 
     // Import state
     var importPasswort by remember { mutableStateOf("") }
-    var importPasswortSichtbar by remember { mutableStateOf(false) }
-    var importUri by remember { mutableStateOf<Uri?>(null) }
-    var importLaeuft by remember { mutableStateOf(false) }
+    var importPasswortSichtbar by remember { mutableStateOf(value = false) }
+    var importUri by remember { mutableStateOf<Uri?>(value = null) }
+    var importLaeuft by remember { mutableStateOf(value = false) }
     var importDateiName by remember { mutableStateOf("") }
 
     // File picker for import (GetContent is usually safer with FragmentActivity than CreateDocument)
     val dateiPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.GetContent(),
     ) { uri ->
         uri?.let {
             importUri = it
@@ -179,8 +179,9 @@ fun EinstellungenScreen(
                             onWertChange = { exportPasswort = it },
                             label = stringResource(R.string.export_password),
                             sichtbar = exportPasswortSichtbar,
-                            onSichtbarToggle = { exportPasswortSichtbar = !exportPasswortSichtbar }
-                        )
+                        ) {
+                            exportPasswortSichtbar = !exportPasswortSichtbar
+                        }
                         Button(
                             onClick = {
                                 if (exportPasswort.isBlank()) return@Button
@@ -238,8 +239,7 @@ fun EinstellungenScreen(
                             Icon(Icons.Filled.FolderOpen, null, Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                text = if (importDateiName.isNotBlank()) importDateiName
-                                       else stringResource(R.string.import_file_select)
+                                text = importDateiName.ifBlank { stringResource(R.string.import_file_select) }
                             )
                         }
 
@@ -248,8 +248,9 @@ fun EinstellungenScreen(
                             onWertChange = { importPasswort = it },
                             label = stringResource(R.string.import_password),
                             sichtbar = importPasswortSichtbar,
-                            onSichtbarToggle = { importPasswortSichtbar = !importPasswortSichtbar }
-                        )
+                        ) {
+                            importPasswortSichtbar = !importPasswortSichtbar
+                        }
 
                         // Warning
                         Card(
@@ -292,10 +293,9 @@ fun EinstellungenScreen(
                                         importDateiName = ""
                                         importPasswort = ""
                                     },
-                                    onError = { _ ->
-                                        importLaeuft = false
-                                    }
-                                )
+                                ) { _ ->
+                                    importLaeuft = false
+                                }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -305,7 +305,7 @@ fun EinstellungenScreen(
                                 containerColor = MaterialTheme.colorScheme.secondary,
                                 contentColor = MaterialTheme.colorScheme.onSecondary
                             ),
-                            enabled = importUri != null && importPasswort.isNotBlank() && !importLaeuft
+                            enabled = (importUri != null) && importPasswort.isNotBlank() && (!importLaeuft)
                         ) {
                             if (importLaeuft) {
                                 CircularProgressIndicator(

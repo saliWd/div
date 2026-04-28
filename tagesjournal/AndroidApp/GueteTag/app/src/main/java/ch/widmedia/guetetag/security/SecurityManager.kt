@@ -1,7 +1,10 @@
+@file:Suppress("DEPRECATION")
+
 package ch.widmedia.guetetag.security
 
 import android.content.Context
 import android.util.Base64
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import javax.crypto.Cipher
@@ -27,7 +30,7 @@ object SecurityManager {
     // Fixed salt embedded in the app
     private val EXPORT_SALT = byteArrayOf(
         0x47, 0x54, 0x61, 0x67, 0x53, 0x61, 0x6C, 0x74,
-        0x32, 0x30, 0x32, 0x35, 0x57, 0x49, 0x44, 0x4D
+        0x32, 0x30, 0x32, 0x35, 0x57, 0x49, 0x44, 0x4D,
     )
 
     // ── DB passphrase ─────────────────────────────────────────────────────────
@@ -35,16 +38,15 @@ object SecurityManager {
     fun getOrCreateDbPassphrase(context: Context): CharArray {
         val prefs = getSecurePrefs(context)
         val existing = prefs.getString(PREF_DB_PASSPHRASE, null)
-        if (existing != null) return existing.toCharArray()
-        val passphrase = generatePassphrase()
-        prefs.edit().putString(PREF_DB_PASSPHRASE, String(passphrase)).apply()
-        return passphrase
+        return existing?.toCharArray() ?: generatePassphrase().also {
+            prefs.edit { putString(PREF_DB_PASSPHRASE, String(it)) }
+        }
     }
 
     // ── Export password ───────────────────────────────────────────────────────
 
     fun saveExportPassword(context: Context, password: String) {
-        getSecurePrefs(context).edit().putString(PREF_EXPORT_PASS, password).apply()
+        getSecurePrefs(context).edit { putString(PREF_EXPORT_PASS, password) }
     }
 
     fun getExportPassword(context: Context): String? =
@@ -82,7 +84,7 @@ object SecurityManager {
             password.toCharArray(),
             EXPORT_SALT,
             PBKDF2_ITERATIONS,
-            KEY_LEN_BITS
+            KEY_LEN_BITS,
         )
         val raw = SecretKeyFactory.getInstance(PBKDF2_ALGO)
             .generateSecret(spec).encoded
@@ -105,6 +107,6 @@ object SecurityManager {
             .setUserAuthenticationRequired(false)
             .build(),
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
 }

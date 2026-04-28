@@ -21,7 +21,7 @@ data class UiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val tageWithEintrag: Set<String> = emptySet()
+    val tageWithEintrag: Set<String> = emptySet(),
 )
 
 class MainViewModel(private val repository: EintragRepository) : ViewModel() {
@@ -47,8 +47,6 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
             _uiState.value = _uiState.value.copy(tageWithEintrag = tage.toSet())
         }
     }
-
-    fun refreshKalender() = ladeTageWithEintrag()
 
     suspend fun eintragFuerDatum(datum: String): TagEintrag? =
         repository.eintraegFuerDatum(datum)
@@ -103,7 +101,7 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
 
     class Factory(private val repository: EintragRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return MainViewModel(repository) as T
         }
     }

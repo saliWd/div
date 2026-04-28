@@ -36,13 +36,13 @@ fun EintragScreen(
     datum: String,
     viewModel: MainViewModel,
     onZurueck: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    var eintrag by remember { mutableStateOf<TagEintrag?>(null) }
-    var bewertung by remember { mutableIntStateOf(5) }
-    var notizen by remember { mutableStateOf("") }
-    var isLoaded by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    var eintrag by remember { mutableStateOf<TagEintrag?>(value = null) }
+    var bewertung by remember { mutableIntStateOf(value = 5) }
+    var notizen by remember { mutableStateOf(value = "") }
+    var isLoaded by remember { mutableStateOf(value = false) }
+    var showDeleteDialog by remember { mutableStateOf(value = false) }
 
     // Load existing entry for this date
     LaunchedEffect(datum) {
@@ -53,7 +53,6 @@ fun EintragScreen(
         isLoaded = true
     }
 
-    val ratingCol = ratingColor(bewertung)
     val isNew = eintrag == null
 
     // Delete confirmation dialog
@@ -64,7 +63,7 @@ fun EintragScreen(
                 Text(
                     text = stringResource(R.string.delete_confirm_title),
                     style = MaterialTheme.typography.titleLarge,
-                    color = DeepForest
+                    color = DeepForest,
                 )
             },
             text = {

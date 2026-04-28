@@ -54,7 +54,7 @@ fun HauptScreen(
                     containerColor = SageGreen,
                     contentColor = Color.White,
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 )
             }
         },
