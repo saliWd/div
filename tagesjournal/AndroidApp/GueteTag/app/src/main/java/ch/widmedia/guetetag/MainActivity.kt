@@ -125,6 +125,14 @@ class MainActivity : FragmentActivity() {
             if (isUnlocked) {
                 GueteTagNavigation(
                     viewModel = viewModel,
+                    onLock = {
+                        GueteTagDatabase.destroyInstance()
+                        // Restart activity to ensure all components are re-initialized with a fresh DB session
+                        finish()
+                        startActivity(intent)
+                        @Suppress("DEPRECATION")
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             } else {

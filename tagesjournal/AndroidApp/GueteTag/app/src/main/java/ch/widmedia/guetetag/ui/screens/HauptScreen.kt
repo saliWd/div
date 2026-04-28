@@ -1,5 +1,6 @@
 package ch.widmedia.guetetag.ui.screens
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,6 +8,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +27,7 @@ import ch.widmedia.guetetag.ui.MainViewModel
 import ch.widmedia.guetetag.ui.components.EintragKarte
 import ch.widmedia.guetetag.ui.components.KalenderStreifen
 import ch.widmedia.guetetag.ui.theme.*
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +35,7 @@ fun HauptScreen(
     viewModel: MainViewModel,
     onEintragKlick: (String) -> Unit,
     onEinstellungen: () -> Unit,
+    onLock: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val alleEintraege by viewModel.alleEintraege.collectAsState()
@@ -71,7 +76,7 @@ fun HauptScreen(
                     .fillMaxWidth()
             ) {
                 Column {
-                    AppHeader(onEinstellungen = onEinstellungen)
+                    AppHeader(onEinstellungen = onEinstellungen, onLock = onLock)
                     Spacer(Modifier.height(8.dp))
                     KalenderStreifen(
                         tageWithEintrag = uiState.tageWithEintrag,
@@ -149,7 +154,16 @@ fun HauptScreen(
 }
 
 @Composable
-fun AppHeader(onEinstellungen: () -> Unit) {
+fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
+    var isLocking by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isLocking) {
+        if (isLocking) {
+            delay(400) // Brief delay to show the lock animation
+            onLock()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -179,17 +193,36 @@ fun AppHeader(onEinstellungen: () -> Unit) {
                         color = Color.White.copy(alpha = 0.75f)
                     )
                 }
-                IconButton(
-                    onClick = onEinstellungen,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = stringResource(R.string.settings_title),
-                        tint = Color.White
-                    )
+                    IconButton(
+                        onClick = { if (!isLocking) isLocking = true },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.15f))
+                    ) {
+                        Crossfade(targetState = isLocking, label = "lockAnimation") { locking ->
+                            Icon(
+                                imageVector = if (locking) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                                contentDescription = stringResource(R.string.lock_title),
+                                tint = Color.White
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = onEinstellungen,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.15f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = stringResource(R.string.settings_title),
+                            tint = Color.White
+                        )
+                    }
                 }
             }
         }

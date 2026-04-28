@@ -16,6 +16,7 @@
     <string name="auth_welcome">Willkommen zurück! ✓</string>
     <string name="auth_retry">Nicht erkannt. Erneut versuchen.</string>
     <string name="auth_fingerprint">Fingerabdruck</string>
+    <string name="lock_title">Sperren</string>
 
     <!-- Main -->
     <string name="today">Heute</string>

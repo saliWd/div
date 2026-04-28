@@ -22,6 +22,7 @@ sealed class Ziel(val route: String) {
 @Composable
 fun GueteTagNavigation(
     viewModel: MainViewModel,
+    onLock: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
@@ -39,7 +40,8 @@ fun GueteTagNavigation(
                 },
                 onEinstellungen = {
                     navController.navigate(Ziel.Einstellungen.route)
-                }
+                },
+                onLock = onLock
             )
         }
 

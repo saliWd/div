@@ -23,8 +23,6 @@ Make it visually appealing, use a built-in serif-font for the titles and a non-s
 The texts of the app shall be in German.  
 
 ### Refinement
-- Authentification (and database decryption) is only required on startup, not everytime context is lost
-- add a lock symbol on HauptScreen to close the database. User shall be on the Unlock-view afterwards
 - 'notizen' field shall be of type text (unicode) and have a maximum size of about 4kByte
 - the 'notizen' input field shall be a normal text field. This means after typing a point '.' the keyboard switches automatically to uppercase letters for the next character and words are wrapped
 - the on-screen keyboard shall only be automatically visible when there is no external keyboard connected. Add a button to display it on request

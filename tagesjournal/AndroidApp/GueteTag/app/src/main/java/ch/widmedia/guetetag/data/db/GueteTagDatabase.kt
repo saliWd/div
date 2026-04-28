@@ -28,6 +28,11 @@ abstract class GueteTagDatabase : RoomDatabase() {
             }
         }
 
+        fun destroyInstance() {
+            INSTANCE?.close()
+            INSTANCE = null
+        }
+
         private fun buildDatabase(context: Context, passphrase: CharArray): GueteTagDatabase {
             System.loadLibrary("sqlcipher")
             val factory = SupportOpenHelperFactory(String(passphrase).toByteArray())
