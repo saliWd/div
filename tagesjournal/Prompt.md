@@ -22,24 +22,13 @@ Name of the app is "GueteTag", namespace is ch.widmedia.guetetag
 Make it visually appealing, use a built-in serif-font for the titles and a non-serif font for all other texts. Generous spacing, use dividers between different sections. Colors should have a noble touch, hinting toward a noble diary.  
 The texts of the app shall be in German.  
 
-### Result
-Does not compile out of the box, needs afterwork in Android Studio, Gemini AI is able to fix the errors.  
-Functionality however is good, all stuff is there (in previous versions)
-
-
-
-
-## Github Copilot
-Check results "div\tagesjournal\AndroidApp\GueteTag_o"
-
-All done. The project is fully ready for Android Studio:
-
-What was just added:
-
-gradlew.bat and gradlew — standard wrapper scripts
-gradle-wrapper.jar (~49 KB) — downloaded from GitHub (official Gradle 9.4.1)
-To open in Android Studio:
-
-File → Open → select GueteTag_o
-Android Studio will read gradle-wrapper.properties, download Gradle 9.4.1, and sync automatically
-Requires JDK 17+ configured in Android Studio (File → Project Structure → SDK Location → JDK location)
+### Refinement
+- Authentification (and database decryption) is only required on startup, not everytime context is lost
+- add a lock symbol on HauptScreen to close the database. User shall be on the Unlock-view afterwards
+- 'notizen' field shall be of type text (unicode) and have a maximum size of about 4kByte
+- the 'notizen' input field shall be a normal text field. This means after typing a point '.' the keyboard switches automatically to uppercase letters for the next character and words are wrapped
+- the on-screen keyboard shall only be automatically visible when there is no external keyboard connected. Add a button to display it on request
+- change app symbol
+- maybe use Raleway for some titles?
+- remove fingerprint drawing on unlock screen
+- remove month indicators below the calender (April Mai)
