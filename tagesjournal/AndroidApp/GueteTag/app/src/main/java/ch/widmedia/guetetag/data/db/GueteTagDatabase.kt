@@ -5,8 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import ch.widmedia.guetetag.data.model.TagEintrag
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(
     entities = [TagEintrag::class],
@@ -35,9 +34,8 @@ abstract class GueteTagDatabase : RoomDatabase() {
         }
 
         private fun buildDatabase(context: Context, passphrase: CharArray): GueteTagDatabase {
-            SQLiteDatabase.loadLibs(context)
-            val passphraseBytes = SQLiteDatabase.getBytes(passphrase)
-            val factory = SupportFactory(passphraseBytes)
+            System.loadLibrary("sqlcipher")
+            val factory = SupportOpenHelperFactory(String(passphrase).toByteArray())
 
             return Room.databaseBuilder(
                 context.applicationContext,
