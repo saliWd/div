@@ -32,7 +32,7 @@ fun KalenderStreifen(
     val heute = remember { LocalDate.now() }
     val limit = remember(heute) { heute.minusDays(6) }
 
-    Column(modifier = modifier.padding(bottom = 16.dp)) {
+    Column(modifier = modifier) {
         // Header
         Row(
             modifier = Modifier
@@ -125,10 +125,6 @@ fun KalenderStreifen(
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Month indicators
-        MonatsIndikator(tage = tage)
     }
 }
 
@@ -204,31 +200,6 @@ fun KalenderTag(
     }
 }
 
-@Composable
-fun MonatsIndikator(tage: List<LocalDate>) {
-    // Show month name at boundary positions
-    val monate = tage.mapIndexed { index, date ->
-        val prev = if (index > 0) tage[index - 1].monthValue else -1
-        if (date.monthValue != prev) Pair(index, "${DateUtil.monatName(date.monthValue)}") else null
-    }.filterNotNull()
-
-    if (monate.isNotEmpty()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-        ) {
-            monate.forEach { (_, name) ->
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SlateGray.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(end = 16.dp)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun LegendePunkt(farbe: Color, label: String) {

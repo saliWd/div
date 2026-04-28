@@ -31,4 +31,3 @@ The texts of the app shall be in German.
 - change app symbol
 - maybe use Raleway for some titles?
 - remove fingerprint drawing on unlock screen
-- remove month indicators below the calender (April Mai)
