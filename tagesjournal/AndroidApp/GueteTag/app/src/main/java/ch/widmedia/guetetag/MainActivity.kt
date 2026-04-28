@@ -1,20 +1,20 @@
 package ch.widmedia.guetetag
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import ch.widmedia.guetetag.data.db.GueteTagDatabase
 import ch.widmedia.guetetag.data.repository.EintragRepository
@@ -30,6 +30,13 @@ class MainActivity : FragmentActivity() {
 
     private lateinit var viewModel: MainViewModel
     private var onPickerResult: ((Uri?) -> Unit)? = null
+
+    private val filePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri ->
+        onPickerResult?.invoke(uri)
+        onPickerResult = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,31 +60,18 @@ class MainActivity : FragmentActivity() {
     }
 
     /**
-     * Helper to launch file picker with a fixed request code to avoid FragmentActivity 16-bit crash
+     * Helper to launch file picker using Activity Result API
      */
     fun launchFilePicker(defaultFileName: String, callback: (Uri?) -> Unit) {
         onPickerResult = callback
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "application/octet-stream"
-            putExtra(Intent.EXTRA_TITLE, defaultFileName)
-        }
-        startActivityForResult(intent, 0x1234)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 0x1234) {
-            onPickerResult?.invoke(if (resultCode == RESULT_OK) data?.data else null)
-            onPickerResult = null
-        }
+        filePickerLauncher.launch(defaultFileName)
     }
 
     @Composable
     private fun AppContent() {
-        var entsperrt by remember { mutableStateOf(false) }
-        var authStatus by remember { mutableStateOf(AuthStatus.WAITING) }
-        var fehlermeldung by remember { mutableStateOf<String?>(null) }
+        var entsperrt by rememberSaveable { mutableStateOf(false) }
+        var authStatus by rememberSaveable { mutableStateOf(AuthStatus.WAITING) }
+        var fehlermeldung by rememberSaveable { mutableStateOf<String?>(null) }
 
         val triggerAuth: () -> Unit = {
             authStatus = AuthStatus.SCANNING
@@ -102,20 +96,6 @@ class MainActivity : FragmentActivity() {
         // Auto-trigger on first launch if biometric is available
         val lifecycleOwner = LocalLifecycleOwner.current
         
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_STOP) {
-                    entsperrt = false
-                    authStatus = AuthStatus.WAITING
-                    fehlermeldung = null
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-
         LaunchedEffect(lifecycleOwner) {
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 if (!entsperrt && authStatus == AuthStatus.WAITING) {
