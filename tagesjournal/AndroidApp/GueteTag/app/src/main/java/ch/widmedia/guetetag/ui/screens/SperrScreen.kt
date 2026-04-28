@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -117,8 +117,8 @@ fun SperrScreen(
                         .background(Color.White.copy(alpha = 0.1f))
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Fingerprint,
-                        contentDescription = stringResource(R.string.auth_fingerprint),
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = stringResource(R.string.auth_title),
                         tint = iconColor,
                         modifier = Modifier.size(56.dp)
                     )

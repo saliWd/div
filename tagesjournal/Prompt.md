@@ -30,4 +30,3 @@ The texts of the app shall be in German.
 - the on-screen keyboard shall only be automatically visible when there is no external keyboard connected. Add a button to display it on request
 - change app symbol
 - maybe use Raleway for some titles?
-- remove fingerprint drawing on unlock screen
