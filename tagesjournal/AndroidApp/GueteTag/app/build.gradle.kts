@@ -45,6 +45,17 @@ android {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        val kspDir = layout.buildDirectory.dir("generated/ksp/${variant.name}/kotlin")
+        variant.sources.kotlin?.addStaticSourceDirectory(kspDir.get().asFile.absolutePath)
+    }
+}
+
+ksp {
+    arg("ksp.add-to-compilations", "false")
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
