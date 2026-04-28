@@ -65,10 +65,9 @@ fun HauptScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Upper Part: Header and Calendar (approx 40%+)
+            // Upper Part: Header and Calendar
             Box(
                 modifier = Modifier
-                    .weight(0.48f)
                     .fillMaxWidth()
             ) {
                 Column {
@@ -84,7 +83,7 @@ fun HauptScreen(
 
             // Separator
             HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp),
                 color = DividerColor,
                 thickness = 1.dp
             )
@@ -92,7 +91,7 @@ fun HauptScreen(
             // Lower Part: Entries List
             Box(
                 modifier = Modifier
-                    .weight(0.52f)
+                    .weight(1f)
                     .fillMaxWidth()
             ) {
                 if (alleEintraege.isEmpty()) {
