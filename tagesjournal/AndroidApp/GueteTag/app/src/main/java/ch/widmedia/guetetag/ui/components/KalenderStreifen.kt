@@ -53,8 +53,8 @@ fun KalenderStreifen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                LegendePunkt(farbe = PaleGreen, label = "Eintrag")
-                LegendePunkt(farbe = LightChamois, label = "Leer")
+                LegendePunkt(farbe = PaleGreen, label = stringResource(R.string.legend_entry))
+                LegendePunkt(farbe = LightChamois, label = stringResource(R.string.legend_empty))
             }
         }
 

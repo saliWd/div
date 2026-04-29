@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,11 +42,19 @@ fun HauptScreen(
     val alleEintraege by viewModel.alleEintraege.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     // Show snackbar for success/error messages
-    LaunchedEffect(uiState.successMessage) {
-        uiState.successMessage?.let {
-            snackbarHostState.showSnackbar(it)
+    LaunchedEffect(uiState.successResId) {
+        uiState.successResId?.let { resId ->
+            snackbarHostState.showSnackbar(context.getString(resId))
+            viewModel.clearMessages()
+        }
+    }
+
+    LaunchedEffect(uiState.errorResId) {
+        uiState.errorResId?.let { resId ->
+            snackbarHostState.showSnackbar(context.getString(resId))
             viewModel.clearMessages()
         }
     }
@@ -191,11 +200,6 @@ fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
                         style = MaterialTheme.typography.displayMedium,
                         color = Color.White,
                         fontWeight = FontWeight.Normal
-                    )
-                    Text(
-                        text = stringResource(R.string.app_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.75f)
                     )
                 }
                 Row(

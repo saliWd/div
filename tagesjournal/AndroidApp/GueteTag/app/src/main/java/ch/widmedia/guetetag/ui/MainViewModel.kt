@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import ch.widmedia.guetetag.R
 import ch.widmedia.guetetag.data.model.TagEintrag
 import ch.widmedia.guetetag.data.repository.EintragRepository
 import ch.widmedia.guetetag.utils.DateUtil
@@ -19,8 +20,8 @@ import java.time.LocalDate
 
 data class UiState(
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val successMessage: String? = null,
+    val errorResId: Int? = null,
+    val successResId: Int? = null,
     val tageWithEintrag: Set<String> = emptySet(),
 )
 
@@ -55,7 +56,7 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
         viewModelScope.launch {
             repository.speichern(eintrag)
             ladeTageWithEintrag()
-            _uiState.value = _uiState.value.copy(successMessage = "Eintrag gespeichert")
+            _uiState.value = _uiState.value.copy(successResId = R.string.entry_saved)
             onDone()
         }
     }
@@ -64,7 +65,7 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
         viewModelScope.launch {
             repository.loeschen(eintrag)
             ladeTageWithEintrag()
-            _uiState.value = _uiState.value.copy(successMessage = "Eintrag gelöscht")
+            _uiState.value = _uiState.value.copy(successResId = R.string.entry_deleted)
             onDone()
         }
     }
@@ -90,13 +91,13 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
                 ladeTageWithEintrag()
                 onSuccess()
             } catch (e: Exception) {
-                onError(e.message ?: "Unbekannter Fehler")
+                onError(e.message ?: context.getString(R.string.error_unknown))
             }
         }
     }
 
     fun clearMessages() {
-        _uiState.value = _uiState.value.copy(errorMessage = null, successMessage = null)
+        _uiState.value = _uiState.value.copy(errorResId = null, successResId = null)
     }
 
     class Factory(private val repository: EintragRepository) : ViewModelProvider.Factory {

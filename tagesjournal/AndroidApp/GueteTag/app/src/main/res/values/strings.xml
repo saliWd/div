@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GueteTag</string>
-    <string name="app_title">GueteTag</string>
-    <string name="app_subtitle">Wie war dein Tag?</string>
+    <string name="app_subtitle">Wie war der Tag?</string>
 
     <!-- Auth -->
     <string name="auth_title">Entsperren</string>
     <string name="auth_subtitle"> </string>
     <string name="auth_prompt">Authentifizierung erforderlich</string>
     <string name="auth_cancel">Abbrechen</string>
-    <string name="auth_failed">Authentifizierung fehlgeschlagen</string>
     <string name="auth_error">Fehler bei der Authentifizierung</string>
     <string name="auth_no_biometric">Kein Fingerabdruck eingerichtet. Bitte in den Einstellungen konfigurieren.</string>
     <string name="auth_waiting">Tippe zum Entsperren</string>
@@ -33,7 +31,7 @@
     <string name="entry_rating">Bewertung</string>
     <string name="entry_rating_label">Wie war dein Tag? (%d/10)</string>
     <string name="entry_text">Notizen</string>
-    <string name="entry_text_hint">Was hat diesen Tag besonders gemacht?</string>
+    <string name="entry_text_hint">Tagebuch…</string>
     <string name="back">Zurück</string>
     <string name="save">Speichern</string>
     <string name="cancel">Abbrechen</string>
@@ -42,6 +40,11 @@
     <string name="delete_confirm_message">Dieser Eintrag wird unwiderruflich gelöscht.</string>
     <string name="entry_saved">Eintrag gespeichert</string>
     <string name="entry_deleted">Eintrag gelöscht</string>
+    <string name="error_unknown">Unbekannter Fehler</string>
+
+    <!-- Legend -->
+    <string name="legend_entry">Eintrag</string>
+    <string name="legend_empty">Leer</string>
 
     <!-- Export / Import -->
     <string name="export_title">Datenbank exportieren</string>
@@ -82,22 +85,6 @@
     <string name="fri">Fr</string>
     <string name="sat">Sa</string>
     <string name="sun">So</string>
-
-    <!-- Months -->
-    <string-array name="months">
-        <item>Januar</item>
-        <item>Februar</item>
-        <item>März</item>
-        <item>April</item>
-        <item>Mai</item>
-        <item>Juni</item>
-        <item>Juli</item>
-        <item>August</item>
-        <item>September</item>
-        <item>Oktober</item>
-        <item>November</item>
-        <item>Dezember</item>
-    </string-array>
 
     <!-- FAB -->
     <string name="add_entry">Eintrag hinzufügen</string>
