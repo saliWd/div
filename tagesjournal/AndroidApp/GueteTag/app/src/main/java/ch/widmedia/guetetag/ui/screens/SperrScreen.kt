@@ -88,7 +88,7 @@ fun SperrScreen(
                     text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.displayLarge,
                     color = Color.White,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Normal
                 )
                 Text(
                     text = stringResource(R.string.app_subtitle),
@@ -166,7 +166,7 @@ fun SperrScreen(
                 Text(
                     text = stringResource(R.string.auth_title),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Normal,
                     fontSize = 16.sp
                 )
             }

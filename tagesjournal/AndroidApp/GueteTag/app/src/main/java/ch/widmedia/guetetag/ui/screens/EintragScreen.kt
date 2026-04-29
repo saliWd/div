@@ -133,7 +133,7 @@ fun EintragScreen(
                             text = if (isNew) stringResource(R.string.new_entry) else stringResource(R.string.edit_entry),
                             style = MaterialTheme.typography.titleLarge,
                             color = Color.White,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Normal
                         )
                         Text(
                             text = DateUtil.lokalDatum(datum),
@@ -266,7 +266,7 @@ fun EintragScreen(
                         text = stringResource(R.string.save),
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Normal
                     )
                 }
             }

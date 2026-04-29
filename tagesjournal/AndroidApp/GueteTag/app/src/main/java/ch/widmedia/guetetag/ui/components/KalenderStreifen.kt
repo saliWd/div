@@ -44,7 +44,7 @@ fun KalenderStreifen(
                 text = "Kalender",
                 style = MaterialTheme.typography.headlineSmall,
                 color = DeepForest,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Normal
             )
             // Legend
             Row(
@@ -177,13 +177,13 @@ fun KalenderTag(
             style = MaterialTheme.typography.labelSmall,
             color = textColor,
             fontSize = 11.sp, // Slightly larger
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Normal
         )
         Spacer(modifier = Modifier.height(6.dp)) // More spacing
         Text(
             text = datum.dayOfMonth.toString(),
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = if (istHeute) FontWeight.Bold else FontWeight.SemiBold,
+            fontWeight = FontWeight.Normal,
             color = textColor,
             fontSize = 18.sp // Slightly larger
         )

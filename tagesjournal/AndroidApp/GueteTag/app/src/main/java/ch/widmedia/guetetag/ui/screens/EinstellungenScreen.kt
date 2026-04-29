@@ -147,7 +147,7 @@ fun EinstellungenScreen(
                         text = stringResource(R.string.settings_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Normal
                     )
                 }
             }
@@ -348,7 +348,7 @@ fun SektionsKopf(text: String, icon: ImageVector) {
             text = text,
             style = MaterialTheme.typography.labelLarge,
             color = SageGreen,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Normal
         )
     }
 }

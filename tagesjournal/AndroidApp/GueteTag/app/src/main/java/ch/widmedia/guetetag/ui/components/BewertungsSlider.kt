@@ -58,7 +58,7 @@ fun BewertungsSlider(
                         text = bewertung.toString(),
                         style = MaterialTheme.typography.titleMedium,
                         color = ratingCol,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         fontSize = 18.sp
                     )
                 }
@@ -93,7 +93,7 @@ fun BewertungsSlider(
                     text = n.toString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (n == bewertung) ratingCol else SlateGray.copy(alpha = 0.5f),
-                    fontWeight = if (n == bewertung) FontWeight.Bold else FontWeight.Normal,
+                    fontWeight = FontWeight.Normal,
                     fontSize = 10.sp
                 )
             }

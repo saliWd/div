@@ -56,7 +56,7 @@ fun EintragKarte(
                     text = eintrag.bewertung.toString(),
                     style = MaterialTheme.typography.titleMedium,
                     color = ratingCol,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     fontSize = 16.sp
                 )
             }
@@ -76,7 +76,7 @@ fun EintragKarte(
                     text = DateUtil.lokalDatum(eintrag.datum),
                     style = MaterialTheme.typography.labelLarge,
                     color = DeepForest,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Normal
                 )
                 if (eintrag.notizen.isNotBlank()) {
                     Text(

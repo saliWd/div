@@ -185,7 +185,7 @@ fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
                         text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.displayMedium,
                         color = Color.White,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Normal
                     )
                     Text(
                         text = stringResource(R.string.app_subtitle),

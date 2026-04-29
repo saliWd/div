@@ -37,58 +37,70 @@ fun ratingColor(rating: Int): Color = when {
 // ── Fonts ────────────────────────────────────────────────────────────────────
 val RalewayFamily = FontFamily(
     Font(R.font.raleway_regular, FontWeight.Normal),
-    Font(R.font.raleway_semibold, FontWeight.SemiBold),
-    Font(R.font.raleway_bold, FontWeight.Bold),
+    Font(R.font.raleway_regular, FontWeight.SemiBold),
+    Font(R.font.raleway_regular, FontWeight.Bold),
 )
 
 val NunitoFamily = FontFamily(
     Font(R.font.nunito_regular, FontWeight.Normal),
-    Font(R.font.nunito_semibold, FontWeight.SemiBold),
-    Font(R.font.nunito_bold, FontWeight.Bold),
+    Font(R.font.nunito_regular, FontWeight.SemiBold),
+    Font(R.font.nunito_regular, FontWeight.Bold),
 )
 
 // ── Typography ───────────────────────────────────────────────────────────────
 val GueteTagTypography = androidx.compose.material3.Typography(
     displayLarge = TextStyle(
         fontFamily = RalewayFamily,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Normal,
         fontSize = 36.sp,
         color = DeepForest,
     ),
     displayMedium = TextStyle(
         fontFamily = RalewayFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         fontSize = 28.sp,
+        color = DeepForest,
+    ),
+    displaySmall = TextStyle(
+        fontFamily = RalewayFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 24.sp,
         color = DeepForest,
     ),
     headlineLarge = TextStyle(
         fontFamily = RalewayFamily,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Normal,
         fontSize = 24.sp,
         color = DeepForest,
     ),
     headlineMedium = TextStyle(
         fontFamily = RalewayFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         fontSize = 20.sp,
         color = DeepForest,
     ),
     headlineSmall = TextStyle(
         fontFamily = RalewayFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         fontSize = 18.sp,
         color = DeepForest,
     ),
     titleLarge = TextStyle(
         fontFamily = RalewayFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         fontSize = 18.sp,
         color = DeepForest,
     ),
     titleMedium = TextStyle(
-        fontFamily = NunitoFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontFamily = RalewayFamily,
+        fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
+        color = DeepForest,
+    ),
+    titleSmall = TextStyle(
+        fontFamily = RalewayFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
         color = DeepForest,
     ),
     bodyLarge = TextStyle(
@@ -110,14 +122,14 @@ val GueteTagTypography = androidx.compose.material3.Typography(
         color = SlateGray
     ),
     labelLarge = TextStyle(
-        fontFamily = NunitoFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontFamily = RalewayFamily,
+        fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         color = DeepForest,
     ),
     labelMedium = TextStyle(
         fontFamily = NunitoFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         color = SlateGray
     ),
