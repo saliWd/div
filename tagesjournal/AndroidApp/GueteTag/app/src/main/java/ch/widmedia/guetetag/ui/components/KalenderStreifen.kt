@@ -154,7 +154,7 @@ fun KalenderTag(
     val textColor = when {
         istHeute && hatEintrag -> Color.White
         istHeute              -> DeepForest
-        hatEintrag            -> SageGreen
+        hatEintrag            -> DeepForest
         !isClickable         -> SlateGray.copy(alpha = 0.3f)
         else                  -> SlateGray
     }

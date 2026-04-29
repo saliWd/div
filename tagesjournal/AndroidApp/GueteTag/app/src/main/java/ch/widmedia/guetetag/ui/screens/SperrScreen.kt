@@ -136,9 +136,9 @@ fun SperrScreen(
                 val (text, color) = when (status) {
                     AuthStatus.WAITING  -> stringResource(R.string.auth_waiting) to Color.White.copy(alpha = 0.75f)
                     AuthStatus.SCANNING -> stringResource(R.string.auth_subtitle) to GoldAmber
-                    AuthStatus.SUCCESS  -> stringResource(R.string.auth_welcome) to SageGreen
-                    AuthStatus.FAILED   -> stringResource(R.string.auth_retry) to ErrorRed
-                    AuthStatus.ERROR    -> (fehlermeldung ?: stringResource(R.string.auth_error)) to ErrorRed
+                    AuthStatus.SUCCESS  -> stringResource(R.string.auth_welcome) to MossLight
+                    AuthStatus.FAILED   -> stringResource(R.string.auth_retry) to Color(0xFFFFB2B2)
+                    AuthStatus.ERROR    -> (fehlermeldung ?: stringResource(R.string.auth_error)) to Color(0xFFFFB2B2)
                 }
                 Text(
                     text = text,
@@ -166,6 +166,7 @@ fun SperrScreen(
                 Text(
                     text = stringResource(R.string.auth_title),
                     style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
                     fontWeight = FontWeight.Normal,
                     fontSize = 16.sp
                 )

@@ -53,85 +53,71 @@ val GueteTagTypography = androidx.compose.material3.Typography(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 36.sp,
-        color = DeepForest,
     ),
     displayMedium = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 28.sp,
-        color = DeepForest,
     ),
     displaySmall = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 24.sp,
-        color = DeepForest,
     ),
     headlineLarge = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 24.sp,
-        color = DeepForest,
     ),
     headlineMedium = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 20.sp,
-        color = DeepForest,
     ),
     headlineSmall = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 18.sp,
-        color = DeepForest,
     ),
     titleLarge = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 18.sp,
-        color = DeepForest,
     ),
     titleMedium = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        color = DeepForest,
     ),
     titleSmall = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        color = DeepForest,
     ),
     bodyLarge = TextStyle(
         fontFamily = NunitoFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        color = SlateGray
     ),
     bodyMedium = TextStyle(
         fontFamily = NunitoFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        color = SlateGray
     ),
     bodySmall = TextStyle(
         fontFamily = NunitoFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        color = SlateGray
     ),
     labelLarge = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        color = DeepForest,
     ),
     labelMedium = TextStyle(
         fontFamily = NunitoFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        color = SlateGray
     ),
 )
 
@@ -154,6 +140,7 @@ val GueteTagColorScheme = lightColorScheme(
     onSurfaceVariant = SlateGray,
     outline          = DividerColor,
     error            = ErrorRed,
+    onError          = Color.White,
 )
 
 // ── Theme Composable ──────────────────────────────────────────────────────────

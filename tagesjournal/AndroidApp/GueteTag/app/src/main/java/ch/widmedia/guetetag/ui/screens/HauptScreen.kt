@@ -55,12 +55,17 @@ fun HauptScreen(
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
-                    snackbarData = data,
                     containerColor = SageGreen,
                     contentColor = Color.White,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.padding(16.dp),
-                )
+                ) {
+                    Text(
+                        text = data.visuals.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                }
             }
         },
         containerColor = Chamois

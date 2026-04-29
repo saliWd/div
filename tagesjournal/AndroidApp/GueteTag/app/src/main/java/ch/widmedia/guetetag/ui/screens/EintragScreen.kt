@@ -83,7 +83,10 @@ fun EintragScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text(stringResource(R.string.delete))
+                    Text(
+                        text = stringResource(R.string.delete),
+                        color = Color.White
+                    )
                 }
             },
             dismissButton = {
@@ -146,7 +149,7 @@ fun EintragScreen(
                             onClick = { showDeleteDialog = true },
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(ErrorRed.copy(alpha = 0.25f))
+                                .background(ErrorRed.copy(alpha = 0.4f))
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
