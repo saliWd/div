@@ -15,6 +15,15 @@ object DateUtil {
         }
     }
 
+    fun lokalDatumMitWochentag(isoDate: String): String {
+        return try {
+            val date = LocalDate.parse(isoDate, ISO_FORMAT)
+            "${wochentag(date)}, ${date.format(DISPLAY_FORMAT)}"
+        } catch (_: Exception) {
+            isoDate
+        }
+    }
+
     fun kalenderWochen(): List<LocalDate> {
         val today = LocalDate.now()
         val diff = today.dayOfWeek.value - 1

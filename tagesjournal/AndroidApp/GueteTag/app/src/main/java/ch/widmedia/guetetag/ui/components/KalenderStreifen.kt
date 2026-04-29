@@ -14,9 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ch.widmedia.guetetag.R
 import ch.widmedia.guetetag.ui.theme.*
 import ch.widmedia.guetetag.utils.DateUtil
 import java.time.LocalDate
@@ -41,8 +43,8 @@ fun KalenderStreifen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Kalender",
-                style = MaterialTheme.typography.headlineSmall,
+                text = stringResource(R.string.calendar_title),
+                style = MaterialTheme.typography.headlineMedium,
                 color = DeepForest,
                 fontWeight = FontWeight.Normal
             )

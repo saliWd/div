@@ -73,7 +73,7 @@ fun EintragKarte(
             // Content
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = DateUtil.lokalDatum(eintrag.datum),
+                    text = DateUtil.lokalDatumMitWochentag(eintrag.datum),
                     style = MaterialTheme.typography.labelLarge,
                     color = DeepForest,
                     fontWeight = FontWeight.Normal
