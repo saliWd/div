@@ -238,7 +238,7 @@ fun EintragScreen(
                                 capitalization = KeyboardCapitalization.Sentences,
                                 keyboardType = KeyboardType.Text
                             ),
-                            maxLines = 8
+                            maxLines = 12
                         )
                     }
                 }
