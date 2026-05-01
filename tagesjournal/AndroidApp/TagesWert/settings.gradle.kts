@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TagesWert"
+rootProject.name = "tageswert"
 include(":app")
