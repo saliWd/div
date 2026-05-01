@@ -24,6 +24,15 @@ object DateUtil {
         }
     }
 
+    fun lokalDatumMitWochentagLang(isoDate: String): String {
+        return try {
+            val date = LocalDate.parse(isoDate, ISO_FORMAT)
+            "${wochentagLang(date)}, ${date.format(DISPLAY_FORMAT)}"
+        } catch (_: Exception) {
+            isoDate
+        }
+    }
+
     fun kalenderWochen(): List<LocalDate> {
         val today = LocalDate.now()
         val diff = today.dayOfWeek.value - 1
@@ -43,6 +52,19 @@ object DateUtil {
             5 -> "Fr"
             6 -> "Sa"
             7 -> "So"
+            else -> ""
+        }
+    }
+
+    fun wochentagLang(date: LocalDate): String {
+        return when (date.dayOfWeek.value) {
+            1 -> "Montag"
+            2 -> "Dienstag"
+            3 -> "Mittwoch"
+            4 -> "Donnerstag"
+            5 -> "Freitag"
+            6 -> "Samstag"
+            7 -> "Sonntag"
             else -> ""
         }
     }

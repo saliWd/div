@@ -142,7 +142,7 @@ fun EintragScreen(
                             fontWeight = FontWeight.Normal
                         )
                         Text(
-                            text = DateUtil.lokalDatum(datum),
+                            text = DateUtil.lokalDatumMitWochentagLang(datum),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White.copy(alpha = 0.75f)
                         )
