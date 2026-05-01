@@ -1,48 +1,211 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    ic_launcher_foreground.xml — TagesWert · Sealed Journal
+    ─────────────────────────────────────────────────────────
+    Adaptive icon foreground layer.
+    • Canvas    : 108 × 108 dp  (Android adaptive icon standard)
+    • Safe zone : 72 × 72 dp centred at (54,54) — all art lives inside (18,18)→(90,90)
+    • Background: set #1A3A2E in ic_launcher_background.xml / mipmap color resource
+    • minSdk    : 36  (API 26+ VectorDrawable features used: fillAlpha, strokeLineCap)
+    ─────────────────────────────────────────────────────────
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Outer glow circle -->
-    <path
-        android:fillColor="#33FFFFFF"
-        android:pathData="M54,18 A36,36 0 1,1 54,90 A36,36 0 1,1 54,18 Z"/>
+    <!--
+    ══════════════════════════════════════════
+      BOOK BODY
+    ══════════════════════════════════════════
+    -->
 
-    <!-- Inner white circle -->
+    <!-- Drop shadow / back cover (darkest green) -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,24 A30,30 0 1,1 54,84 A30,30 0 1,1 54,24 Z"/>
+        android:fillColor="#0F2219"
+        android:pathData="
+            M26,18
+            h50
+            a6,6 0 0 1 6,6
+            v60
+            a6,6 0 0 1 -6,6
+            h-50
+            a6,6 0 0 1 -6,-6
+            v-60
+            a6,6 0 0 1 6,-6
+            z" />
 
-    <!-- Letter G in DeepForest green -->
+    <!-- Front cover (mid green) -->
     <path
-        android:fillColor="#1A3A2E"
-        android:pathData="M54,36 C44.06,36 36,44.06 36,54 C36,63.94 44.06,72 54,72
-                          C60.5,72 66.2,68.6 69.4,63.5 L57,63.5 L57,56.5 L76,56.5
-                          L76,54 C76,42.95 67.05,34 54,36 Z
-                          M54,42 C63.94,42 72,50.06 72,58 L63,58 L63,63.5
-                          C61.0,65.6 57.7,67 54,67 C47.37,67 42,61.63 42,55
-                          C42,48.37 47.37,43 54,43 Z"/>
+        android:fillColor="#1E4535"
+        android:pathData="
+            M29,18
+            h46
+            a5,5 0 0 1 5,5
+            v62
+            a5,5 0 0 1 -5,5
+            h-46
+            a5,5 0 0 1 -5,-5
+            v-62
+            a5,5 0 0 1 5,-5
+            z" />
 
-    <!-- Simplified bold G letterform -->
+    <!-- Spine (deep olive-green strip on left edge) -->
+    <path
+        android:fillColor="#143020"
+        android:pathData="
+            M24,18
+            h2
+            a4,4 0 0 1 4,4
+            v64
+            a4,4 0 0 1 -4,4
+            h-2
+            a4,4 0 0 1 -4,-4
+            v-64
+            a4,4 0 0 1 4,-4
+            z" />
+
+    <!-- Spine highlight line (inner edge, subtle) -->
+    <path
+        android:fillColor="#6ABFA0"
+        android:fillAlpha="0.20"
+        android:pathData="M30,20 h1 v68 h-1 z" />
+
+    <!--
+    ══════════════════════════════════════════
+      RULED LINES  (simulate diary pages)
+    ══════════════════════════════════════════
+    -->
+
+    <path
+        android:fillColor="#F5EDD8"
+        android:fillAlpha="0.28"
+        android:pathData="M34,27 h40 v2 h-40 z" />
+
+    <path
+        android:fillColor="#F5EDD8"
+        android:fillAlpha="0.18"
+        android:pathData="M34,33 h32 v2 h-32 z" />
+
+    <path
+        android:fillColor="#F5EDD8"
+        android:fillAlpha="0.18"
+        android:pathData="M34,39 h36 v2 h-36 z" />
+
+    <path
+        android:fillColor="#F5EDD8"
+        android:fillAlpha="0.10"
+        android:pathData="M34,45 h28 v2 h-28 z" />
+
+    <!--
+    ══════════════════════════════════════════
+      PADLOCK — shackle (gold arc)
+    ══════════════════════════════════════════
+    -->
+
+    <!--
+        Quadratic-bezier arc: anchored at the lock body top.
+        Q control point pulls the shackle into a smooth U-shape.
+    -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#C9A84C"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="
+            M42,59
+            Q42,47 54,47
+            Q66,47 66,59" />
+
+    <!-- Shackle inner highlight (thinner, lighter gold) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#E8C96A"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:fillAlpha="0.45"
+        android:pathData="
+            M44,59
+            Q44,50 54,50
+            Q64,50 64,59" />
+
+    <!--
+    ══════════════════════════════════════════
+      PADLOCK — body
+    ══════════════════════════════════════════
+    -->
+
+    <!-- Lock body shadow (1 dp offset, darker) -->
+    <path
+        android:fillColor="#8A6A20"
+        android:fillAlpha="0.45"
+        android:pathData="
+            M43,59
+            h23
+            a5,5 0 0 1 5,5
+            v15
+            a5,5 0 0 1 -5,5
+            h-23
+            a5,5 0 0 1 -5,-5
+            v-15
+            a5,5 0 0 1 5,-5
+            z" />
+
+    <!-- Lock body (gold) -->
+    <path
+        android:fillColor="#C9A84C"
+        android:pathData="
+            M43,57
+            h22
+            a5,5 0 0 1 5,5
+            v14
+            a5,5 0 0 1 -5,5
+            h-22
+            a5,5 0 0 1 -5,-5
+            v-14
+            a5,5 0 0 1 5,-5
+            z" />
+
+    <!-- Lock body top-edge highlight -->
+    <path
+        android:fillColor="#E8C96A"
+        android:fillAlpha="0.50"
+        android:pathData="
+            M43,57
+            h22
+            a5,5 0 0 1 5,5
+            v1
+            a5,5 0 0 0 -5,-5
+            h-22
+            a5,5 0 0 0 -5,5
+            v-1
+            a5,5 0 0 1 5,-5
+            z" />
+
+    <!--
+    ══════════════════════════════════════════
+      PADLOCK — keyhole
+    ══════════════════════════════════════════
+    -->
+
+    <!-- Keyhole circle -->
     <path
         android:fillColor="#1A3A2E"
         android:pathData="
-          M54,33
-          C42.4,33 33,42.4 33,54
-          C33,65.6 42.4,75 54,75
-          C61.2,75 67.5,71.4 71.2,65.8
-          L58,65.8 L58,58 L74,58
-          L74,54
-          C74,43.5 65.2,34.2 54,33 Z
-        "/>
+            M50,66
+            a4,4 0 1 0 8,0
+            a4,4 0 1 0 -8,0" />
 
-    <!-- Clean G shape -->
+    <!-- Keyhole stem (rounded rectangle below circle) -->
     <path
-        android:fillColor="#4A7C59"
-        android:pathData="M54,30 C40.75,30 30,40.75 30,54 C30,67.25 40.75,78 54,78
-                          C62.5,78 70,73.6 74.2,66.8 L59,66.8 L59,57.5 L77.5,57.5
-                          L77.5,54 C77.5,41.6 68.4,31.2 54,30 Z"/>
+        android:fillColor="#1A3A2E"
+        android:pathData="
+            M52,68
+            h4
+            v6
+            a2,2 0 0 1 -4,0
+            v-6
+            z" />
 
 </vector>
