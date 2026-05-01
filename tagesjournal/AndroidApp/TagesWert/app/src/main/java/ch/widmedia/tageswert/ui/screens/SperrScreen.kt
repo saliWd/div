@@ -79,24 +79,15 @@ fun SperrScreen(
         ) {
             Spacer(Modifier.height(40.dp))
 
-            // App Icon / Title
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.displayLarge,
-                    color = Color.White,
-                    fontWeight = FontWeight.Normal
-                )
-                Text(
-                    text = stringResource(R.string.app_subtitle),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
-            }
+            // App Logo
+            AppLogo()
+
+            Text(
+                text = stringResource(R.string.app_subtitle),
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
 
             Spacer(Modifier.height(32.dp))
 
@@ -175,5 +166,66 @@ fun SperrScreen(
 
         // Bottom spacing (10%)
         Spacer(modifier = Modifier.align(Alignment.BottomCenter).height(80.dp))
+    }
+}
+
+@Composable
+private fun AppLogo(modifier: Modifier = Modifier) {
+    Box(modifier = modifier) {
+        // "Tages"
+        Row(
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            Text(
+                text = "T",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontSize = 80.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    lineHeight = 80.sp
+                ),
+                color = Color.White
+            )
+            Text(
+                text = "ages",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Light,
+                    letterSpacing = 1.sp
+                ),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier
+                    .padding(bottom = 28.dp)
+                    .offset(x = (-8).dp)
+            )
+        }
+
+        // "Wert"
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .padding(start = 44.dp, top = 52.dp)
+        ) {
+            Text(
+                text = "W",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontSize = 80.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    lineHeight = 80.sp
+                ),
+                color = Color.White
+            )
+            Text(
+                text = "ert",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Light,
+                    letterSpacing = 1.sp
+                ),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier
+                    .padding(bottom = 28.dp)
+                    .offset(x = (-8).dp)
+            )
+        }
     }
 }
