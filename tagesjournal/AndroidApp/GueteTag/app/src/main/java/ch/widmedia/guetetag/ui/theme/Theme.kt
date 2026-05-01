@@ -48,7 +48,7 @@ val NunitoFamily = FontFamily(
 )
 
 // ── Typography ───────────────────────────────────────────────────────────────
-val GueteTagTypography = androidx.compose.material3.Typography(
+val TagesWertTypography = androidx.compose.material3.Typography(
     displayLarge = TextStyle(
         fontFamily = RalewayFamily,
         fontWeight = FontWeight.Normal,
@@ -122,7 +122,7 @@ val GueteTagTypography = androidx.compose.material3.Typography(
 )
 
 // ── Color Scheme ─────────────────────────────────────────────────────────────
-val GueteTagColorScheme = lightColorScheme(
+val TagesWertColorScheme = lightColorScheme(
     primary          = SageGreen,
     onPrimary        = Color.White,
     primaryContainer = MossLight,
@@ -145,10 +145,10 @@ val GueteTagColorScheme = lightColorScheme(
 
 // ── Theme Composable ──────────────────────────────────────────────────────────
 @Composable
-fun GueteTagTheme(content: @Composable () -> Unit) {
+fun TagesWertTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = GueteTagColorScheme,
-        typography  = GueteTagTypography,
+        colorScheme = TagesWertColorScheme,
+        typography  = TagesWertTypography,
         content     = content
     )
 }

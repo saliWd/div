@@ -16,7 +16,7 @@ import javax.crypto.spec.SecretKeySpec
 
 object SecurityManager {
 
-    private const val PREFS_NAME         = "guetetag_secure_prefs"
+    private const val PREFS_NAME         = "tageswert_secure_prefs"
     private const val PREF_DB_PASSPHRASE = "db_passphrase"
     private const val PREF_EXPORT_PASS   = "export_password"
 

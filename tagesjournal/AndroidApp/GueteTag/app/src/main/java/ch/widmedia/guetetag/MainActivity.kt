@@ -16,15 +16,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import ch.widmedia.guetetag.data.db.GueteTagDatabase
+import ch.widmedia.guetetag.data.db.TagesWertDatabase
 import ch.widmedia.guetetag.data.repository.EintragRepository
 import ch.widmedia.guetetag.security.BiometricHelper
 import ch.widmedia.guetetag.security.SecurityManager
-import ch.widmedia.guetetag.ui.GueteTagNavigation
+import ch.widmedia.guetetag.ui.TagesWertNavigation
 import ch.widmedia.guetetag.ui.MainViewModel
 import ch.widmedia.guetetag.ui.screens.AuthStatus
 import ch.widmedia.guetetag.ui.screens.SperrScreen
-import ch.widmedia.guetetag.ui.theme.GueteTagTheme
+import ch.widmedia.guetetag.ui.theme.TagesWertTheme
 
 class MainActivity : FragmentActivity() {
 
@@ -44,7 +44,7 @@ class MainActivity : FragmentActivity() {
 
         // Initialize encrypted database with biometric-protected passphrase
         val passphrase = SecurityManager.getOrCreateDbPassphrase(this)
-        val db = GueteTagDatabase.getInstance(this, passphrase)
+        val db = TagesWertDatabase.getInstance(this, passphrase)
         val repository = EintragRepository(db.tagEintragDao())
 
         viewModel = ViewModelProvider(
@@ -53,7 +53,7 @@ class MainActivity : FragmentActivity() {
         )[MainViewModel::class.java]
 
         setContent {
-            GueteTagTheme {
+            TagesWertTheme {
                 AppContent()
             }
         }
@@ -123,10 +123,10 @@ class MainActivity : FragmentActivity() {
             modifier = Modifier.fillMaxSize()
         ) { isUnlocked ->
             if (isUnlocked) {
-                GueteTagNavigation(
+                TagesWertNavigation(
                     viewModel = viewModel,
                     onLock = {
-                        GueteTagDatabase.destroyInstance()
+                        TagesWertDatabase.destroyInstance()
                         // Restart activity to ensure all components are re-initialized with a fresh DB session
                         finish()
                         startActivity(intent)

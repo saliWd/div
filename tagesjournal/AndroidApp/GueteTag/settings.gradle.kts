@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "GueteTag"
+rootProject.name = "TagesWert"
 include(":app")

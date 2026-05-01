@@ -20,7 +20,7 @@ sealed class Ziel(val route: String) {
 }
 
 @Composable
-fun GueteTagNavigation(
+fun TagesWertNavigation(
     viewModel: MainViewModel,
     onLock: () -> Unit,
     modifier: Modifier = Modifier,

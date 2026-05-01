@@ -10,7 +10,7 @@ import com.google.gson.reflect.TypeToken
 object ExportImportUtil {
 
     private val gson = Gson()
-    private const val EXPORT_MAGIC = "GUETETAG_EXPORT_V1"
+    private const val EXPORT_MAGIC = "TAGESWERT_EXPORT_V1"
 
     data class ExportData(
         val magic: String = EXPORT_MAGIC,

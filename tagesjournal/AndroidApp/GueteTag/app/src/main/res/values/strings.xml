@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GueteTag</string>
+    <string name="app_name">TagesWert</string>
     <string name="app_subtitle">Wie war der Tag?</string>
 
     <!-- Auth -->

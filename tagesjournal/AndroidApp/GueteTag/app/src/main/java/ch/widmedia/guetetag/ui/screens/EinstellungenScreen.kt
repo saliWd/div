@@ -190,7 +190,7 @@ fun EinstellungenScreen(
                         Button(
                             onClick = {
                                 if (exportPasswort.isBlank()) return@Button
-                                val fileName = "guetetag_export_${System.currentTimeMillis()}.gtb"
+                                val fileName = "tageswert_export_${System.currentTimeMillis()}.gtb"
                                 activity?.launchFilePicker(fileName, onExportResult)
                             },
                             modifier = Modifier
