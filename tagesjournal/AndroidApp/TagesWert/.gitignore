@@ -1,5 +1,42 @@
-.gradle
-.idea
-.kotlin
-app/build/
-build/reports/
+# Gradle files
+.gradle/
+build/
+
+# Kotlin files
+.kotlin/
+
+# IDE files
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/deploymentTargetSelector.xml
+.idea/deviceManager.xml
+*.iml
+
+# Android Studio
+captures/
+.externalNativeBuild
+.cxx/
+local.properties
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Secrets
+google-services.json
+*.keystore
+*.jks
+!debug.keystore
