@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.ui.screens
+package ch.widmedia.tageswert.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -26,12 +26,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import ch.widmedia.guetetag.R
-import ch.widmedia.guetetag.data.model.TagEintrag
-import ch.widmedia.guetetag.ui.MainViewModel
-import ch.widmedia.guetetag.ui.components.BewertungsSlider
-import ch.widmedia.guetetag.ui.theme.*
-import ch.widmedia.guetetag.utils.DateUtil
+import ch.widmedia.tageswert.R
+import ch.widmedia.tageswert.data.model.TagEintrag
+import ch.widmedia.tageswert.ui.MainViewModel
+import ch.widmedia.tageswert.ui.components.BewertungsSlider
+import ch.widmedia.tageswert.ui.theme.*
+import ch.widmedia.tageswert.utils.DateUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

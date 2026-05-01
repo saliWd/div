@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package ch.widmedia.guetetag.security
+package ch.widmedia.tageswert.security
 
 import android.content.Context
 import android.util.Base64

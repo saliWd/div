@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.ui.theme
+package ch.widmedia.tageswert.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
@@ -9,7 +9,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import ch.widmedia.guetetag.R
+import ch.widmedia.tageswert.R
 
 // ── Farben ──────────────────────────────────────────────────────────────────
 val Chamois       = Color(0xFFF5EDD6)     // warm parchment background

@@ -1,15 +1,15 @@
-package ch.widmedia.guetetag.ui
+package ch.widmedia.tageswert.ui
 
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import ch.widmedia.guetetag.R
-import ch.widmedia.guetetag.data.model.TagEintrag
-import ch.widmedia.guetetag.data.repository.EintragRepository
-import ch.widmedia.guetetag.utils.DateUtil
-import ch.widmedia.guetetag.utils.ExportImportUtil
+import ch.widmedia.tageswert.R
+import ch.widmedia.tageswert.data.model.TagEintrag
+import ch.widmedia.tageswert.data.repository.EintragRepository
+import ch.widmedia.tageswert.utils.DateUtil
+import ch.widmedia.tageswert.utils.ExportImportUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

@@ -1,7 +1,7 @@
-package ch.widmedia.guetetag.data.db
+package ch.widmedia.tageswert.data.db
 
 import androidx.room.*
-import ch.widmedia.guetetag.data.model.TagEintrag
+import ch.widmedia.tageswert.data.model.TagEintrag
 import kotlinx.coroutines.flow.Flow
 
 @Dao

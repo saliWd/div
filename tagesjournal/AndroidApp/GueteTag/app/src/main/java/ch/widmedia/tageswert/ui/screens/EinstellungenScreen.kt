@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.ui.screens
+package ch.widmedia.tageswert.ui.screens
 
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -28,11 +28,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import ch.widmedia.guetetag.MainActivity
-import ch.widmedia.guetetag.R
-import ch.widmedia.guetetag.security.SecurityManager
-import ch.widmedia.guetetag.ui.MainViewModel
-import ch.widmedia.guetetag.ui.theme.*
+import ch.widmedia.tageswert.MainActivity
+import ch.widmedia.tageswert.R
+import ch.widmedia.tageswert.security.SecurityManager
+import ch.widmedia.tageswert.ui.MainViewModel
+import ch.widmedia.tageswert.ui.theme.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

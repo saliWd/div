@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.security
+package ch.widmedia.tageswert.security
 
 import android.content.Context
 import androidx.biometric.BiometricManager

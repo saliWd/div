@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.ui.components
+package ch.widmedia.tageswert.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -18,9 +18,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ch.widmedia.guetetag.R
-import ch.widmedia.guetetag.ui.theme.*
-import ch.widmedia.guetetag.utils.DateUtil
+import ch.widmedia.tageswert.R
+import ch.widmedia.tageswert.ui.theme.*
+import ch.widmedia.tageswert.utils.DateUtil
 import java.time.LocalDate
 
 @Composable

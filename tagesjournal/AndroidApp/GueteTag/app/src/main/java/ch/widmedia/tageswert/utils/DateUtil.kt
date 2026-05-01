@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.utils
+package ch.widmedia.tageswert.utils
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

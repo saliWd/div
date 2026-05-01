@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.ui.components
+package ch.widmedia.tageswert.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,9 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ch.widmedia.guetetag.data.model.TagEintrag
-import ch.widmedia.guetetag.ui.theme.*
-import ch.widmedia.guetetag.utils.DateUtil
+import ch.widmedia.tageswert.data.model.TagEintrag
+import ch.widmedia.tageswert.ui.theme.*
+import ch.widmedia.tageswert.utils.DateUtil
 
 @Composable
 fun EintragKarte(

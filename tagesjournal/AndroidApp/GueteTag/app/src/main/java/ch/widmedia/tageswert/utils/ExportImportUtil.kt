@@ -1,9 +1,9 @@
-package ch.widmedia.guetetag.utils
+package ch.widmedia.tageswert.utils
 
 import android.content.Context
 import android.net.Uri
-import ch.widmedia.guetetag.data.model.TagEintrag
-import ch.widmedia.guetetag.security.SecurityManager
+import ch.widmedia.tageswert.data.model.TagEintrag
+import ch.widmedia.tageswert.security.SecurityManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 

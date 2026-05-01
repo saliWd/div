@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "ch.widmedia.guetetag"
+    namespace = "ch.widmedia.tageswert"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "ch.widmedia.guetetag"
+        applicationId = "ch.widmedia.tageswert"
         minSdk = 36
         targetSdk = 37
         versionCode = 1

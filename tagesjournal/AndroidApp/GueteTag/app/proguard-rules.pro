@@ -20,8 +20,8 @@
 }
 
 # Data models
--keep class ch.widmedia.guetetag.data.model.** { *; }
--keep class ch.widmedia.guetetag.utils.ExportImportUtil$ExportData { *; }
+-keep class ch.widmedia.tageswert.data.model.** { *; }
+-keep class ch.widmedia.tageswert.utils.ExportImportUtil$ExportData { *; }
 
 # Kotlin
 -keep class kotlin.** { *; }

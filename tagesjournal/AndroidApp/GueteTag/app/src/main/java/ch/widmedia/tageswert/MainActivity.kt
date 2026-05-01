@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag
+package ch.widmedia.tageswert
 
 import android.net.Uri
 import android.os.Bundle
@@ -16,15 +16,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import ch.widmedia.guetetag.data.db.TagesWertDatabase
-import ch.widmedia.guetetag.data.repository.EintragRepository
-import ch.widmedia.guetetag.security.BiometricHelper
-import ch.widmedia.guetetag.security.SecurityManager
-import ch.widmedia.guetetag.ui.TagesWertNavigation
-import ch.widmedia.guetetag.ui.MainViewModel
-import ch.widmedia.guetetag.ui.screens.AuthStatus
-import ch.widmedia.guetetag.ui.screens.SperrScreen
-import ch.widmedia.guetetag.ui.theme.TagesWertTheme
+import ch.widmedia.tageswert.data.db.TagesWertDatabase
+import ch.widmedia.tageswert.data.repository.EintragRepository
+import ch.widmedia.tageswert.security.BiometricHelper
+import ch.widmedia.tageswert.security.SecurityManager
+import ch.widmedia.tageswert.ui.TagesWertNavigation
+import ch.widmedia.tageswert.ui.MainViewModel
+import ch.widmedia.tageswert.ui.screens.AuthStatus
+import ch.widmedia.tageswert.ui.screens.SperrScreen
+import ch.widmedia.tageswert.ui.theme.TagesWertTheme
 
 class MainActivity : FragmentActivity() {
 

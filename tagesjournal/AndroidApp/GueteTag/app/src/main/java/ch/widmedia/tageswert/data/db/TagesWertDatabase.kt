@@ -1,10 +1,10 @@
-package ch.widmedia.guetetag.data.db
+package ch.widmedia.tageswert.data.db
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import ch.widmedia.guetetag.data.model.TagEintrag
+import ch.widmedia.tageswert.data.model.TagEintrag
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(

@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.ui.screens
+package ch.widmedia.tageswert.ui.screens
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -23,11 +23,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ch.widmedia.guetetag.R
-import ch.widmedia.guetetag.ui.MainViewModel
-import ch.widmedia.guetetag.ui.components.EintragKarte
-import ch.widmedia.guetetag.ui.components.KalenderStreifen
-import ch.widmedia.guetetag.ui.theme.*
+import ch.widmedia.tageswert.R
+import ch.widmedia.tageswert.ui.MainViewModel
+import ch.widmedia.tageswert.ui.components.EintragKarte
+import ch.widmedia.tageswert.ui.components.KalenderStreifen
+import ch.widmedia.tageswert.ui.theme.*
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)

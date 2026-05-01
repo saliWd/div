@@ -1,7 +1,7 @@
-package ch.widmedia.guetetag.data.repository
+package ch.widmedia.tageswert.data.repository
 
-import ch.widmedia.guetetag.data.db.TagEintragDao
-import ch.widmedia.guetetag.data.model.TagEintrag
+import ch.widmedia.tageswert.data.db.TagEintragDao
+import ch.widmedia.tageswert.data.model.TagEintrag
 import kotlinx.coroutines.flow.Flow
 
 class EintragRepository(private val dao: TagEintragDao) {

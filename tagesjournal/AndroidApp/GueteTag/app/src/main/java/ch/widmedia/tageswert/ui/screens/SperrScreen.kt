@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.ui.screens
+package ch.widmedia.tageswert.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -21,8 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ch.widmedia.guetetag.R
-import ch.widmedia.guetetag.ui.theme.*
+import ch.widmedia.tageswert.R
+import ch.widmedia.tageswert.ui.theme.*
 
 enum class AuthStatus { WAITING, SCANNING, SUCCESS, FAILED, ERROR }
 

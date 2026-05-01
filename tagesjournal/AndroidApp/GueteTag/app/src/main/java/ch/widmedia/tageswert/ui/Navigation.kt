@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.ui
+package ch.widmedia.tageswert.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -7,9 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import ch.widmedia.guetetag.ui.screens.EinstellungenScreen
-import ch.widmedia.guetetag.ui.screens.EintragScreen
-import ch.widmedia.guetetag.ui.screens.HauptScreen
+import ch.widmedia.tageswert.ui.screens.EinstellungenScreen
+import ch.widmedia.tageswert.ui.screens.EintragScreen
+import ch.widmedia.tageswert.ui.screens.HauptScreen
 
 sealed class Ziel(val route: String) {
     data object Haupt : Ziel("haupt")

@@ -1,4 +1,4 @@
-package ch.widmedia.guetetag.data.model
+package ch.widmedia.tageswert.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
