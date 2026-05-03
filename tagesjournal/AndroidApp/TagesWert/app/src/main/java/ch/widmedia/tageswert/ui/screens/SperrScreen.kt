@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ch.widmedia.tageswert.R
 import ch.widmedia.tageswert.ui.theme.*
+import kotlinx.coroutines.delay
 
 enum class AuthStatus { WAITING, SCANNING, SUCCESS, FAILED, ERROR }
 
@@ -53,7 +54,7 @@ fun SperrScreen(
 
     LaunchedEffect(authStatus) {
         if (authStatus == AuthStatus.SUCCESS) {
-            kotlinx.coroutines.delay(400)
+            delay(400)
             onAuthentifiziert()
         }
     }

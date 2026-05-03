@@ -39,21 +39,7 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
-        jniLibs {
-            useLegacyPackaging = true
-        }
     }
-}
-
-androidComponents {
-    onVariants { variant ->
-        val kspDir = layout.buildDirectory.dir("generated/ksp/${variant.name}/kotlin")
-        variant.sources.kotlin?.addStaticSourceDirectory(kspDir.get().asFile.absolutePath)
-    }
-}
-
-ksp {
-    arg("ksp.add-to-compilations", "false")
 }
 
 kotlin {
