@@ -5,14 +5,14 @@ ksp = "2.3.7"
 coreKtx = "1.18.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
-composeBom = "2026.04.01"
+composeBom = "2026.05.00"
 room = "2.8.4"
-sqlcipher = "4.15.0"
+sqlcipher = "4.16.0"
 biometric = "1.4.0-alpha07"
 securityCrypto = "1.1.0"
 navigationCompose = "2.9.8"
 gson = "2.14.0"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

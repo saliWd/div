@@ -32,3 +32,7 @@
 
 # Security Crypto
 -keep class androidx.security.crypto.** { *; }
+
+# JSR-305
+-dontwarn javax.annotation.Nullable
+-dontwarn javax.annotation.concurrent.GuardedBy

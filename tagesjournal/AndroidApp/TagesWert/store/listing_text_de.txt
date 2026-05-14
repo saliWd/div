@@ -1,0 +1,17 @@
+Titel: TagesWert - Wie war dein Tag?
+
+Kurzbeschreibung:
+Halte deine täglichen Erlebnisse fest und schütze deine Privatsphäre mit biometrischer Sperre.
+
+Beschreibung:
+TagesWert ist dein persönliches Tagebuch, das Einfachheit mit Sicherheit verbindet.
+Reflektiere deinen Tag, bewerte ihn auf einer Skala von 1 bis 10 und notiere deine Gedanken.
+
+Hauptfunktionen:
+- Schnelle Bewertung: Gib jedem Tag einen Wert.
+- Notizen: Halte fest, was wichtig war.
+- Kalender-Ansicht: Sieh deine Entwicklung auf einen Blick.
+- Biometrischer Schutz: Deine Daten sind sicher hinter deinem Fingerabdruck oder Gesichtsscan verschlüsselt.
+- Datensouveränität: Exportiere und importiere deine Datenbank jederzeit. Keine Cloud, nur deine Daten auf deinem Gerät.
+
+Perfekt für alle, die eine minimalistische und sichere Methode suchen, um ihren Alltag zu dokumentieren.
