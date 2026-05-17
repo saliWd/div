@@ -17,6 +17,7 @@ sealed class Ziel(val route: String) {
         fun mitDatum(datum: String) = "eintrag/$datum"
     }
     data object Einstellungen : Ziel("einstellungen")
+    data object Kalender : Ziel("kalender")
 }
 
 @Composable
@@ -41,6 +42,9 @@ fun TagesWertNavigation(
                 onEinstellungen = {
                     navController.navigate(Ziel.Einstellungen.route)
                 },
+                onKalenderKlick = {
+                    navController.navigate(Ziel.Kalender.route)
+                },
                 onLock = onLock
             )
         }
@@ -60,6 +64,16 @@ fun TagesWertNavigation(
         composable(Ziel.Einstellungen.route) {
             EinstellungenScreen(
                 viewModel = viewModel,
+                onZurueck = { navController.popBackStack() }
+            )
+        }
+
+        composable(Ziel.Kalender.route) {
+            ch.widmedia.tageswert.ui.screens.KalenderScreen(
+                viewModel = viewModel,
+                onEintragKlick = { datum ->
+                    navController.navigate(Ziel.Eintrag.mitDatum(datum))
+                },
                 onZurueck = { navController.popBackStack() }
             )
         }

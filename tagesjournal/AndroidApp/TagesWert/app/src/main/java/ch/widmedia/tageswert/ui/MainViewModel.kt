@@ -22,7 +22,8 @@ data class UiState(
     val isLoading: Boolean = false,
     val errorResId: Int? = null,
     val successResId: Int? = null,
-    val tageWithEintrag: Set<String> = emptySet(),
+    val tageWithEintrag: Map<String, Int> = emptyMap(),
+    val monatBewertungen: Map<String, Int> = emptyMap(),
 )
 
 data class ImportSummary(
@@ -49,11 +50,28 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
         viewModelScope.launch {
             val heute = LocalDate.now()
             val von = heute.minusDays(20)
-            val tage = repository.datumMitEintrag(
+            val bewertungen = repository.bewertungenFuerZeitraum(
                 DateUtil.toIso(von),
                 DateUtil.toIso(heute)
             )
-            _uiState.value = _uiState.value.copy(tageWithEintrag = tage.toSet())
+            val map = bewertungen.associate { it.datum to it.bewertung }
+            _uiState.value = _uiState.value.copy(tageWithEintrag = map)
+            
+            // Also load current month by default
+            ladeMonatBewertungen(heute)
+        }
+    }
+
+    fun ladeMonatBewertungen(datum: LocalDate) {
+        viewModelScope.launch {
+            val von = datum.withDayOfMonth(1)
+            val bis = datum.withDayOfMonth(datum.lengthOfMonth())
+            val bewertungen = repository.bewertungenFuerZeitraum(
+                DateUtil.toIso(von),
+                DateUtil.toIso(bis)
+            )
+            val map = bewertungen.associate { it.datum to it.bewertung }
+            _uiState.value = _uiState.value.copy(monatBewertungen = map)
         }
     }
 

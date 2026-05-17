@@ -1,6 +1,7 @@
 package ch.widmedia.tageswert.data.repository
 
 import ch.widmedia.tageswert.data.db.TagEintragDao
+import ch.widmedia.tageswert.data.db.DatumBewertung
 import ch.widmedia.tageswert.data.model.TagEintrag
 import kotlinx.coroutines.flow.Flow
 
@@ -13,6 +14,9 @@ class EintragRepository(private val dao: TagEintragDao) {
 
     suspend fun datumMitEintrag(vonDatum: String, bisDatum: String): List<String> =
         dao.datumMitEintrag(vonDatum, bisDatum)
+
+    suspend fun bewertungenFuerZeitraum(vonDatum: String, bisDatum: String) =
+        dao.bewertungenFuerZeitraum(vonDatum, bisDatum)
 
     suspend fun speichern(eintrag: TagEintrag): Long {
         return if (eintrag.id == 0L) {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Settings
@@ -36,6 +37,7 @@ fun HauptScreen(
     viewModel: MainViewModel,
     onEintragKlick: (String) -> Unit,
     onEinstellungen: () -> Unit,
+    onKalenderKlick: () -> Unit,
     onLock: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -90,7 +92,11 @@ fun HauptScreen(
                     .fillMaxWidth()
             ) {
                 Column {
-                    AppHeader(onEinstellungen = onEinstellungen, onLock = onLock)
+                    AppHeader(
+                        onEinstellungen = onEinstellungen,
+                        onKalenderKlick = onKalenderKlick,
+                        onLock = onLock
+                    )
                     Spacer(Modifier.height(8.dp))
                     KalenderStreifen(
                         tageWithEintrag = uiState.tageWithEintrag,
@@ -168,7 +174,7 @@ fun HauptScreen(
 }
 
 @Composable
-fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
+fun AppHeader(onEinstellungen: () -> Unit, onKalenderKlick: () -> Unit, onLock: () -> Unit) {
     var isLocking by remember { mutableStateOf(false) }
 
     LaunchedEffect(isLocking) {
@@ -206,6 +212,18 @@ fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    IconButton(
+                        onClick = onKalenderKlick,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.15f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.DateRange,
+                            contentDescription = "Kalender",
+                            tint = Color.White
+                        )
+                    }
                     IconButton(
                         onClick = { if (!isLocking) isLocking = true },
                         modifier = Modifier

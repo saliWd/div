@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 @Composable
 fun KalenderStreifen(
-    tageWithEintrag: Set<String>,
+    tageWithEintrag: Map<String, Int>,
     onDatumKlick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -53,7 +53,7 @@ fun KalenderStreifen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                LegendePunkt(farbe = PaleGreen, label = stringResource(R.string.legend_entry))
+                LegendePunkt(farbe = ratingColor(8), label = stringResource(R.string.legend_entry))
                 LegendePunkt(farbe = LightChamois, label = stringResource(R.string.legend_empty))
             }
         }
@@ -80,13 +80,13 @@ fun KalenderStreifen(
                 ) {
                     tage.subList(0, 7).forEach { tag ->
                         val isoDate = DateUtil.toIso(tag)
-                        val hatEintrag = isoDate in tageWithEintrag
+                        val bewertung = tageWithEintrag[isoDate]
                         val istHeute = tag == heute
                         val isClickable = !tag.isBefore(limit) && !tag.isAfter(heute)
                         
                         KalenderTag(
                             datum = tag,
-                            hatEintrag = hatEintrag,
+                            bewertung = bewertung,
                             istHeute = istHeute,
                             isClickable = isClickable,
                             onClick = { if (isClickable) onDatumKlick(isoDate) },
@@ -109,13 +109,13 @@ fun KalenderStreifen(
                 ) {
                     tage.subList(7, 14).forEach { tag ->
                         val isoDate = DateUtil.toIso(tag)
-                        val hatEintrag = isoDate in tageWithEintrag
+                        val bewertung = tageWithEintrag[isoDate]
                         val istHeute = tag == heute
                         val isClickable = !tag.isBefore(limit) && !tag.isAfter(heute)
 
                         KalenderTag(
                             datum = tag,
-                            hatEintrag = hatEintrag,
+                            bewertung = bewertung,
                             istHeute = istHeute,
                             isClickable = isClickable,
                             onClick = { if (isClickable) onDatumKlick(isoDate) },
@@ -132,18 +132,20 @@ fun KalenderStreifen(
 @Composable
 fun KalenderTag(
     datum: LocalDate,
-    hatEintrag: Boolean,
+    bewertung: Int?,
     istHeute: Boolean,
     isClickable: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val hatEintrag = bewertung != null
     val targetBgColor = when {
-        istHeute && hatEintrag -> SageGreen
-        istHeute              -> SageGreen.copy(alpha = 0.25f)
-        hatEintrag            -> PaleGreen
-        !isClickable         -> DividerColor.copy(alpha = 0.2f)
-        else                  -> LightChamois.copy(alpha = 0.6f)
+        istHeute && bewertung != null -> ratingColor(bewertung)
+        istHeute                     -> SageGreen.copy(alpha = 0.25f)
+        bewertung != null && isClickable -> ratingColor(bewertung).copy(alpha = 0.8f)
+        bewertung != null && !isClickable -> ratingColor(bewertung).copy(alpha = 0.25f)
+        !isClickable                -> DividerColor.copy(alpha = 0.15f)
+        else                         -> LightChamois.copy(alpha = 0.6f)
     }
     val bgColor by animateColorAsState(
         targetValue = targetBgColor,
@@ -154,7 +156,8 @@ fun KalenderTag(
     val textColor = when {
         istHeute && hatEintrag -> Color.White
         istHeute              -> DeepForest
-        hatEintrag            -> DeepForest
+        hatEintrag && isClickable -> DeepForest
+        hatEintrag && !isClickable -> DeepForest.copy(alpha = 0.5f)
         !isClickable         -> SlateGray.copy(alpha = 0.3f)
         else                  -> SlateGray
     }
@@ -195,7 +198,11 @@ fun KalenderTag(
                 modifier = Modifier
                     .size(4.dp)
                     .clip(CircleShape)
-                    .background(if (istHeute) Color.White else SageGreen)
+                    .background(
+                        if (istHeute) Color.White 
+                        else if (isClickable) Color.White.copy(alpha = 0.8f) 
+                        else Color.White.copy(alpha = 0.4f)
+                    )
             )
         }
     }
