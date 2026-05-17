@@ -25,6 +25,14 @@ data class UiState(
     val tageWithEintrag: Set<String> = emptySet(),
 )
 
+data class ImportSummary(
+    val existingCount: Int,
+    val newCount: Int,
+    val startDate: String?,
+    val endDate: String?,
+    val neueEintraege: List<TagEintrag>
+)
+
 class MainViewModel(private val repository: EintragRepository) : ViewModel() {
 
     val alleEintraege: StateFlow<List<TagEintrag>> = repository.alleEintraege()
@@ -82,17 +90,43 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
         }
     }
 
-    fun importieren(context: Context, uri: Uri, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    fun prepareImport(
+        context: Context,
+        uri: Uri,
+        password: String,
+        onSuccess: (ImportSummary) -> Unit,
+        onError: (String) -> Unit
+    ) {
         viewModelScope.launch {
             try {
-                val eintraege = ExportImportUtil.importieren(context, uri, password)
-                repository.alleLoeschen()
-                eintraege.forEach { repository.speichern(it.copy(id = 0)) }
-                ladeTageWithEintrag()
-                onSuccess()
+                val neueEintraege = ExportImportUtil.importieren(context, uri, password)
+                val existingEintraege = repository.alleEintraegeListe()
+
+                val sorted = neueEintraege.sortedBy { it.datum }
+                val startDate = sorted.firstOrNull()?.datum
+                val endDate = sorted.lastOrNull()?.datum
+
+                onSuccess(
+                    ImportSummary(
+                        existingCount = existingEintraege.size,
+                        newCount = neueEintraege.size,
+                        startDate = startDate,
+                        endDate = endDate,
+                        neueEintraege = neueEintraege
+                    )
+                )
             } catch (e: Exception) {
                 onError(e.message ?: context.getString(R.string.error_unknown))
             }
+        }
+    }
+
+    fun executeImport(eintraege: List<TagEintrag>, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            repository.alleLoeschen()
+            eintraege.forEach { repository.speichern(it.copy(id = 0)) }
+            ladeTageWithEintrag()
+            onSuccess()
         }
     }
 

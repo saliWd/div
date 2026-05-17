@@ -66,6 +66,9 @@
     <string name="import_file_select">Datei auswählen</string>
     <string name="import_no_file">Keine Datei ausgewählt</string>
     <string name="import_overwrite_warning">Alle bestehenden Einträge werden überschrieben.</string>
+    <string name="import_summary_dialog_title">Import bestätigen</string>
+    <string name="import_summary_text">Bisher sind %1$d Einträge enthalten. Diese werden gelöscht und %2$d neue Einträge (im Zeitraum von %3$s bis %4$s) werden importiert.</string>
+    <string name="import_summary_confirm">Jetzt überschreiben</string>
 
     <!-- Settings -->
     <string name="settings_title">Einstellungen</string>

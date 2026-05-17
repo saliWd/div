@@ -31,8 +31,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import ch.widmedia.tageswert.MainActivity
 import ch.widmedia.tageswert.R
 import ch.widmedia.tageswert.security.SecurityManager
+import ch.widmedia.tageswert.ui.ImportSummary
 import ch.widmedia.tageswert.ui.MainViewModel
 import ch.widmedia.tageswert.ui.theme.*
+import ch.widmedia.tageswert.utils.DateUtil
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +60,8 @@ fun EinstellungenScreen(
     var importUri by remember { mutableStateOf<Uri?>(value = null) }
     var importLaeuft by remember { mutableStateOf(value = false) }
     var importDateiName by remember { mutableStateOf("") }
+    var importSummary by remember { mutableStateOf<ImportSummary?>(null) }
+    var zeigeImportBestaetigung by remember { mutableStateOf(false) }
 
     // File picker for import (GetContent is usually safer with FragmentActivity than CreateDocument)
     val dateiPickerLauncher = rememberLauncherForActivityResult(
@@ -288,19 +292,22 @@ fun EinstellungenScreen(
                                 val uri = importUri ?: return@Button
                                 if (importPasswort.isBlank()) return@Button
                                 importLaeuft = true
-                                viewModel.importieren(
+                                viewModel.prepareImport(
                                     context = context,
                                     uri = uri,
                                     password = importPasswort,
-                                    onSuccess = {
+                                    onSuccess = { summary ->
                                         importLaeuft = false
-                                        importUri = null
-                                        importDateiName = ""
-                                        importPasswort = ""
+                                        importSummary = summary
+                                        zeigeImportBestaetigung = true
                                     },
-                                ) { _ ->
-                                    importLaeuft = false
-                                }
+                                    onError = { error ->
+                                        importLaeuft = false
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(error)
+                                        }
+                                    }
+                                )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -337,6 +344,54 @@ fun EinstellungenScreen(
 
                 Spacer(Modifier.height(16.dp))
             }
+        }
+
+        // Import Confirmation Dialog
+        if (zeigeImportBestaetigung && importSummary != null) {
+            val summary = importSummary!!
+            AlertDialog(
+                onDismissRequest = { zeigeImportBestaetigung = false },
+                title = { Text(stringResource(R.string.import_summary_dialog_title)) },
+                text = {
+                    Text(
+                        stringResource(
+                            R.string.import_summary_text,
+                            summary.existingCount,
+                            summary.newCount,
+                            summary.startDate?.let { DateUtil.lokalDatum(it) } ?: "?",
+                            summary.endDate?.let { DateUtil.lokalDatum(it) } ?: "?"
+                        )
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            zeigeImportBestaetigung = false
+                            importLaeuft = true
+                            viewModel.executeImport(summary.neueEintraege) {
+                                importLaeuft = false
+                                importUri = null
+                                importDateiName = ""
+                                importPasswort = ""
+                                importSummary = null
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.import_success))
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Terracotta)
+                    ) {
+                        Text(stringResource(R.string.import_summary_confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { zeigeImportBestaetigung = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                containerColor = Chamois
+            )
         }
     }
 }
