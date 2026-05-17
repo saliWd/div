@@ -102,8 +102,9 @@ class MainActivity : FragmentActivity() {
                     if (BiometricHelper.isBiometricAvailable(this@MainActivity)) {
                         triggerAuth()
                     } else {
-                        // No biometrics: skip lock screen (or show error)
-                        entsperrt = true
+                        // No biometrics: stay on lock screen and show error
+                        fehlermeldung = getString(R.string.auth_no_biometric)
+                        authStatus = AuthStatus.ERROR
                     }
                 }
             }

@@ -9,7 +9,7 @@
     <string name="auth_prompt">Authentifizierung erforderlich</string>
     <string name="auth_cancel">Abbrechen</string>
     <string name="auth_error">Fehler bei der Authentifizierung</string>
-    <string name="auth_no_biometric">Kein Fingerabdruck eingerichtet. Bitte in den Einstellungen konfigurieren.</string>
+    <string name="auth_no_biometric">Kein Fingerabdruck eingerichtet. Diese App funktioniert nur mit Fingerabdruck. Bitte in den Einstellungen konfigurieren.</string>
     <string name="auth_waiting">Tippe zum Entsperren</string>
     <string name="auth_welcome">Willkommen zurück! ✓</string>
     <string name="auth_retry">Nicht erkannt. Erneut versuchen.</string>
