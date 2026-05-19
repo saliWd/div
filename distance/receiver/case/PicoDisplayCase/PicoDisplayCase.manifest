@@ -1,0 +1,12 @@
+{
+  "autodeskProduct": "Fusion360",
+  "type": "script",
+  "id": "PicoDisplayCase",
+  "author": "",
+  "description": "Generates a parametric two-part case (body + lid) for the Pimoroni Pico Display Pack 2.8\" and a 90x62x13 mm power bank.",
+  "version": "1.0.0",
+  "runOnStartup": false,
+  "supportedOS": "windows|mac",
+  "engine": "python",
+  "entrypoint": "PicoDisplayCase.py"
+}

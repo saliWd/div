@@ -1,2 +1,2 @@
-I need a case for the "Pimoroni 2.8 inch pico display". No need to access the buttons on this item. Provide a project file for "Autodesk Fusion".
+I need a case for the 'Pimoroni pico display pack 2.8"'. No need to access the buttons on this item. Provide a project file for "Autodesk Fusion".
 The case needs to fit the pico display and a small power bank below the pico display. The power bank measures 90 x 62 x 13 mm. Also provide space for connecting the power bank to the pico by USB cable, this shall all be within the case.
