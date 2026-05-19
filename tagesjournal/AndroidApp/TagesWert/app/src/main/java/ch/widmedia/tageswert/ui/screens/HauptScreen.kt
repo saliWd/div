@@ -27,9 +27,10 @@ import androidx.compose.ui.unit.sp
 import ch.widmedia.tageswert.R
 import ch.widmedia.tageswert.ui.MainViewModel
 import ch.widmedia.tageswert.ui.components.EintragKarte
-import ch.widmedia.tageswert.ui.components.KalenderStreifen
+import ch.widmedia.tageswert.ui.components.MonatsKalender
 import ch.widmedia.tageswert.ui.theme.*
 import kotlinx.coroutines.delay
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +38,6 @@ fun HauptScreen(
     viewModel: MainViewModel,
     onEintragKlick: (String) -> Unit,
     onEinstellungen: () -> Unit,
-    onKalenderKlick: () -> Unit,
     onLock: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -45,6 +45,12 @@ fun HauptScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    
+    var aktuellerMonat by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
+
+    LaunchedEffect(aktuellerMonat) {
+        viewModel.ladeMonatBewertungen(aktuellerMonat)
+    }
 
     // Show snackbar for success/error messages
     LaunchedEffect(uiState.successResId) {
@@ -94,12 +100,13 @@ fun HauptScreen(
                 Column {
                     AppHeader(
                         onEinstellungen = onEinstellungen,
-                        onKalenderKlick = onKalenderKlick,
                         onLock = onLock
                     )
                     Spacer(Modifier.height(8.dp))
-                    KalenderStreifen(
-                        tageWithEintrag = uiState.tageWithEintrag,
+                    MonatsKalender(
+                        aktuellerMonat = aktuellerMonat,
+                        monatBewertungen = uiState.monatBewertungen,
+                        onMonatWechsel = { aktuellerMonat = it },
                         onDatumKlick = onEintragKlick,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -174,7 +181,7 @@ fun HauptScreen(
 }
 
 @Composable
-fun AppHeader(onEinstellungen: () -> Unit, onKalenderKlick: () -> Unit, onLock: () -> Unit) {
+fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
     var isLocking by remember { mutableStateOf(false) }
 
     LaunchedEffect(isLocking) {
@@ -212,18 +219,6 @@ fun AppHeader(onEinstellungen: () -> Unit, onKalenderKlick: () -> Unit, onLock: 
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = onKalenderKlick,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.15f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.DateRange,
-                            contentDescription = "Kalender",
-                            tint = Color.White
-                        )
-                    }
                     IconButton(
                         onClick = { if (!isLocking) isLocking = true },
                         modifier = Modifier

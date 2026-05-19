@@ -22,7 +22,6 @@ data class UiState(
     val isLoading: Boolean = false,
     val errorResId: Int? = null,
     val successResId: Int? = null,
-    val tageWithEintrag: Map<String, Int> = emptyMap(),
     val monatBewertungen: Map<String, Int> = emptyMap(),
 )
 
@@ -43,23 +42,8 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     init {
-        ladeTageWithEintrag()
-    }
-
-    private fun ladeTageWithEintrag() {
-        viewModelScope.launch {
-            val heute = LocalDate.now()
-            val von = heute.minusDays(20)
-            val bewertungen = repository.bewertungenFuerZeitraum(
-                DateUtil.toIso(von),
-                DateUtil.toIso(heute)
-            )
-            val map = bewertungen.associate { it.datum to it.bewertung }
-            _uiState.value = _uiState.value.copy(tageWithEintrag = map)
-            
-            // Also load current month by default
-            ladeMonatBewertungen(heute)
-        }
+        // Load current month by default
+        ladeMonatBewertungen(LocalDate.now())
     }
 
     fun ladeMonatBewertungen(datum: LocalDate) {
@@ -81,7 +65,8 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
     fun speichern(eintrag: TagEintrag, onDone: () -> Unit) {
         viewModelScope.launch {
             repository.speichern(eintrag)
-            ladeTageWithEintrag()
+            // Refresh evaluations (using the date of the entry to ensure correct month is updated if visible)
+            ladeMonatBewertungen(LocalDate.parse(eintrag.datum, DateUtil.ISO_FORMAT))
             _uiState.value = _uiState.value.copy(successResId = R.string.entry_saved)
             onDone()
         }
@@ -90,7 +75,7 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
     fun loeschen(eintrag: TagEintrag, onDone: () -> Unit) {
         viewModelScope.launch {
             repository.loeschen(eintrag)
-            ladeTageWithEintrag()
+            ladeMonatBewertungen(LocalDate.parse(eintrag.datum, DateUtil.ISO_FORMAT))
             _uiState.value = _uiState.value.copy(successResId = R.string.entry_deleted)
             onDone()
         }
@@ -143,7 +128,7 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
         viewModelScope.launch {
             repository.alleLoeschen()
             eintraege.forEach { repository.speichern(it.copy(id = 0)) }
-            ladeTageWithEintrag()
+            ladeMonatBewertungen(LocalDate.now())
             onSuccess()
         }
     }
