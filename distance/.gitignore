@@ -1,0 +1,15 @@
+nonPublic/private_key.pepk
+nonPublic/google-services.json
+nonPublic/SwimMeterKeyStore.jks
+nonPublic/
+zz__old_swimmeterApp/
+receiver/pico2w/logData.csv
+receiver/pico2w/__pycache__
+receiver/pico2w/logDataLocal.csv
+receiver/loggingData/.~lock.Analysis.ods#
+receiver/case/thingiverse_6128955/files
+receiver/case/thingiverse_6128955/images
+receiver/case/thingiverse_6128955/LICENSE.txt
+receiver/case/thingiverse_6128955/README.txt
+swimmeterApp/build/reports/problems/problems-report.html
+tmp/

@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SwimMeter</string>
+    <string name="kein_beacon_gefunden">kein Beacon gefunden</string>
+    <string name="suche_eingeschaltet_warte">Suche eingeschaltet, warte…</string>
+    <string name="suche_ausgeschaltet">Suche ausgeschaltet…</string>
+    <string name="suche_eingeschaltet_beacon_s_gefunden">Suche aktiv: %1$d Beacon(s) gefunden</string>
+    <string name="speichern">speichern</string>
+    <string name="suche_ausschalten">Suche ausschalten</string>
+    <string name="suche_einschalten">Suche einschalten</string>
+    <string name="wurde_gespeichert">Datei wurde gespeichert: Downloads/data1.csv</string>
+    <string name="notification">Bluetooth-Suche aktiv</string>
+    <string name="_0_visible_beacons">0 visible beacons:</string>
+</resources>
