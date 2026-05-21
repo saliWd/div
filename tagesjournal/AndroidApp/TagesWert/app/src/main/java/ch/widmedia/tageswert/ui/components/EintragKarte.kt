@@ -71,12 +71,17 @@ fun EintragKarte(
             )
 
             // Content
-            Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
                     text = DateUtil.lokalDatumMitWochentag(eintrag.datum),
                     style = MaterialTheme.typography.labelLarge,
                     color = DeepForest,
-                    fontWeight = FontWeight.Normal
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1
                 )
                 if (eintrag.notizen.isNotBlank()) {
                     Text(
@@ -84,7 +89,8 @@ fun EintragKarte(
                         style = MaterialTheme.typography.bodySmall,
                         color = SlateGray,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }

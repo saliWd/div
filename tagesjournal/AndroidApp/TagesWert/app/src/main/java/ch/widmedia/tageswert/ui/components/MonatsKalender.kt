@@ -110,40 +110,35 @@ fun MonatsKalender(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Legende
+        // Durchschnittliche Bewertung
+        val durchschnitt = remember(monatBewertungen) {
+            if (monatBewertungen.isNotEmpty()) {
+                monatBewertungen.values.average()
+            } else {
+                null
+            }
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            LegendItem(color = ratingColor(2), label = "1-3")
-            LegendItem(color = ratingColor(5), label = "4-5")
-            LegendItem(color = ratingColor(7), label = "6-7")
-            LegendItem(color = ratingColor(9), label = "8-10")
+            Text(
+                text = "Monatsdurchschnitt: ",
+                style = MaterialTheme.typography.bodyMedium,
+                color = SlateGray
+            )
+            Text(
+                text = durchschnitt?.let { "%.2f".format(it) } ?: "--",
+                style = MaterialTheme.typography.titleMedium,
+                color = DeepForest,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
 
-@Composable
-fun LegendItem(color: Color, label: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = SlateGray,
-            fontSize = 10.sp
-        )
-    }
-}
 
 @Composable
 fun MonatsTagZelle(
@@ -154,23 +149,21 @@ fun MonatsTagZelle(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val hatBewertung = bewertung != null
-    
     val bgColor = when {
-        hatBewertung && !istZukunft -> ratingColor(bewertung!!)
+        bewertung != null && !istZukunft -> ratingColor(bewertung).copy(alpha = 0.15f)
         istHeute -> SageGreen.copy(alpha = 0.15f)
         istZukunft -> DividerColor.copy(alpha = 0.1f)
         else -> Color.White.copy(alpha = 0.6f)
     }
     
     val textColor = when {
-        hatBewertung && !istZukunft -> Color.White
+        bewertung != null && !istZukunft -> ratingColor(bewertung)
         istZukunft -> SlateGray.copy(alpha = 0.3f)
         else -> DeepForest
     }
 
     val borderModifier = if (istHeute) {
-        Modifier.border(1.dp, SageGreen, RoundedCornerShape(10.dp))
+        Modifier.border(1.2.dp, SageGreen, RoundedCornerShape(10.dp))
     } else {
         Modifier
     }
@@ -192,16 +185,16 @@ fun MonatsTagZelle(
                 text = datum.dayOfMonth.toString(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = textColor,
-                fontWeight = if (istHeute) FontWeight.Bold else FontWeight.Normal,
+                fontWeight = if (istHeute || (bewertung != null && !istZukunft)) FontWeight.Bold else FontWeight.Normal,
                 fontSize = 14.sp
             )
-            if (hatBewertung && !istZukunft) {
+            if (bewertung != null && !istZukunft) {
                 Box(
                     modifier = Modifier
                         .padding(top = 1.dp)
                         .size(3.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.8f))
+                        .background(textColor.copy(alpha = 0.7f))
                 )
             }
         }
