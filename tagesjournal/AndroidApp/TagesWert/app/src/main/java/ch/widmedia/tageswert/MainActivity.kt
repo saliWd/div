@@ -67,11 +67,28 @@ class MainActivity : FragmentActivity() {
         filePickerLauncher.launch(defaultFileName)
     }
 
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        if (::viewModel.isInitialized) {
+            viewModel.resetInactivityTimer()
+        }
+    }
+
     @Composable
     private fun AppContent() {
         var entsperrt by rememberSaveable { mutableStateOf(value = false) }
         var authStatus by rememberSaveable { mutableStateOf(value = AuthStatus.WAITING) }
         var fehlermeldung by rememberSaveable { mutableStateOf<String?>(value = null) }
+
+        // Observe lock state from ViewModel
+        val shouldLock by viewModel.shouldLock.collectAsState()
+        
+        LaunchedEffect(shouldLock) {
+            if (shouldLock && entsperrt) {
+                entsperrt = false
+                authStatus = AuthStatus.WAITING
+            }
+        }
 
         val triggerAuth: () -> Unit = {
             authStatus = AuthStatus.SCANNING
@@ -138,7 +155,10 @@ class MainActivity : FragmentActivity() {
                 )
             } else {
                 SperrScreen(
-                    onAuthentifiziert = { entsperrt = true },
+                    onAuthentifiziert = { 
+                        entsperrt = true
+                        viewModel.resetInactivityTimer()
+                    },
                     onTriggerAuth = triggerAuth,
                     authStatus = authStatus,
                     fehlermeldung = fehlermeldung,

@@ -9,11 +9,11 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "ch.widmedia.tageswert"
+        applicationId = "ch.widmedia.tageswert_tst"
         minSdk = 36
         targetSdk = 37
-        versionCode = 5
-        versionName = "2026.05.19"
+        versionCode = 6
+        versionName = "2026.05.21"
     }
 
     buildTypes {

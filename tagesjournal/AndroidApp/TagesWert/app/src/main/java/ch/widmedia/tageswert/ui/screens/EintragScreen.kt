@@ -41,22 +41,30 @@ fun EintragScreen(
     onZurueck: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var eintrag by remember { mutableStateOf<TagEintrag?>(value = null) }
-    var bewertung by remember { mutableIntStateOf(value = 5) }
-    var notizen by remember { mutableStateOf(value = "") }
-    var isLoaded by remember { mutableStateOf(value = false) }
+    val eintrag = viewModel.editingEintrag
     var showDeleteDialog by remember { mutableStateOf(value = false) }
 
     // Load existing entry for this date
     LaunchedEffect(datum) {
-        val existing = viewModel.eintragFuerDatum(datum)
-        eintrag = existing
-        bewertung = existing?.bewertung ?: 5
-        notizen = existing?.notizen ?: ""
-        isLoaded = true
+        viewModel.startEditing(datum)
     }
 
-    val isNew = eintrag == null
+    // Clear editing state when leaving
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopEditing()
+        }
+    }
+
+    if (eintrag == null) {
+        // Loading state or error
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = SageGreen)
+        }
+        return
+    }
+
+    val isNew = eintrag.id == 0L
 
     // Delete confirmation dialog
     if (showDeleteDialog) {
@@ -79,7 +87,7 @@ fun EintragScreen(
                 Button(
                     onClick = {
                         showDeleteDialog = false
-                        eintrag?.let { viewModel.loeschen(it) { onZurueck() } }
+                        viewModel.loeschen(eintrag) { onZurueck() }
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error,
@@ -166,7 +174,7 @@ fun EintragScreen(
         }
     ) { paddingValues ->
         AnimatedVisibility(
-            visible = isLoaded,
+            visible = true,
             enter = fadeIn() + slideInVertically { it / 3 }
         ) {
             Column(
@@ -191,8 +199,8 @@ fun EintragScreen(
                         modifier = Modifier.padding(20.dp)
                     ) {
                         BewertungsSlider(
-                            bewertung = bewertung,
-                            onBewertungChange = { bewertung = it }
+                            bewertung = eintrag.bewertung,
+                            onBewertungChange = { viewModel.updateEditing(bewertung = it) }
                         )
                     }
                 }
@@ -214,8 +222,8 @@ fun EintragScreen(
                             color = DeepForest
                         )
                         OutlinedTextField(
-                            value = notizen,
-                            onValueChange = { notizen = it },
+                            value = eintrag.notizen,
+                            onValueChange = { viewModel.updateEditing(notizen = it) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .heightIn(min = 120.dp),
@@ -246,16 +254,7 @@ fun EintragScreen(
                 // Save Button
                 Button(
                     onClick = {
-                        val toSave = eintrag?.copy(
-                            bewertung = bewertung,
-                            notizen = notizen,
-                            datum = datum
-                        ) ?: TagEintrag(
-                            datum = datum,
-                            bewertung = bewertung,
-                            notizen = notizen
-                        )
-                        viewModel.speichern(toSave) { onZurueck() }
+                        viewModel.speichern(eintrag) { onZurueck() }
                     },
                     modifier = Modifier
                         .fillMaxWidth()

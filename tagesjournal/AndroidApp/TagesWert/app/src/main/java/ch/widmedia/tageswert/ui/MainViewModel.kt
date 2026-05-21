@@ -2,6 +2,9 @@ package ch.widmedia.tageswert.ui
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,6 +13,8 @@ import ch.widmedia.tageswert.data.model.TagEintrag
 import ch.widmedia.tageswert.data.repository.EintragRepository
 import ch.widmedia.tageswert.utils.DateUtil
 import ch.widmedia.tageswert.utils.ExportImportUtil
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,9 +46,52 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    // Inactivity and locking
+    private var inactivityJob: Job? = null
+    private val _shouldLock = MutableStateFlow(false)
+    val shouldLock: StateFlow<Boolean> = _shouldLock.asStateFlow()
+
+    // Current editing state for autosave
+    var editingEintrag by mutableStateOf<TagEintrag?>(null)
+        private set
+
     init {
         // Load current month by default
         ladeMonatBewertungen(LocalDate.now())
+        resetInactivityTimer()
+    }
+
+    fun resetInactivityTimer() {
+        _shouldLock.value = false
+        inactivityJob?.cancel()
+        inactivityJob = viewModelScope.launch {
+            delay(10 * 60 * 1000) // 10 minutes
+            autosave()
+            _shouldLock.value = true
+        }
+    }
+
+    private suspend fun autosave() {
+        editingEintrag?.let {
+            repository.speichern(it)
+        }
+    }
+
+    fun startEditing(datum: String) {
+        viewModelScope.launch {
+            editingEintrag = repository.eintraegFuerDatum(datum) ?: TagEintrag(datum = datum, bewertung = 5)
+        }
+    }
+
+    fun updateEditing(bewertung: Int? = null, notizen: String? = null) {
+        editingEintrag = editingEintrag?.copy(
+            bewertung = bewertung ?: editingEintrag?.bewertung ?: 5,
+            notizen = notizen ?: editingEintrag?.notizen ?: ""
+        )
+    }
+
+    fun stopEditing() {
+        editingEintrag = null
     }
 
     fun ladeMonatBewertungen(datum: LocalDate) {
