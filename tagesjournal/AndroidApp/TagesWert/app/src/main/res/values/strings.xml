@@ -55,6 +55,8 @@
     <string name="export_chooser_title">Export speichern</string>
     <string name="export_success">Export erfolgreich gespeichert</string>
     <string name="export_error">Fehler beim Exportieren</string>
+    <string name="export_reminder_title">Sicherung empfohlen</string>
+    <string name="export_reminder_text">Dein letzter Export ist über 30 Tage her. Deine Daten werden nur lokal gespeichert und sind biometrisch verschlüsselt. Sollten sich deine Fingerabdrücke ändern, werden die lokalen Daten unbrauchbar. Bitte exportiere regelmässig eine Sicherung.</string>
 
     <string name="import_title">Datenbank importieren</string>
     <string name="import_description">Einträge aus einer verschlüsselten Datei importieren</string>

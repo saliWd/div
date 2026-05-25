@@ -76,10 +76,10 @@ fun SperrScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier.padding(40.dp)
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(horizontal = 40.dp, vertical = 24.dp)
         ) {
-            Spacer(Modifier.height(40.dp))
-
             // App Logo
             AppLogo()
 

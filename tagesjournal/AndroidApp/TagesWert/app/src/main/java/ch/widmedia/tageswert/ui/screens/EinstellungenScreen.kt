@@ -85,6 +85,7 @@ fun EinstellungenScreen(
                         context.contentResolver.openOutputStream(targetUri)?.use { output ->
                             output.write(data)
                         }
+                        viewModel.updateLastExportTime(context)
                         scope.launch {
                             snackbarHostState.showSnackbar(context.getString(R.string.export_success))
                         }
@@ -122,7 +123,7 @@ fun EinstellungenScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
             // Header
             Box(
@@ -133,7 +134,8 @@ fun EinstellungenScreen(
                             colors = listOf(DeepForest, SageGreen.copy(alpha = 0.8f))
                         )
                     )
-                    .padding(top = 48.dp, bottom = 20.dp, start = 8.dp, end = 16.dp)
+                    .statusBarsPadding()
+                    .padding(bottom = 20.dp, start = 8.dp, end = 16.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

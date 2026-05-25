@@ -19,6 +19,8 @@ object SecurityManager {
     private const val PREFS_NAME         = "tageswert_secure_prefs"
     private const val PREF_DB_PASSPHRASE = "db_passphrase"
     private const val PREF_EXPORT_PASS   = "export_password"
+    private const val PREF_LAST_EXPORT   = "last_export_time"
+    private const val PREF_FIRST_START   = "first_start_time"
 
     private const val AES_GCM           = "AES/GCM/NoPadding"
     private const val GCM_IV_LEN        = 12
@@ -51,6 +53,25 @@ object SecurityManager {
 
     fun getExportPassword(context: Context): String? =
         getSecurePrefs(context).getString(PREF_EXPORT_PASS, null)
+
+    fun saveLastExportTime(context: Context, time: Long) {
+        getSecurePrefs(context).edit { putLong(PREF_LAST_EXPORT, time) }
+    }
+
+    fun getLastExportTime(context: Context): Long =
+        getSecurePrefs(context).getLong(PREF_LAST_EXPORT, 0L)
+
+    fun getOrCreateFirstStartTime(context: Context): Long {
+        val prefs = getSecurePrefs(context)
+        val existing = prefs.getLong(PREF_FIRST_START, 0L)
+        return if (existing == 0L) {
+            val now = System.currentTimeMillis()
+            prefs.edit { putLong(PREF_FIRST_START, now) }
+            now
+        } else {
+            existing
+        }
+    }
 
     // ── Export encryption (AES-256-GCM via PBKDF2) ───────────────────────────
 

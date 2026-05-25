@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,6 +48,10 @@ fun HauptScreen(
     val context = LocalContext.current
     
     var aktuellerMonat by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadLastExportTime(context)
+    }
 
     LaunchedEffect(aktuellerMonat) {
         viewModel.ladeMonatBewertungen(aktuellerMonat)
@@ -90,7 +95,7 @@ fun HauptScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
             // Upper Part: Header and Calendar
             Box(
@@ -135,6 +140,72 @@ fun HauptScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 32.dp)
                     ) {
+                        item {
+                            // Export Reminder
+                            val thirtyDaysMillis = 30L * 24 * 60 * 60 * 1000
+                            val isOlderThan30Days = (System.currentTimeMillis() - uiState.lastExportTime) > thirtyDaysMillis
+                            val firstStartOlderThan30Days = (System.currentTimeMillis() - uiState.firstStartTime) > thirtyDaysMillis
+                            
+                            if (isOlderThan30Days && firstStartOlderThan30Days && alleEintraege.isNotEmpty()) {
+                                Card(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                        .fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = GoldAmber.copy(alpha = 0.1f)
+                                    ),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, GoldAmber.copy(alpha = 0.2f))
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Warning,
+                                                contentDescription = null,
+                                                tint = GoldAmber,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.export_reminder_title),
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = DeepForest,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Text(
+                                            text = stringResource(R.string.export_reminder_text),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = SlateGray,
+                                            lineHeight = 18.sp
+                                        )
+                                        TextButton(
+                                            onClick = onEinstellungen,
+                                            contentPadding = PaddingValues(0.dp),
+                                            modifier = Modifier.align(Alignment.End)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.export_confirm),
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = SageGreen
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Default.Settings,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp).padding(start = 4.dp),
+                                                tint = SageGreen
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         item {
                             Row(
                                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
@@ -199,7 +270,8 @@ fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
                     colors = listOf(DeepForest, SageGreen.copy(alpha = 0.85f))
                 )
             )
-            .padding(top = 40.dp, start = 24.dp, end = 16.dp, bottom = 16.dp)
+            .statusBarsPadding()
+            .padding(start = 24.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)
     ) {
         Column {
             Row(

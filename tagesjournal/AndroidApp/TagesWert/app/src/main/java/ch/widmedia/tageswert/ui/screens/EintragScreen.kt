@@ -123,7 +123,8 @@ fun EintragScreen(
                             colors = listOf(DeepForest, SageGreen.copy(alpha = 0.8f))
                         )
                     )
-                    .padding(top = 48.dp, bottom = 20.dp, start = 8.dp, end = 16.dp)
+                    .statusBarsPadding()
+                    .padding(bottom = 20.dp, start = 8.dp, end = 16.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

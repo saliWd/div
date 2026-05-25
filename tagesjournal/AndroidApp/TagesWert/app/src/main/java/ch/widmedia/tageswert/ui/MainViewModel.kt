@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import ch.widmedia.tageswert.R
 import ch.widmedia.tageswert.data.model.TagEintrag
 import ch.widmedia.tageswert.data.repository.EintragRepository
+import ch.widmedia.tageswert.security.SecurityManager
 import ch.widmedia.tageswert.utils.DateUtil
 import ch.widmedia.tageswert.utils.ExportImportUtil
 import kotlinx.coroutines.Job
@@ -28,6 +29,8 @@ data class UiState(
     val errorResId: Int? = null,
     val successResId: Int? = null,
     val monatBewertungen: Map<String, Int> = emptyMap(),
+    val lastExportTime: Long = 0L,
+    val firstStartTime: Long = 0L,
 )
 
 data class ImportSummary(
@@ -59,6 +62,21 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
         // Load current month by default
         ladeMonatBewertungen(LocalDate.now())
         resetInactivityTimer()
+    }
+
+    fun loadLastExportTime(context: Context) {
+        val time = SecurityManager.getLastExportTime(context)
+        val firstStart = SecurityManager.getOrCreateFirstStartTime(context)
+        _uiState.value = _uiState.value.copy(
+            lastExportTime = time,
+            firstStartTime = firstStart
+        )
+    }
+
+    fun updateLastExportTime(context: Context) {
+        val now = System.currentTimeMillis()
+        SecurityManager.saveLastExportTime(context, now)
+        _uiState.value = _uiState.value.copy(lastExportTime = now)
     }
 
     fun resetInactivityTimer() {
