@@ -1,0 +1,11 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "script",
+    "id": "PimoroniDisplayCase",
+    "author": "Custom",
+    "description": "Extended case for Pimoroni Pico Display Pack 2.8\". Adds a lower compartment for a 90 × 62 × 13 mm power bank, removes button and LED holes from the lid, and centres the display window in the full case footprint.",
+    "version": "1.0.0",
+    "runOnStartup": false,
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}
