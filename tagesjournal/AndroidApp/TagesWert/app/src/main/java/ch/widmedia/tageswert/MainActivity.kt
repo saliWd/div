@@ -39,8 +39,8 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
 
         // Initialize encrypted database with biometric-protected passphrase
         val passphrase = SecurityManager.getOrCreateDbPassphrase(this)
@@ -148,8 +148,11 @@ class MainActivity : FragmentActivity() {
                         // Restart activity to ensure all components are re-initialized with a fresh DB session
                         finish()
                         startActivity(intent)
-                        @Suppress("DEPRECATION")
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        overrideActivityTransition(
+                            OVERRIDE_TRANSITION_OPEN,
+                            android.R.anim.fade_in,
+                            android.R.anim.fade_out
+                        )
                     },
                     modifier = Modifier.fillMaxSize()
                 )

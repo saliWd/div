@@ -77,7 +77,7 @@ fun SperrScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier
-                .statusBarsPadding()
+                .safeDrawingPadding()
                 .padding(horizontal = 40.dp, vertical = 24.dp)
         ) {
             // App Logo

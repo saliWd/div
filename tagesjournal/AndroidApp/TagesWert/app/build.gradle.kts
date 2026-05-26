@@ -9,16 +9,17 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "ch.widmedia.tageswert"
+        applicationId = "ch.widmedia.tageswert_tst"
         minSdk = 36
         targetSdk = 37
-        versionCode = 7
-        versionName = "2026.05.25"
+        versionCode = 9
+        versionName = "2026.05.26"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

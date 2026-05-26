@@ -2,7 +2,7 @@
 
 ## Refinement
 This list is updated as soon as the stuff works, only the next few points (TODOs) are listed
-- fix this warning from publishing the app:
+- should be fixed: -- fix this warning from publishing the app:
      1. "Edge-to-edge may not display for all users  
 From Android 15, apps targeting SDK 35 will display edge-to-edge by default. Apps targeting SDK 35 should handle insets to make sure that their app displays correctly on Android 15 and later. Investigate this issue and allow time to test edge-to-edge and make the required updates. Alternatively, call enableEdgeToEdge() for Kotlin or EdgeToEdge.enable() for Java for backward compatibility."
      1. "Your app uses deprecated APIs or parameters for edge-to-edge  
@@ -17,6 +17,8 @@ These start in the following places:
     r40.a
     o40.b
 To fix this, migrate away from these APIs or parameters."
+
+
      1. Implement picture-in-picture to improve your app quality and user experience
 - rework the settings page, change name and symbol to import/export and make it more clearly arranged.     
 - add an introduction to the app at first startup which explains the functionality. This also needs a 'skip intro' button.
