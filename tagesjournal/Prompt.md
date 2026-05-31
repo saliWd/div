@@ -6,7 +6,6 @@ This list is updated as soon as the stuff works, only the next few points (TODOs
    - Implement picture-in-picture to improve your app quality and user experience
 - check the warning about debug information when uploading the app bundle. TBD: copy exact text.  
 - rework the settings page, change name and symbol to import/export and make it more clearly arranged.  
-- add an introduction to the app at first startup which explains the functionality. This also needs a 'skip intro' button.  
 - clean up the code. Check for newer stable versions of dependencies and in general reduce the number of imports and dependencies.  
 - try out some different UIs / colors. TODO: maybe with another tool (figma)
 - have the lock symbol more prominent (TODO: decide how)

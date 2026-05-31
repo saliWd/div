@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,11 +29,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
 import ch.widmedia.tageswert.MainActivity
 import ch.widmedia.tageswert.R
 import ch.widmedia.tageswert.security.SecurityManager
 import ch.widmedia.tageswert.ui.ImportSummary
 import ch.widmedia.tageswert.ui.MainViewModel
+import ch.widmedia.tageswert.ui.TutorialStep
+import ch.widmedia.tageswert.ui.components.TutorialOverlay
 import ch.widmedia.tageswert.ui.theme.*
 import ch.widmedia.tageswert.utils.DateUtil
 import kotlinx.coroutines.launch
@@ -45,12 +50,21 @@ fun EinstellungenScreen(
     onRestartTutorial: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val activity = context as? MainActivity
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scrollState = rememberScrollState()
 
-    // Export state
+    // Scroll to tutorial items
+    LaunchedEffect(uiState.tutorialStep) {
+        if (uiState.tutorialStep == TutorialStep.SETTINGS_DATA) {
+            scrollState.animateScrollTo(200) // Scroll down a bit for data cards
+        } else if (uiState.tutorialStep == TutorialStep.SETTINGS_RESTART) {
+            scrollState.animateScrollTo(scrollState.maxValue) // Scroll to bottom for restart
+        }
+    }
     var exportPasswort by remember { mutableStateOf(SecurityManager.getExportPassword(context) ?: "") }
     var exportPasswortSichtbar by remember { mutableStateOf(value = false) }
     var exportLaeuft by remember { mutableStateOf(value = false) }
@@ -168,7 +182,7 @@ fun EinstellungenScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 100.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -183,7 +197,12 @@ fun EinstellungenScreen(
                     titel = stringResource(R.string.export_confirm),
                     beschreibung = stringResource(R.string.export_description),
                     icon = Icons.Filled.Upload,
-                    iconFarbe = SageGreen
+                    iconFarbe = SageGreen,
+                    modifier = Modifier.onGloballyPositioned { coords ->
+                        if (uiState.tutorialStep == TutorialStep.SETTINGS_DATA) {
+                            viewModel.setTargetRect(coords.boundsInWindow())
+                        }
+                    }
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         PasswortFeld(
@@ -348,13 +367,18 @@ fun EinstellungenScreen(
                 Spacer(Modifier.height(8.dp))
 
                 // Section: Hilfe & Tutorial
-                SektionsKopf(text = stringResource(R.string.help_tutorial), icon = Icons.Filled.Help)
+                SektionsKopf(text = stringResource(R.string.help_tutorial), icon = Icons.AutoMirrored.Filled.Help)
 
                 EinstellungsKarte(
                     titel = stringResource(R.string.restart_tutorial),
                     beschreibung = stringResource(R.string.restart_tutorial_desc),
                     icon = Icons.Filled.RestartAlt,
-                    iconFarbe = SageGreen
+                    iconFarbe = SageGreen,
+                    modifier = Modifier.onGloballyPositioned { coords ->
+                        if (uiState.tutorialStep == TutorialStep.SETTINGS_RESTART) {
+                            viewModel.setTargetRect(coords.boundsInWindow())
+                        }
+                    }
                 ) {
                     Button(
                         onClick = {
@@ -386,6 +410,28 @@ fun EinstellungenScreen(
 
                 Spacer(Modifier.height(16.dp))
             }
+        }
+
+        // Tutorial Overlay
+        when (uiState.tutorialStep) {
+            TutorialStep.SETTINGS_DATA -> {
+                TutorialOverlay(
+                    text = stringResource(R.string.tutorial_settings_data),
+                    onNext = { viewModel.advanceTutorial(context, {}, onZurueck) },
+                    onSkip = { viewModel.skipTutorial(context) },
+                    targetRect = uiState.targetRect
+                )
+            }
+            TutorialStep.SETTINGS_RESTART -> {
+                TutorialOverlay(
+                    text = stringResource(R.string.tutorial_settings_restart),
+                    onNext = { viewModel.advanceTutorial(context, {}, onZurueck) },
+                    onSkip = { viewModel.skipTutorial(context) },
+                    targetRect = uiState.targetRect,
+                    isLastStep = true
+                )
+            }
+            else -> {}
         }
 
         // Import Confirmation Dialog
@@ -461,10 +507,11 @@ fun EinstellungsKarte(
     beschreibung: String,
     icon: ImageVector,
     iconFarbe: Color,
+    modifier: Modifier = Modifier,
     inhalt: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = CardBg),
         elevation = CardDefaults.cardElevation(2.dp)

@@ -35,25 +35,32 @@ fun TutorialOverlay(
 ) {
     val density = LocalDensity.current
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f))
+            .background(Color.Black.copy(alpha = 0.55f))
             .clickable(enabled = false) {}
     ) {
+        val screenHeight = constraints.maxHeight.toFloat()
+        
         if (targetRect != null) {
-            val isTopHalf = targetRect.center.y < (with(density) { LocalBoxHeight() } / 2)
+            val isTopHalf = targetRect.center.y < (screenHeight / 2)
             
+            // Positioning logic:
+            // If target is in top half, show card below target.
+            // If target is in bottom half, show card above target.
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = if (isTopHalf) Arrangement.Top else Arrangement.Bottom
             ) {
                 if (isTopHalf) {
-                    // Space for target
-                    Spacer(modifier = Modifier.height(with(density) { targetRect.bottom.toDp() } + 8.dp))
+                    // Item is at the top. 
+                    // Card should be below.
+                    // Spacer from top of screen to bottom of element + small margin
+                    val topPadding = (targetRect.bottom / density.density).coerceAtLeast(0f).dp
+                    Spacer(modifier = Modifier.height(topPadding + 8.dp))
                     
-                    // Arrow pointing UP to target
                     Icon(
                         imageVector = Icons.Default.ArrowUpward,
                         contentDescription = null,
@@ -63,33 +70,29 @@ fun TutorialOverlay(
                     
                     TutorialCard(text, onNext, onSkip, isLastStep, modifier)
                 } else {
+                    // Item is at the bottom.
+                    // Card should be above.
                     TutorialCard(text, onNext, onSkip, isLastStep, modifier)
                     
-                    // Arrow pointing DOWN to target
                     Icon(
                         imageVector = Icons.Default.ArrowDownward,
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(40.dp)
                     )
-                    
-                    // Space for target
-                    Spacer(modifier = Modifier.height(with(density) { (LocalBoxHeight() - targetRect.top).toDp() } + 8.dp))
+
+                    // Spacer from top of element to bottom of screen
+                    val bottomPadding = ((screenHeight - targetRect.top) / density.density).coerceAtLeast(0f).dp
+                    Spacer(modifier = Modifier.height(bottomPadding + 8.dp))
                 }
             }
         } else {
-            // Default center positioning if no target
+            // No target: Center the card
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 TutorialCard(text, onNext, onSkip, isLastStep, modifier)
             }
         }
     }
-}
-
-@Composable
-private fun LocalBoxHeight(): Float {
-    // A simplified way to get height, though usually we'd use BoxWithConstraints
-    return with(LocalDensity.current) { androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp.toPx() }
 }
 
 @Composable
@@ -102,7 +105,7 @@ private fun TutorialCard(
 ) {
     Card(
         modifier = modifier
-            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .padding(horizontal = 24.dp, vertical = 4.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
         shape = RoundedCornerShape(24.dp),

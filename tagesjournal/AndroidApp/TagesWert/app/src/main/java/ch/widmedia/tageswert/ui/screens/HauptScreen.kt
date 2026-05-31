@@ -127,7 +127,8 @@ fun HauptScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .onGloballyPositioned { coords ->
-                                    if (uiState.tutorialStep == TutorialStep.WELCOME) {
+                                    if (uiState.tutorialStep == TutorialStep.WELCOME || 
+                                        uiState.tutorialStep == TutorialStep.COLOR_EXPLANATION) {
                                         viewModel.setTargetRect(coords.boundsInWindow())
                                     }
                                 }
@@ -258,13 +259,7 @@ fun HauptScreen(
                                 EintragKarte(
                                     eintrag = eintrag,
                                     onClick = { onEintragKlick(eintrag.datum) },
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp, vertical = 5.dp)
-                                        .onGloballyPositioned { coords ->
-                                            if (uiState.tutorialStep == TutorialStep.COLOR_EXPLANATION) {
-                                                viewModel.setTargetRect(coords.boundsInWindow())
-                                            }
-                                        }
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
                                 )
                             }
                         }
@@ -284,10 +279,9 @@ fun HauptScreen(
         } else if (uiState.tutorialStep == TutorialStep.COLOR_EXPLANATION) {
             TutorialOverlay(
                 text = stringResource(R.string.tutorial_color_change),
-                onNext = { viewModel.advanceTutorial(context, {}, {}) },
+                onNext = { viewModel.advanceTutorial(context, { _ -> onEinstellungen() }, {}) },
                 onSkip = { viewModel.skipTutorial(context) },
-                targetRect = uiState.targetRect,
-                isLastStep = true
+                targetRect = uiState.targetRect
             )
         }
     }

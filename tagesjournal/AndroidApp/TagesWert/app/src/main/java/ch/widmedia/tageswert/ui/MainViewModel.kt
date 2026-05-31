@@ -34,7 +34,9 @@ enum class TutorialStep {
     RATING,       // Point to rating scale
     NOTES,        // Point to entry text
     SAVE,         // Point to save button
-    COLOR_EXPLANATION // Back on main screen, explain color
+    COLOR_EXPLANATION, // Back on main screen, explain color
+    SETTINGS_DATA, // Settings page, explain export/import
+    SETTINGS_RESTART // Settings page, point to restart button
 }
 
 data class UiState(
@@ -121,7 +123,7 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
             }
             TutorialStep.NOTES -> {
                 // Write bogus text and set rating
-                updateEditing(bewertung = 10, notizen = "Ein toller Tag! Alles hat super geklappt.")
+                updateEditing(bewertung = 9, notizen = "Ein schicker Tag. Gut vorangekommen und schönes Wetter.")
                 _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.SAVE)
             }
             TutorialStep.SAVE -> {
@@ -134,8 +136,17 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
                 }
             }
             TutorialStep.COLOR_EXPLANATION -> {
+                // Navigate to settings
+                onNavigate(Ziel.Einstellungen.route)
+                _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.SETTINGS_DATA)
+            }
+            TutorialStep.SETTINGS_DATA -> {
+                _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.SETTINGS_RESTART)
+            }
+            TutorialStep.SETTINGS_RESTART -> {
                 setIntroShown(context)
                 _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.NONE)
+                onBack()
             }
             else -> {}
         }

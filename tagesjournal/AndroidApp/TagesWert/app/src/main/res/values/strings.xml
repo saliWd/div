@@ -97,5 +97,7 @@
     <string name="tutorial_notes">Hier kannst du deine Gedanken und Erlebnisse festhalten. Wir haben mal etwas für dich vorgeschrieben.</string>
     <string name="tutorial_save">Speichere deinen Eintrag nun ab.</string>
     <string name="tutorial_color_change">Siehst du? Das Datum im Kalender hat nun eine Farbe erhalten, die deiner Bewertung entspricht. So siehst du auf einen Blick, wie dein Monat war!</string>
+    <string name="tutorial_settings_data">In den Einstellungen kannst du deine Daten sichern. Da alles lokal und verschlüsselt ist, solltest du regelmässig einen Export erstellen, um bei einem Gerätewechsel oder Problemen deine Einträge wiederherstellen zu können.</string>
+    <string name="tutorial_settings_restart">Falls du später noch einmal Hilfe brauchst, kannst du das Tutorial hier jederzeit neu starten. Viel Freude mit TagesWert!</string>
     <string name="tutorial_finish">Tutorial abschliessen</string>
 </resources>
