@@ -4,7 +4,8 @@
 This list is updated as soon as the stuff works, only the next few points (TODOs) are listed
 - fix this warning from publishing the app:
    - Implement picture-in-picture to improve your app quality and user experience
-- check the warning about debug information when uploading the app bundle. TBD: copy exact text.  
+- check the warning about debug information when uploading the app bundle.
+  "This App Bundle contains native code, and you've not uploaded debug symbols. We recommend that you upload a symbol file to make your crashes and ANRs easier to analyse and debug."
 - rework the settings page, change name and symbol to import/export and make it more clearly arranged.  
 - clean up the code. Check for newer stable versions of dependencies and in general reduce the number of imports and dependencies.  
 - try out some different UIs / colors. TODO: maybe with another tool (figma)
