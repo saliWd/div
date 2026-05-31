@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 fun EinstellungenScreen(
     viewModel: MainViewModel,
     onZurueck: () -> Unit,
+    onRestartTutorial: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -341,6 +342,45 @@ fun EinstellungenScreen(
                                 )
                             }
                         }
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                // Section: Hilfe & Tutorial
+                SektionsKopf(text = stringResource(R.string.help_tutorial), icon = Icons.Filled.Help)
+
+                EinstellungsKarte(
+                    titel = stringResource(R.string.restart_tutorial),
+                    beschreibung = stringResource(R.string.restart_tutorial_desc),
+                    icon = Icons.Filled.RestartAlt,
+                    iconFarbe = SageGreen
+                ) {
+                    Button(
+                        onClick = {
+                            viewModel.restartTutorial(context)
+                            onRestartTutorial()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = SageGreen,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.White
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.restart_tutorial),
+                            color = Color.White
+                        )
                     }
                 }
 

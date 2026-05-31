@@ -1,7 +1,11 @@
 package ch.widmedia.tageswert.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,6 +30,12 @@ fun TagesWertNavigation(
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.loadLastExportTime(context)
+    }
 
     NavHost(
         navController = navController,
@@ -60,7 +70,14 @@ fun TagesWertNavigation(
         composable(Ziel.Einstellungen.route) {
             EinstellungenScreen(
                 viewModel = viewModel,
-                onZurueck = { navController.popBackStack() }
+                onZurueck = { navController.popBackStack() },
+                onRestartTutorial = {
+                    viewModel.restartTutorial(context)
+                    // No need to navigate to Intro anymore, just stay on Haupt but with tutorial triggered
+                    navController.navigate(Ziel.Haupt.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
     }

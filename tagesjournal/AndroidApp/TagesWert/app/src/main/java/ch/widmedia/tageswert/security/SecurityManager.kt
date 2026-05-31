@@ -21,6 +21,7 @@ object SecurityManager {
     private const val PREF_EXPORT_PASS   = "export_password"
     private const val PREF_LAST_EXPORT   = "last_export_time"
     private const val PREF_FIRST_START   = "first_start_time"
+    private const val PREF_INTRO_SHOWN   = "intro_shown"
 
     private const val AES_GCM           = "AES/GCM/NoPadding"
     private const val GCM_IV_LEN        = 12
@@ -71,6 +72,13 @@ object SecurityManager {
         } else {
             existing
         }
+    }
+
+    fun isIntroShown(context: Context): Boolean =
+        getSecurePrefs(context).getBoolean(PREF_INTRO_SHOWN, false)
+
+    fun setIntroShown(context: Context, shown: Boolean) {
+        getSecurePrefs(context).edit { putBoolean(PREF_INTRO_SHOWN, shown) }
     }
 
     // ── Export encryption (AES-256-GCM via PBKDF2) ───────────────────────────

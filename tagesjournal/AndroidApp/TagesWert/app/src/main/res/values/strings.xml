@@ -17,19 +17,13 @@
     <string name="lock_title">Sperren</string>
 
     <!-- Main -->
-    <string name="today">Heute</string>
     <string name="no_entries">Noch keine Einträge</string>
     <string name="no_entries_hint">Tippe auf ein Datum im Kalender</string>
     <string name="entries_title">Einträge</string>
-    <string name="calendar_title">Kalender</string>
-    <string name="last_14_days">Letzte 14 Tage</string>
 
     <!-- Entry -->
     <string name="new_entry">Neuer Eintrag</string>
     <string name="edit_entry">Eintrag bearbeiten</string>
-    <string name="entry_date">Datum</string>
-    <string name="entry_rating">Bewertung</string>
-    <string name="entry_rating_label">Wie war dein Tag? (%d/10)</string>
     <string name="entry_text">Notizen</string>
     <string name="entry_text_hint">Tagebuch…</string>
     <string name="back">Zurück</string>
@@ -41,10 +35,6 @@
     <string name="entry_saved">Eintrag gespeichert</string>
     <string name="entry_deleted">Eintrag gelöscht</string>
     <string name="error_unknown">Unbekannter Fehler</string>
-
-    <!-- Legend -->
-    <string name="legend_entry">Eintrag</string>
-    <string name="legend_empty">Leer</string>
 
     <!-- Export / Import -->
     <string name="export_title">Datenbank exportieren</string>
@@ -75,6 +65,7 @@
     <!-- Settings -->
     <string name="settings_title">Einstellungen</string>
     <string name="data_management">Datenverwaltung</string>
+    <string name="help_tutorial">Hilfe &amp; Tutorial</string>
 
     <!-- Password -->
     <string name="password_show">Passwort anzeigen</string>
@@ -94,4 +85,17 @@
     <!-- FAB -->
     <string name="add_entry">Eintrag hinzufügen</string>
     <string name="fab_description">Neuen Eintrag erstellen</string>
+
+    <!-- Tutorial -->
+    <string name="intro_skip">Intro überspringen</string>
+    <string name="intro_next">Weiter</string>
+    <string name="restart_tutorial">Tutorial neu starten</string>
+    <string name="restart_tutorial_desc">Erklärt die Funktionen der App erneut</string>
+    <string name="tutorial_welcome_title">Tutorial</string>
+    <string name="tutorial_past_dates">Du kannst alle Daten in der Vergangenheit anklicken, um sie zu bewerten. Versuchen wir es mit gestern!</string>
+    <string name="tutorial_rating">Bewege den Schieberegler, um deinen Tag zu bewerten. Je grüner, desto besser!</string>
+    <string name="tutorial_notes">Hier kannst du deine Gedanken und Erlebnisse festhalten. Wir haben mal etwas für dich vorgeschrieben.</string>
+    <string name="tutorial_save">Speichere deinen Eintrag nun ab.</string>
+    <string name="tutorial_color_change">Siehst du? Das Datum im Kalender hat nun eine Farbe erhalten, die deiner Bewertung entspricht. So siehst du auf einen Blick, wie dein Monat war!</string>
+    <string name="tutorial_finish">Tutorial abschliessen</string>
 </resources>

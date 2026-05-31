@@ -24,6 +24,19 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.geometry.Rect
+
+enum class TutorialStep {
+    NONE,
+    WELCOME,      // Point to calendar
+    RATING,       // Point to rating scale
+    NOTES,        // Point to entry text
+    SAVE,         // Point to save button
+    COLOR_EXPLANATION // Back on main screen, explain color
+}
+
 data class UiState(
     val isLoading: Boolean = false,
     val errorResId: Int? = null,
@@ -31,6 +44,9 @@ data class UiState(
     val monatBewertungen: Map<String, Int> = emptyMap(),
     val lastExportTime: Long = 0L,
     val firstStartTime: Long = 0L,
+    val isIntroShown: Boolean = false,
+    val tutorialStep: TutorialStep = TutorialStep.NONE,
+    val targetRect: Rect? = null,
 )
 
 data class ImportSummary(
@@ -67,9 +83,74 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
     fun loadLastExportTime(context: Context) {
         val time = SecurityManager.getLastExportTime(context)
         val firstStart = SecurityManager.getOrCreateFirstStartTime(context)
+        val introShown = SecurityManager.isIntroShown(context)
         _uiState.value = _uiState.value.copy(
             lastExportTime = time,
-            firstStartTime = firstStart
+            firstStartTime = firstStart,
+            isIntroShown = introShown
+        )
+    }
+
+    fun setIntroShown(context: Context) {
+        SecurityManager.setIntroShown(context, true)
+        _uiState.value = _uiState.value.copy(isIntroShown = true)
+    }
+
+    fun startTutorial() {
+        _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.WELCOME)
+    }
+
+    fun setTargetRect(rect: Rect?) {
+        _uiState.value = _uiState.value.copy(targetRect = rect)
+    }
+
+    fun advanceTutorial(context: Context, onNavigate: (String) -> Unit, onBack: () -> Unit) {
+        val current = _uiState.value.tutorialStep
+        // Reset target rect for next step
+        setTargetRect(null)
+
+        when (current) {
+            TutorialStep.WELCOME -> {
+                // Navigate to entry screen for yesterday
+                val yesterday = LocalDate.now().minusDays(1)
+                onNavigate(DateUtil.toIso(yesterday))
+                _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.RATING)
+            }
+            TutorialStep.RATING -> {
+                _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.NOTES)
+            }
+            TutorialStep.NOTES -> {
+                // Write bogus text and set rating
+                updateEditing(bewertung = 10, notizen = "Ein toller Tag! Alles hat super geklappt.")
+                _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.SAVE)
+            }
+            TutorialStep.SAVE -> {
+                // Save and navigate back
+                editingEintrag?.let {
+                    speichern(it) {
+                        onBack()
+                        _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.COLOR_EXPLANATION)
+                    }
+                }
+            }
+            TutorialStep.COLOR_EXPLANATION -> {
+                setIntroShown(context)
+                _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.NONE)
+            }
+            else -> {}
+        }
+    }
+
+    fun skipTutorial(context: Context) {
+        setIntroShown(context)
+        _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.NONE)
+    }
+
+    fun restartTutorial(context: Context) {
+        SecurityManager.setIntroShown(context, false)
+        _uiState.value = _uiState.value.copy(
+            isIntroShown = false,
+            tutorialStep = TutorialStep.NONE
         )
     }
 
