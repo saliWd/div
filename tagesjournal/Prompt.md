@@ -1,13 +1,9 @@
 # Prompt
 
 ## Refinement
-This list is updated as soon as the stuff works, only the next few points (TODOs) are listed
-1. fix this warning from publishing the app:  
-   - Implement picture-in-picture to improve your app quality and user experience.  
-1. (should be done) check the warning about debug information when uploading the app bundle.  
-  "This App Bundle contains native code, and you've not uploaded debug symbols. We recommend that you upload a symbol file to make your crashes and ANRs easier to analyse and debug."  
-1. in the tutorial, use the current day as an example instead of yesterday.  
-1. in the tutorial, use an arrow which really points to the center of the UI element it refers (it may be curved and/or at an angle instead of vertical only).  
+This list is updated as soon as the stuff works, only the next few points (TODOs) are listed 
+1. I get this warning: 
+  "This App Bundle contains native code, and you've not uploaded debug symbols. We recommend that you upload a symbol file to make your crashes and ANRs easier to analyse and debug." and when I analyze my build, I don't have the BUNDLE-METADATA/com.android.tools.build.debugsymbols folder. NDK version 27.3.13750724 is installed.
 1. add the "without ads" claim on the start page.  
 1. have a statistics view of the avarage-per-month number for the last 12 months.  Place it below the calendar.  
 1. have the list of entries on a separate page. On the main page present the total number of entries and a link to this page.  

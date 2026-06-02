@@ -12,8 +12,8 @@ android {
         applicationId = "ch.widmedia.tageswert_tst"
         minSdk = 36
         targetSdk = 37
-        versionCode = 11
-        versionName = "2026.06.01"
+        versionCode = 15
+        versionName = "2026.06.03"
     }
 
     buildTypes {
@@ -35,11 +35,19 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    // Specify NDK version to ensure debug symbols can be processed
+    // Using LTS version 27.3.13750724 for better stability in symbol extraction
+    ndkVersion = "27.3.13750724"
+
     buildFeatures {
         compose = true
     }
 
     packaging {
+        jniLibs {
+            // Keep debug symbols for all native libraries (like SQLCipher)
+            keepDebugSymbols += "**/*.so"
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }

@@ -1,19 +1,26 @@
 package ch.widmedia.tageswert.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import ch.widmedia.tageswert.R
 import ch.widmedia.tageswert.ui.theme.DeepForest
 import ch.widmedia.tageswert.ui.theme.SageGreen
+import kotlin.math.*
 
 @Composable
 fun TutorialOverlay(
@@ -34,11 +42,14 @@ fun TutorialOverlay(
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
+    var cardRect by remember { mutableStateOf<Rect?>(null) }
+    var overlayPos by remember { mutableStateOf(Offset.Zero) }
 
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.55f))
+            .onGloballyPositioned { overlayPos = it.positionInWindow() }
             .clickable(enabled = false) {}
     ) {
         val screenHeight = constraints.maxHeight.toFloat()
@@ -46,44 +57,48 @@ fun TutorialOverlay(
         if (targetRect != null) {
             val isTopHalf = targetRect.center.y < (screenHeight / 2)
             
-            // Positioning logic:
-            // If target is in top half, show card below target.
-            // If target is in bottom half, show card above target.
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = if (isTopHalf) Arrangement.Top else Arrangement.Bottom
             ) {
                 if (isTopHalf) {
-                    // Item is at the top. 
-                    // Card should be below.
-                    // Spacer from top of screen to bottom of element + small margin
                     val topPadding = (targetRect.bottom / density.density).coerceAtLeast(0f).dp
-                    Spacer(modifier = Modifier.height(topPadding + 8.dp))
+                    Spacer(modifier = Modifier.height(topPadding + 48.dp))
                     
-                    Icon(
-                        imageVector = Icons.Default.ArrowUpward,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(40.dp)
+                    TutorialCard(
+                        text = text,
+                        onNext = onNext,
+                        onSkip = onSkip,
+                        isLastStep = isLastStep,
+                        modifier = modifier.onGloballyPositioned { cardRect = it.boundsInWindow() }
                     )
-                    
-                    TutorialCard(text, onNext, onSkip, isLastStep, modifier)
                 } else {
-                    // Item is at the bottom.
-                    // Card should be above.
-                    TutorialCard(text, onNext, onSkip, isLastStep, modifier)
-                    
-                    Icon(
-                        imageVector = Icons.Default.ArrowDownward,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(40.dp)
+                    TutorialCard(
+                        text = text,
+                        onNext = onNext,
+                        onSkip = onSkip,
+                        isLastStep = isLastStep,
+                        modifier = modifier.onGloballyPositioned { cardRect = it.boundsInWindow() }
                     )
-
-                    // Spacer from top of element to bottom of screen
+                    
                     val bottomPadding = ((screenHeight - targetRect.top) / density.density).coerceAtLeast(0f).dp
-                    Spacer(modifier = Modifier.height(bottomPadding + 8.dp))
+                    Spacer(modifier = Modifier.height(bottomPadding + 48.dp))
+                }
+            }
+
+            // Draw curved arrow
+            cardRect?.let { card ->
+                val localTarget = targetRect.center - overlayPos
+                val localCard = card.translate(-overlayPos.x, -overlayPos.y)
+                
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val start = if (isTopHalf) {
+                        Offset(localCard.center.x, localCard.top)
+                    } else {
+                        Offset(localCard.center.x, localCard.bottom)
+                    }
+                    drawCurvedArrow(start, localTarget, Color.White)
                 }
             }
         } else {
@@ -93,6 +108,74 @@ fun TutorialOverlay(
             }
         }
     }
+}
+
+private fun DrawScope.drawCurvedArrow(
+    start: Offset,
+    end: Offset,
+    color: Color
+) {
+    val strokeWidth = 3.dp.toPx()
+    val headLength = 16.dp.toPx()
+    val headAngle = PI / 6
+
+    val dx = end.x - start.x
+    val dy = end.y - start.y
+    val distance = sqrt(dx * dx + dy * dy)
+    
+    // Normalize direction
+    val ux = dx / distance
+    val uy = dy / distance
+    
+    // Perpendicular vector for the curve bulge
+    val px = -uy
+    val py = ux
+    
+    // Bulge based on distance, but limited
+    val bulge = (distance * 0.25f).coerceAtMost(60.dp.toPx())
+    
+    // Control point for quadratic curve
+    val control = Offset(
+        x = start.x + dx * 0.5f + px * bulge,
+        y = start.y + dy * 0.5f + py * bulge
+    )
+
+    val path = Path().apply {
+        moveTo(start.x, start.y)
+        quadraticTo(control.x, control.y, end.x, end.y)
+    }
+
+    drawPath(
+        path = path,
+        color = color,
+        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+    )
+
+    // Arrow head
+    // The direction at the end of a quadratic bezier is from control to end
+    val angle = atan2(end.y - control.y, end.x - control.x)
+
+    val p1 = Offset(
+        x = (end.x - headLength * cos(angle - headAngle)).toFloat(),
+        y = (end.y - headLength * sin(angle - headAngle)).toFloat()
+    )
+    val p2 = Offset(
+        x = (end.x - headLength * cos(angle + headAngle)).toFloat(),
+        y = (end.y - headLength * sin(angle + headAngle)).toFloat()
+    )
+
+    val headPath = Path().apply {
+        moveTo(end.x, end.y)
+        lineTo(p1.x, p1.y)
+        moveTo(end.x, end.y)
+        lineTo(p2.x, p2.y)
+    }
+
+    drawPath(
+        path = headPath,
+        color = color,
+        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+    )
 }
 
 @Composable

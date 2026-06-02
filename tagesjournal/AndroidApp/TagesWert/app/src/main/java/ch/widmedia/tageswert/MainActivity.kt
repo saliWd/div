@@ -1,7 +1,13 @@
 package ch.widmedia.tageswert
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import android.app.PictureInPictureParams
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.util.Rational
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowCompat
@@ -30,6 +36,7 @@ class MainActivity : FragmentActivity() {
 
     private lateinit var viewModel: MainViewModel
     private var onPickerResult: ((Uri?) -> Unit)? = null
+    private var isInPipMode by mutableStateOf(false)
 
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/octet-stream"),
@@ -54,8 +61,38 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             TagesWertTheme {
-                AppContent()
+                if (isInPipMode) {
+                    PipContent()
+                } else {
+                    AppContent()
+                }
             }
+        }
+    }
+
+    private fun updatePipParams(enabled: Boolean) {
+        val params = PictureInPictureParams.Builder()
+            .setAspectRatio(Rational(16, 9))
+            .setAutoEnterEnabled(enabled)
+            .build()
+        setPictureInPictureParams(params)
+    }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        isInPipMode = isInPictureInPictureMode
+    }
+
+    @Composable
+    private fun PipContent() {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = getString(R.string.app_name))
         }
     }
 
@@ -83,6 +120,10 @@ class MainActivity : FragmentActivity() {
         // Observe lock state from ViewModel
         val shouldLock by viewModel.shouldLock.collectAsState()
         
+        LaunchedEffect(entsperrt) {
+            updatePipParams(entsperrt)
+        }
+
         LaunchedEffect(shouldLock) {
             if (shouldLock && entsperrt) {
                 entsperrt = false

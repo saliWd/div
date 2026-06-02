@@ -113,9 +113,9 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
 
         when (current) {
             TutorialStep.WELCOME -> {
-                // Navigate to entry screen for yesterday
-                val yesterday = LocalDate.now().minusDays(1)
-                onNavigate(DateUtil.toIso(yesterday))
+                // Navigate to entry screen for today
+                val today = LocalDate.now()
+                onNavigate(DateUtil.toIso(today))
                 _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.RATING)
             }
             TutorialStep.RATING -> {

@@ -92,7 +92,7 @@
     <string name="restart_tutorial">Tutorial neu starten</string>
     <string name="restart_tutorial_desc">Erklärt die Funktionen der App erneut</string>
     <string name="tutorial_welcome_title">Tutorial</string>
-    <string name="tutorial_past_dates">Du kannst alle Daten in der Vergangenheit anklicken, um sie zu bewerten. Versuchen wir es mit gestern!</string>
+    <string name="tutorial_past_dates">Du kannst alle Daten in der Vergangenheit (plus den heutigen Tag) anklicken, um sie zu bewerten. Versuchen wir es mit heute!</string>
     <string name="tutorial_rating">Bewege den Schieberegler, um deinen Tag zu bewerten. Je grüner, desto besser!</string>
     <string name="tutorial_notes">Hier kannst du deine Gedanken und Erlebnisse festhalten. Wir haben mal etwas für dich vorgeschrieben.</string>
     <string name="tutorial_save">Speichere deinen Eintrag nun ab.</string>
