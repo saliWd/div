@@ -2,7 +2,7 @@
 
 ## Refinement
 This list is updated as soon as the stuff works, only the next few points (TODOs) are listed   
-1. rework the settings page, change name and symbol to import/export and make it more clearly arranged.  
+1. rework the settings page, make it more clearly arranged. Maybe: change name and symbol to import/export.  
 1. clean up the code. Check for newer stable versions of dependencies and in general reduce the number of imports and dependencies.  
 1. try out some different UIs / colors. TODO: maybe with another tool (figma)
 1. have the lock symbol more prominent (TODO: decide how)

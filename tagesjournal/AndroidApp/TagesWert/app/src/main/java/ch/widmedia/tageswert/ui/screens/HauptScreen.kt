@@ -141,11 +141,7 @@ fun HauptScreen(
                                 }
                         )
                         
-                        HorizontalDivider(
-                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 8.dp),
-                            color = DividerColor,
-                            thickness = 1.dp
-                        )
+                        Spacer(Modifier.height(16.dp))
                         
                         StatistikSektion(
                             statistiken = monatsStatistiken,
@@ -155,11 +151,7 @@ fun HauptScreen(
                 }
 
                 // Separator
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 8.dp),
-                    color = DividerColor,
-                    thickness = 1.dp
-                )
+                Spacer(Modifier.height(16.dp))
 
                 // Lower Part: Summary
                 Box(
@@ -172,105 +164,111 @@ fun HauptScreen(
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                         )
                     } else {
-                        Column(
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(CardBg)
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = CardBg),
+                            elevation = CardDefaults.cardElevation(2.dp)
                         ) {
-                            // ... same export reminder code ...
-                            // Export Reminder
-                            val thirtyDaysMillis = 30L * 24 * 60 * 60 * 1000
-                            val isOlderThan30Days = (System.currentTimeMillis() - uiState.lastExportTime) > thirtyDaysMillis
-                            val firstStartOlderThan30Days = (System.currentTimeMillis() - uiState.firstStartTime) > thirtyDaysMillis
-                            
-                            if (isOlderThan30Days && firstStartOlderThan30Days) {
-                                Card(
-                                    modifier = Modifier
-                                        .padding(bottom = 16.dp)
-                                        .fillMaxWidth(),
-                                    shape = RoundedCornerShape(16.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = GoldAmber.copy(alpha = 0.1f)
-                                    ),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, GoldAmber.copy(alpha = 0.2f))
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(16.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                // ... same export reminder code ...
+                                // Export Reminder
+                                val thirtyDaysMillis = 30L * 24 * 60 * 60 * 1000
+                                val isOlderThan30Days = (System.currentTimeMillis() - uiState.lastExportTime) > thirtyDaysMillis
+                                val firstStartOlderThan30Days = (System.currentTimeMillis() - uiState.firstStartTime) > thirtyDaysMillis
+                                
+                                if (isOlderThan30Days && firstStartOlderThan30Days) {
+                                    Card(
+                                        modifier = Modifier
+                                            .padding(bottom = 16.dp)
+                                            .fillMaxWidth(),
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = GoldAmber.copy(alpha = 0.1f)
+                                        ),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, GoldAmber.copy(alpha = 0.2f))
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        Column(
+                                            modifier = Modifier.padding(16.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Warning,
-                                                contentDescription = null,
-                                                tint = GoldAmber,
-                                                modifier = Modifier.size(20.dp)
-                                            )
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Warning,
+                                                    contentDescription = null,
+                                                    tint = GoldAmber,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.export_reminder_title),
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    color = DeepForest,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
                                             Text(
-                                                text = stringResource(R.string.export_reminder_title),
-                                                style = MaterialTheme.typography.titleSmall,
-                                                color = DeepForest,
-                                                fontWeight = FontWeight.Bold
+                                                text = stringResource(R.string.export_reminder_text),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = SlateGray,
+                                                lineHeight = 18.sp
                                             )
-                                        }
-                                        Text(
-                                            text = stringResource(R.string.export_reminder_text),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = SlateGray,
-                                            lineHeight = 18.sp
-                                        )
-                                        TextButton(
-                                            onClick = onEinstellungen,
-                                            contentPadding = PaddingValues(0.dp),
-                                            modifier = Modifier.align(Alignment.End)
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.export_confirm),
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = SageGreen
-                                            )
-                                            Icon(
-                                                imageVector = Icons.Default.Settings,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp).padding(start = 4.dp),
-                                                tint = SageGreen
-                                            )
+                                            TextButton(
+                                                onClick = onEinstellungen,
+                                                contentPadding = PaddingValues(0.dp),
+                                                modifier = Modifier.align(Alignment.End)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.export_confirm),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = SageGreen
+                                                )
+                                                Icon(
+                                                    imageVector = Icons.Default.Settings,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp).padding(start = 4.dp),
+                                                    tint = SageGreen
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            Text(
-                                text = stringResource(R.string.total_entries_count, alleEintraege.size),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = SlateGray,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
-
-                            Spacer(Modifier.height(16.dp))
-
-                            Button(
-                                onClick = onAlleEintraege,
-                                colors = ButtonDefaults.buttonColors(containerColor = SageGreen),
-                                shape = RoundedCornerShape(12.dp),
-                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.DateRange,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = stringResource(R.string.show_all_entries),
-                                    style = MaterialTheme.typography.labelLarge
+                                    text = stringResource(R.string.total_entries_count, alleEintraege.size),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = SlateGray,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
+
+                                Spacer(Modifier.height(16.dp))
+
+                                Button(
+                                    onClick = onAlleEintraege,
+                                    colors = ButtonDefaults.buttonColors(containerColor = SageGreen),
+                                    shape = RoundedCornerShape(12.dp),
+                                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.DateRange,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.show_all_entries),
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
                             }
                         }
                     }
@@ -371,61 +369,65 @@ fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
 
 @Composable
 fun StatistikSektion(statistiken: List<MonatsStatistik>, modifier: Modifier = Modifier) {
-    Column(
+    Card(
         modifier = modifier
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(CardBg)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = CardBg),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Text(
-            text = stringResource(R.string.statistics_title),
-            style = MaterialTheme.typography.titleSmall,
-            color = DeepForest,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(Modifier.height(16.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.Bottom
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            statistiken.forEach { stat ->
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (stat.anzahl > 0) {
+            Text(
+                text = stringResource(R.string.statistics_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = DeepForest,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                statistiken.forEach { stat ->
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (stat.anzahl > 0) {
+                            Text(
+                                text = "%.1f".format(stat.durchschnitt),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = SlateGray,
+                                fontSize = 10.sp
+                            )
+                            Spacer(Modifier.height(2.dp))
+                        }
+                        val heightFactor = (stat.durchschnitt / 10.0).toFloat()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f, fill = false)
+                                .height((heightFactor * 70).dp)
+                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                .background(
+                                    if (stat.anzahl > 0) ratingColor(stat.durchschnitt.toInt()) 
+                                    else DividerColor.copy(alpha = 0.3f)
+                                )
+                        )
+                        Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "%.1f".format(stat.durchschnitt),
+                            text = stat.label,
                             style = MaterialTheme.typography.labelSmall,
                             color = SlateGray,
-                            fontSize = 10.sp
+                            fontSize = 9.sp,
+                            maxLines = 1
                         )
-                        Spacer(Modifier.height(2.dp))
                     }
-                    val heightFactor = (stat.durchschnitt / 10.0).toFloat()
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f, fill = false)
-                            .height((heightFactor * 70).dp)
-                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                            .background(
-                                if (stat.anzahl > 0) ratingColor(stat.durchschnitt.toInt()) 
-                                else DividerColor.copy(alpha = 0.3f)
-                            )
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = stat.label,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = SlateGray,
-                        fontSize = 9.sp,
-                        maxLines = 1
-                    )
                 }
             }
         }

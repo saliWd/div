@@ -34,81 +34,85 @@ fun MonatsKalender(
     val tageImMonat = remember(aktuellerMonat) { DateUtil.daysInMonth(aktuellerMonat) }
     val heute = remember { LocalDate.now() }
 
-    Column(
+    Card(
         modifier = modifier
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(CardBg)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = CardBg),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        // Monat-Navigation
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            IconButton(onClick = { onMonatWechsel(aktuellerMonat.minusMonths(1)) }) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = "Vorheriger Monat", tint = DeepForest)
-            }
-            Text(
-                text = DateUtil.monthTitle(aktuellerMonat),
-                style = MaterialTheme.typography.titleLarge,
-                color = DeepForest,
-                fontWeight = FontWeight.Bold
-            )
-            IconButton(onClick = { onMonatWechsel(aktuellerMonat.plusMonths(1)) }) {
-                Icon(Icons.Default.ChevronRight, contentDescription = "Nächster Monat", tint = DeepForest)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Wochentage Header
-        Row(modifier = Modifier.fillMaxWidth()) {
-            val wochentage = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
-            wochentage.forEach { tag ->
+            // Monat-Navigation
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { onMonatWechsel(aktuellerMonat.minusMonths(1)) }) {
+                    Icon(Icons.Default.ChevronLeft, contentDescription = "Vorheriger Monat", tint = DeepForest)
+                }
                 Text(
-                    text = tag,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = SlateGray,
+                    text = DateUtil.monthTitle(aktuellerMonat),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = DeepForest,
                     fontWeight = FontWeight.Bold
                 )
+                IconButton(onClick = { onMonatWechsel(aktuellerMonat.plusMonths(1)) }) {
+                    Icon(Icons.Default.ChevronRight, contentDescription = "Nächster Monat", tint = DeepForest)
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        // Kalender-Gitter
-        val rows = tageImMonat.chunked(7)
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            rows.forEach { woche ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    woche.forEach { datum ->
-                        if (datum != null) {
-                            val isoDate = DateUtil.toIso(datum)
-                            val bewertung = monatBewertungen[isoDate]
-                            val istHeute = datum == heute
-                            val istZukunft = datum.isAfter(heute)
+            // Wochentage Header
+            Row(modifier = Modifier.fillMaxWidth()) {
+                val wochentage = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+                wochentage.forEach { tag ->
+                    Text(
+                        text = tag,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SlateGray,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
 
-                            MonatsTagZelle(
-                                datum = datum,
-                                bewertung = bewertung,
-                                istHeute = istHeute,
-                                istZukunft = istZukunft,
-                                onClick = { if (!istZukunft) onDatumKlick(isoDate) },
-                                modifier = Modifier.weight(1f)
-                            )
-                        } else {
-                            Box(modifier = Modifier.weight(1f).aspectRatio(1f))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Kalender-Gitter
+            val rows = tageImMonat.chunked(7)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                rows.forEach { woche ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        woche.forEach { datum ->
+                            if (datum != null) {
+                                val isoDate = DateUtil.toIso(datum)
+                                val bewertung = monatBewertungen[isoDate]
+                                val istHeute = datum == heute
+                                val istZukunft = datum.isAfter(heute)
+
+                                MonatsTagZelle(
+                                    datum = datum,
+                                    bewertung = bewertung,
+                                    istHeute = istHeute,
+                                    istZukunft = istZukunft,
+                                    onClick = { if (!istZukunft) onDatumKlick(isoDate) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            } else {
+                                Box(modifier = Modifier.weight(1f).aspectRatio(1f))
+                            }
                         }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 
