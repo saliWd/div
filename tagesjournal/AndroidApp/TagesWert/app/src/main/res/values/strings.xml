@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TagesWert</string>
-    <string name="app_subtitle">Wie war der Tag?</string>
+    <string name="app_subtitle">Wie war dein Tag?</string>
+    <string name="feature_local">alles lokal</string>
+    <string name="feature_encrypted">alles verschlüsselt</string>
+    <string name="feature_no_ads">ohne Werbung</string>
 
     <!-- Auth -->
     <string name="auth_title">Entsperren</string>
@@ -20,6 +23,9 @@
     <string name="no_entries">Noch keine Einträge</string>
     <string name="no_entries_hint">Tippe auf ein Datum im Kalender</string>
     <string name="entries_title">Einträge</string>
+    <string name="statistics_title">Statistik</string>
+    <string name="total_entries_count">Du hast insgesamt %1$d Einträge.</string>
+    <string name="show_all_entries">Alle Einträge anzeigen</string>
 
     <!-- Entry -->
     <string name="new_entry">Neuer Eintrag</string>

@@ -20,9 +20,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.TextStyle
+import java.util.Locale
 
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
@@ -38,6 +42,12 @@ enum class TutorialStep {
     SETTINGS_DATA, // Settings page, explain export/import
     SETTINGS_RESTART // Settings page, point to restart button
 }
+
+data class MonatsStatistik(
+    val label: String,
+    val durchschnitt: Double,
+    val anzahl: Int
+)
 
 data class UiState(
     val isLoading: Boolean = false,
@@ -62,6 +72,31 @@ data class ImportSummary(
 class MainViewModel(private val repository: EintragRepository) : ViewModel() {
 
     val alleEintraege: StateFlow<List<TagEintrag>> = repository.alleEintraege()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val monatsStatistiken: StateFlow<List<MonatsStatistik>> = repository.alleEintraege()
+        .map { eintraege ->
+            val now = LocalDate.now()
+            val last12Months = (0..11).map { YearMonth.from(now.minusMonths(it.toLong())) }.reversed()
+            
+            val grouped = eintraege.groupBy { 
+                try {
+                    YearMonth.parse(it.datum.substring(0, 7))
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            
+            last12Months.map { ym ->
+                val entries = grouped[ym] ?: emptyList()
+                val avg = if (entries.isNotEmpty()) entries.map { it.bewertung }.average() else 0.0
+                MonatsStatistik(
+                    label = ym.month.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                    durchschnitt = avg,
+                    anzahl = entries.size
+                )
+            }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _uiState = MutableStateFlow(UiState())

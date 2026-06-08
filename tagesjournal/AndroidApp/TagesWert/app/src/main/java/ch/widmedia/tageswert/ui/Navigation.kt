@@ -11,12 +11,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ch.widmedia.tageswert.ui.screens.AlleEintraegeScreen
 import ch.widmedia.tageswert.ui.screens.EinstellungenScreen
 import ch.widmedia.tageswert.ui.screens.EintragScreen
 import ch.widmedia.tageswert.ui.screens.HauptScreen
 
 sealed class Ziel(val route: String) {
     data object Haupt : Ziel("haupt")
+    data object Liste : Ziel("liste")
     data object Eintrag : Ziel("eintrag/{datum}") {
         fun mitDatum(datum: String) = "eintrag/$datum"
     }
@@ -48,10 +50,23 @@ fun TagesWertNavigation(
                 onEintragKlick = { datum ->
                     navController.navigate(Ziel.Eintrag.mitDatum(datum))
                 },
+                onAlleEintraege = {
+                    navController.navigate(Ziel.Liste.route)
+                },
                 onEinstellungen = {
                     navController.navigate(Ziel.Einstellungen.route)
                 },
                 onLock = onLock
+            )
+        }
+
+        composable(Ziel.Liste.route) {
+            AlleEintraegeScreen(
+                viewModel = viewModel,
+                onEintragKlick = { datum ->
+                    navController.navigate(Ziel.Eintrag.mitDatum(datum))
+                },
+                onZurueck = { navController.popBackStack() }
             )
         }
 

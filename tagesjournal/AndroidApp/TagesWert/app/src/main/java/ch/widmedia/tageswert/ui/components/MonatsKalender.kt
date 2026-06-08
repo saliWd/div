@@ -109,33 +109,6 @@ fun MonatsKalender(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Durchschnittliche Bewertung
-        val durchschnitt = remember(monatBewertungen) {
-            if (monatBewertungen.isNotEmpty()) {
-                monatBewertungen.values.average()
-            } else {
-                null
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Monatsdurchschnitt: ",
-                style = MaterialTheme.typography.bodyMedium,
-                color = SlateGray
-            )
-            Text(
-                text = durchschnitt?.let { "%.2f".format(it) } ?: "--",
-                style = MaterialTheme.typography.titleMedium,
-                color = DeepForest,
-                fontWeight = FontWeight.Bold
-            )
-        }
     }
 }
 

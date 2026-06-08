@@ -27,8 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import ch.widmedia.tageswert.R
 import ch.widmedia.tageswert.ui.MainViewModel
+import ch.widmedia.tageswert.ui.MonatsStatistik
 import ch.widmedia.tageswert.ui.TutorialStep
 import ch.widmedia.tageswert.ui.components.EintragKarte
 import ch.widmedia.tageswert.ui.components.MonatsKalender
@@ -42,11 +45,13 @@ import java.time.LocalDate
 fun HauptScreen(
     viewModel: MainViewModel,
     onEintragKlick: (String) -> Unit,
+    onAlleEintraege: () -> Unit,
     onEinstellungen: () -> Unit,
     onLock: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val alleEintraege by viewModel.alleEintraege.collectAsState()
+    val monatsStatistiken by viewModel.monatsStatistiken.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -86,6 +91,7 @@ fun HauptScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             snackbarHost = {
+                // ... (no changes here)
                 SnackbarHost(snackbarHostState) { data ->
                     Snackbar(
                         containerColor = SageGreen,
@@ -107,6 +113,7 @@ fun HauptScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = paddingValues.calculateBottomPadding())
+                    .verticalScroll(rememberScrollState())
             ) {
                 // Upper Part: Header and Calendar
                 Box(
@@ -133,133 +140,136 @@ fun HauptScreen(
                                     }
                                 }
                         )
+                        
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 8.dp),
+                            color = DividerColor,
+                            thickness = 1.dp
+                        )
+                        
+                        StatistikSektion(
+                            statistiken = monatsStatistiken,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
 
                 // Separator
                 HorizontalDivider(
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp),
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 8.dp),
                     color = DividerColor,
                     thickness = 1.dp
                 )
 
-                // Lower Part: Entries List
+                // Lower Part: Summary
                 Box(
                     modifier = Modifier
-                        .weight(1f)
                         .fillMaxWidth()
+                        .padding(bottom = 32.dp)
                 ) {
                     if (alleEintraege.isEmpty()) {
                         LeererZustand(
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                         )
                     } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = 32.dp)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(CardBg)
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            item {
-                                // Export Reminder
-                                val thirtyDaysMillis = 30L * 24 * 60 * 60 * 1000
-                                val isOlderThan30Days = (System.currentTimeMillis() - uiState.lastExportTime) > thirtyDaysMillis
-                                val firstStartOlderThan30Days = (System.currentTimeMillis() - uiState.firstStartTime) > thirtyDaysMillis
-                                
-                                if (isOlderThan30Days && firstStartOlderThan30Days && alleEintraege.isNotEmpty()) {
-                                    Card(
-                                        modifier = Modifier
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                            .fillMaxWidth(),
-                                        shape = RoundedCornerShape(16.dp),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = GoldAmber.copy(alpha = 0.1f)
-                                        ),
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, GoldAmber.copy(alpha = 0.2f))
+                            // ... same export reminder code ...
+                            // Export Reminder
+                            val thirtyDaysMillis = 30L * 24 * 60 * 60 * 1000
+                            val isOlderThan30Days = (System.currentTimeMillis() - uiState.lastExportTime) > thirtyDaysMillis
+                            val firstStartOlderThan30Days = (System.currentTimeMillis() - uiState.firstStartTime) > thirtyDaysMillis
+                            
+                            if (isOlderThan30Days && firstStartOlderThan30Days) {
+                                Card(
+                                    modifier = Modifier
+                                        .padding(bottom = 16.dp)
+                                        .fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = GoldAmber.copy(alpha = 0.1f)
+                                    ),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, GoldAmber.copy(alpha = 0.2f))
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        Column(
-                                            modifier = Modifier.padding(16.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Warning,
-                                                    contentDescription = null,
-                                                    tint = GoldAmber,
-                                                    modifier = Modifier.size(20.dp)
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.export_reminder_title),
-                                                    style = MaterialTheme.typography.titleSmall,
-                                                    color = DeepForest,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                            Text(
-                                                text = stringResource(R.string.export_reminder_text),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = SlateGray,
-                                                lineHeight = 18.sp
+                                            Icon(
+                                                imageVector = Icons.Filled.Warning,
+                                                contentDescription = null,
+                                                tint = GoldAmber,
+                                                modifier = Modifier.size(20.dp)
                                             )
-                                            TextButton(
-                                                onClick = onEinstellungen,
-                                                contentPadding = PaddingValues(0.dp),
-                                                modifier = Modifier.align(Alignment.End)
-                                            ) {
-                                                Text(
-                                                    text = stringResource(R.string.export_confirm),
-                                                    style = MaterialTheme.typography.labelLarge,
-                                                    color = SageGreen
-                                                )
-                                                Icon(
-                                                    imageVector = Icons.Default.Settings,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(16.dp).padding(start = 4.dp),
-                                                    tint = SageGreen
-                                                )
-                                            }
+                                            Text(
+                                                text = stringResource(R.string.export_reminder_title),
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = DeepForest,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Text(
+                                            text = stringResource(R.string.export_reminder_text),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = SlateGray,
+                                            lineHeight = 18.sp
+                                        )
+                                        TextButton(
+                                            onClick = onEinstellungen,
+                                            contentPadding = PaddingValues(0.dp),
+                                            modifier = Modifier.align(Alignment.End)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.export_confirm),
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = SageGreen
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Default.Settings,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp).padding(start = 4.dp),
+                                                tint = SageGreen
+                                            )
                                         }
                                     }
                                 }
                             }
 
-                            item {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.entries_title),
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        color = DeepForest
-                                    )
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(SageGreen.copy(alpha = 0.15f))
-                                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                                    ) {
-                                        Text(
-                                            text = alleEintraege.size.toString(),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = SageGreen,
-                                            fontSize = 13.sp
-                                        )
-                                    }
-                                }
-                            }
+                            Text(
+                                text = stringResource(R.string.total_entries_count, alleEintraege.size),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = SlateGray,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
 
-                            itemsIndexed(
-                                items = alleEintraege,
-                                key = { _, eintrag -> eintrag.id }
-                            ) { _, eintrag ->
-                                EintragKarte(
-                                    eintrag = eintrag,
-                                    onClick = { onEintragKlick(eintrag.datum) },
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
+                            Spacer(Modifier.height(16.dp))
+
+                            Button(
+                                onClick = onAlleEintraege,
+                                colors = ButtonDefaults.buttonColors(containerColor = SageGreen),
+                                shape = RoundedCornerShape(12.dp),
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = stringResource(R.string.show_all_entries),
+                                    style = MaterialTheme.typography.labelLarge
                                 )
                             }
                         }
@@ -353,6 +363,69 @@ fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
                             tint = Color.White
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StatistikSektion(statistiken: List<MonatsStatistik>, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(CardBg)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.statistics_title),
+            style = MaterialTheme.typography.titleSmall,
+            color = DeepForest,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            statistiken.forEach { stat ->
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (stat.anzahl > 0) {
+                        Text(
+                            text = "%.1f".format(stat.durchschnitt),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SlateGray,
+                            fontSize = 10.sp
+                        )
+                        Spacer(Modifier.height(2.dp))
+                    }
+                    val heightFactor = (stat.durchschnitt / 10.0).toFloat()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                            .height((heightFactor * 70).dp)
+                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                            .background(
+                                if (stat.anzahl > 0) ratingColor(stat.durchschnitt.toInt()) 
+                                else DividerColor.copy(alpha = 0.3f)
+                            )
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = stat.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SlateGray,
+                        fontSize = 9.sp,
+                        maxLines = 1
+                    )
                 }
             }
         }
