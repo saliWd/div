@@ -40,7 +40,7 @@ enum class TutorialStep {
     SAVE,         // Point to save button
     COLOR_EXPLANATION, // Back on main screen, explain color
     SETTINGS_DATA, // Settings page, explain export/import
-    SETTINGS_RESTART // Settings page, point to restart button
+    RESTART_INFO // Main screen, point to restart button
 }
 
 data class MonatsStatistik(
@@ -176,12 +176,12 @@ class MainViewModel(private val repository: EintragRepository) : ViewModel() {
                 _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.SETTINGS_DATA)
             }
             TutorialStep.SETTINGS_DATA -> {
-                _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.SETTINGS_RESTART)
+                onBack()
+                _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.RESTART_INFO)
             }
-            TutorialStep.SETTINGS_RESTART -> {
+            TutorialStep.RESTART_INFO -> {
                 setIntroShown(context)
                 _uiState.value = _uiState.value.copy(tutorialStep = TutorialStep.NONE)
-                onBack()
             }
             else -> {}
         }

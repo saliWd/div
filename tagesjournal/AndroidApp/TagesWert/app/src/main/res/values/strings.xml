@@ -93,7 +93,7 @@
     <string name="fab_description">Neuen Eintrag erstellen</string>
 
     <!-- Tutorial -->
-    <string name="intro_skip">Intro überspringen</string>
+    <string name="intro_skip">Tutorial überspringen</string>
     <string name="intro_next">Weiter</string>
     <string name="restart_tutorial">Tutorial neu starten</string>
     <string name="restart_tutorial_desc">Erklärt die Funktionen der App erneut</string>

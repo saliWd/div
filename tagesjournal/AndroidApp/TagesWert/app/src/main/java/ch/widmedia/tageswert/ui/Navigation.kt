@@ -85,14 +85,7 @@ fun TagesWertNavigation(
         composable(Ziel.Einstellungen.route) {
             EinstellungenScreen(
                 viewModel = viewModel,
-                onZurueck = { navController.popBackStack() },
-                onRestartTutorial = {
-                    viewModel.restartTutorial(context)
-                    // No need to navigate to Intro anymore, just stay on Haupt but with tutorial triggered
-                    navController.navigate(Ziel.Haupt.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
+                onZurueck = { navController.popBackStack() }
             )
         }
     }

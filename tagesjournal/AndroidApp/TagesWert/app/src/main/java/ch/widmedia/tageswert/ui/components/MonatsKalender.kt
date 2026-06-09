@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -140,7 +139,7 @@ fun MonatsTagZelle(
     }
 
     val borderModifier = if (istHeute) {
-        Modifier.border(1.2.dp, SageGreen, RoundedCornerShape(10.dp))
+        Modifier.border(1.2.dp, SageGreen, AppCardDefaults.smallShape)
     } else {
         Modifier
     }
@@ -149,7 +148,7 @@ fun MonatsTagZelle(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(AppCardDefaults.smallShape)
             .background(bgColor)
             .then(borderModifier)
             .then(if (!istZukunft) Modifier.clickable { onClick() } else Modifier)

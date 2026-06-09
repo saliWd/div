@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
@@ -66,7 +65,7 @@ fun EintragKarte(
                 modifier = Modifier
                     .width(2.dp)
                     .height(32.dp)
-                    .clip(RoundedCornerShape(1.dp))
+                    .clip(CircleShape)
                     .background(ratingCol)
             )
 

@@ -3,14 +3,13 @@ package ch.widmedia.tageswert.ui.screens
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -33,7 +32,6 @@ import ch.widmedia.tageswert.R
 import ch.widmedia.tageswert.ui.MainViewModel
 import ch.widmedia.tageswert.ui.MonatsStatistik
 import ch.widmedia.tageswert.ui.TutorialStep
-import ch.widmedia.tageswert.ui.components.EintragKarte
 import ch.widmedia.tageswert.ui.components.MonatsKalender
 import ch.widmedia.tageswert.ui.components.TutorialOverlay
 import ch.widmedia.tageswert.ui.theme.*
@@ -55,8 +53,16 @@ fun HauptScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
     
     var aktuellerMonat by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
+
+    // Scroll to tutorial items
+    LaunchedEffect(uiState.tutorialStep) {
+        if (uiState.tutorialStep == TutorialStep.RESTART_INFO) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
 
     LaunchedEffect(uiState.isIntroShown) {
         if (!uiState.isIntroShown && uiState.tutorialStep == TutorialStep.NONE) {
@@ -113,7 +119,7 @@ fun HauptScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = paddingValues.calculateBottomPadding())
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState)
             ) {
                 // Upper Part: Header and Calendar
                 Box(
@@ -273,24 +279,92 @@ fun HauptScreen(
                         }
                     }
                 }
+
+                // Help & Tutorial Section at the bottom
+                Spacer(Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 32.dp),
+                    shape = AppCardDefaults.largeShape,
+                    colors = AppCardDefaults.colors(),
+                    elevation = AppCardDefaults.defaultElevation()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.tutorial_welcome_title),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = DeepForest,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Button(
+                            onClick = { viewModel.restartTutorial(context) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .onGloballyPositioned { coords ->
+                                    if (uiState.tutorialStep == TutorialStep.RESTART_INFO) {
+                                        viewModel.setTargetRect(coords.boundsInWindow())
+                                    }
+                                },
+                            shape = AppCardDefaults.smallShape,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = SageGreen,
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.RestartAlt,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = Color.White
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.restart_tutorial),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(24.dp))
             }
         }
 
         // Tutorial Overlay on top of Scaffold
-        if (uiState.tutorialStep == TutorialStep.WELCOME) {
-            TutorialOverlay(
-                text = stringResource(R.string.tutorial_past_dates),
-                onNext = { viewModel.advanceTutorial(context, onEintragKlick, {}) },
-                onSkip = { viewModel.skipTutorial(context) },
-                targetRect = uiState.targetRect
-            )
-        } else if (uiState.tutorialStep == TutorialStep.COLOR_EXPLANATION) {
-            TutorialOverlay(
-                text = stringResource(R.string.tutorial_color_change),
-                onNext = { viewModel.advanceTutorial(context, { _ -> onEinstellungen() }, {}) },
-                onSkip = { viewModel.skipTutorial(context) },
-                targetRect = uiState.targetRect
-            )
+        when (uiState.tutorialStep) {
+            TutorialStep.WELCOME -> {
+                TutorialOverlay(
+                    text = stringResource(R.string.tutorial_past_dates),
+                    onNext = { viewModel.advanceTutorial(context, onEintragKlick, {}) },
+                    onSkip = { viewModel.skipTutorial(context) },
+                    targetRect = uiState.targetRect
+                )
+            }
+            TutorialStep.COLOR_EXPLANATION -> {
+                TutorialOverlay(
+                    text = stringResource(R.string.tutorial_color_change),
+                    onNext = { viewModel.advanceTutorial(context, { _ -> onEinstellungen() }, {}) },
+                    onSkip = { viewModel.skipTutorial(context) },
+                    targetRect = uiState.targetRect
+                )
+            }
+            TutorialStep.RESTART_INFO -> {
+                TutorialOverlay(
+                    text = stringResource(R.string.tutorial_settings_restart),
+                    onNext = { viewModel.advanceTutorial(context, {}, {}) },
+                    onSkip = { viewModel.skipTutorial(context) },
+                    targetRect = uiState.targetRect,
+                    isLastStep = true
+                )
+            }
+            else -> {}
         }
     }
 }

@@ -21,7 +21,6 @@ val MossLight     = Color(0xFFB8D4C0)     // secondary
 val Terracotta    = Color(0xFFC4673A)     // accent / rated high
 val GoldAmber     = Color(0xFFD4A843)     // rating accent
 val SlateGray     = Color(0xFF5A5F60)     // secondary text
-val PaleGreen     = Color(0xFFDDEEE2)     // calendar: has entry
 val LightChamois  = Color(0xFFEEE4CC)     // calendar: no entry
 val ErrorRed      = Color(0xFFB53A2A)
 val Surface       = Color(0xFFFBF7EE)

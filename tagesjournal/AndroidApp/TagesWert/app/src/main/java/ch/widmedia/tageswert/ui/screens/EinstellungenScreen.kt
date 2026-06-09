@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -47,7 +46,6 @@ import kotlinx.coroutines.launch
 fun EinstellungenScreen(
     viewModel: MainViewModel,
     onZurueck: () -> Unit,
-    onRestartTutorial: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -61,8 +59,6 @@ fun EinstellungenScreen(
     LaunchedEffect(uiState.tutorialStep) {
         if (uiState.tutorialStep == TutorialStep.SETTINGS_DATA) {
             scrollState.animateScrollTo(200) // Scroll down a bit for data cards
-        } else if (uiState.tutorialStep == TutorialStep.SETTINGS_RESTART) {
-            scrollState.animateScrollTo(scrollState.maxValue) // Scroll to bottom for restart
         }
     }
     var exportPasswort by remember { mutableStateOf(SecurityManager.getExportPassword(context) ?: "") }
@@ -123,7 +119,7 @@ fun EinstellungenScreen(
                 Snackbar(
                     containerColor = SageGreen,
                     contentColor = Color.White,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = AppCardDefaults.smallShape,
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
@@ -222,7 +218,7 @@ fun EinstellungenScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = AppCardDefaults.smallShape,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -264,7 +260,7 @@ fun EinstellungenScreen(
                         OutlinedButton(
                             onClick = { dateiPickerLauncher.launch("*/*") },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = AppCardDefaults.smallShape,
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = DeepForest)
                         ) {
                             Icon(Icons.Filled.FolderOpen, null, Modifier.size(18.dp))
@@ -334,7 +330,7 @@ fun EinstellungenScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = AppCardDefaults.smallShape,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary,
                                 contentColor = MaterialTheme.colorScheme.onSecondary
@@ -364,74 +360,18 @@ fun EinstellungenScreen(
                     }
                 }
 
-                Spacer(Modifier.height(8.dp))
-
-                // Section: Hilfe & Tutorial
-                SektionsKopf(text = stringResource(R.string.help_tutorial), icon = Icons.AutoMirrored.Filled.Help)
-
-                EinstellungsKarte(
-                    titel = stringResource(R.string.restart_tutorial),
-                    beschreibung = stringResource(R.string.restart_tutorial_desc),
-                    icon = Icons.Filled.RestartAlt,
-                    iconFarbe = SageGreen,
-                    modifier = Modifier.onGloballyPositioned { coords ->
-                        if (uiState.tutorialStep == TutorialStep.SETTINGS_RESTART) {
-                            viewModel.setTargetRect(coords.boundsInWindow())
-                        }
-                    }
-                ) {
-                    Button(
-                        onClick = {
-                            viewModel.restartTutorial(context)
-                            onRestartTutorial()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = SageGreen,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = Color.White
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.restart_tutorial),
-                            color = Color.White
-                        )
-                    }
-                }
-
                 Spacer(Modifier.height(16.dp))
             }
         }
 
         // Tutorial Overlay
-        when (uiState.tutorialStep) {
-            TutorialStep.SETTINGS_DATA -> {
-                TutorialOverlay(
-                    text = stringResource(R.string.tutorial_settings_data),
-                    onNext = { viewModel.advanceTutorial(context, {}, onZurueck) },
-                    onSkip = { viewModel.skipTutorial(context) },
-                    targetRect = uiState.targetRect
-                )
-            }
-            TutorialStep.SETTINGS_RESTART -> {
-                TutorialOverlay(
-                    text = stringResource(R.string.tutorial_settings_restart),
-                    onNext = { viewModel.advanceTutorial(context, {}, onZurueck) },
-                    onSkip = { viewModel.skipTutorial(context) },
-                    targetRect = uiState.targetRect,
-                    isLastStep = true
-                )
-            }
-            else -> {}
+        if (uiState.tutorialStep == TutorialStep.SETTINGS_DATA) {
+            TutorialOverlay(
+                text = stringResource(R.string.tutorial_settings_data),
+                onNext = { viewModel.advanceTutorial(context, {}, onZurueck) },
+                onSkip = { viewModel.skipTutorial(context) },
+                targetRect = uiState.targetRect
+            )
         }
 
         // Import Confirmation Dialog
@@ -528,7 +468,7 @@ fun EinstellungsKarte(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(AppCardDefaults.smallShape)
                         .background(iconFarbe.copy(alpha = 0.12f))
                 ) {
                     Icon(icon, null, tint = iconFarbe, modifier = Modifier.size(20.dp))
@@ -580,7 +520,7 @@ fun PasswortFeld(
                 )
             }
         },
-        shape = RoundedCornerShape(12.dp),
+        shape = AppCardDefaults.smallShape,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = SageGreen,
             unfocusedBorderColor = DividerColor,
