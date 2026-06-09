@@ -28,8 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ch.widmedia.tageswert.R
-import ch.widmedia.tageswert.ui.theme.DeepForest
-import ch.widmedia.tageswert.ui.theme.SageGreen
+import ch.widmedia.tageswert.ui.theme.*
 import kotlin.math.*
 
 @Composable
@@ -191,9 +190,9 @@ private fun TutorialCard(
             .padding(horizontal = 24.dp, vertical = 4.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
-        shape = RoundedCornerShape(24.dp),
+        shape = AppCardDefaults.largeShape,
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(8.dp)
+        elevation = AppCardDefaults.highElevation()
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -233,7 +232,7 @@ private fun TutorialCard(
                 Button(
                     onClick = onNext,
                     colors = ButtonDefaults.buttonColors(containerColor = SageGreen),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = AppCardDefaults.smallShape
                 ) {
                     Text(
                         text = if (isLastStep) stringResource(R.string.tutorial_finish) else stringResource(R.string.intro_next),

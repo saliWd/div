@@ -8,7 +8,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import ch.widmedia.tageswert.R
 
 // ── Farben ──────────────────────────────────────────────────────────────────
@@ -150,5 +152,33 @@ fun TagesWertTheme(content: @Composable () -> Unit) {
         colorScheme = TagesWertColorScheme,
         typography  = TagesWertTypography,
         content     = content
+    )
+}
+
+// ── Shared Layout Settings ──────────────────────────────────────────────────
+object AppCardDefaults {
+    val elevation = 2.dp
+    
+    val cornerRadius = 16.dp
+    val largeCornerRadius = 24.dp
+    val smallCornerRadius = 12.dp
+    
+    val shape = RoundedCornerShape(cornerRadius)
+    val largeShape = RoundedCornerShape(largeCornerRadius)
+    val smallShape = RoundedCornerShape(smallCornerRadius)
+    
+    @Composable
+    fun colors() = androidx.compose.material3.CardDefaults.cardColors(
+        containerColor = CardBg
+    )
+    
+    @Composable
+    fun defaultElevation() = androidx.compose.material3.CardDefaults.cardElevation(
+        defaultElevation = elevation
+    )
+    
+    @Composable
+    fun highElevation() = androidx.compose.material3.CardDefaults.cardElevation(
+        defaultElevation = 8.dp
     )
 }

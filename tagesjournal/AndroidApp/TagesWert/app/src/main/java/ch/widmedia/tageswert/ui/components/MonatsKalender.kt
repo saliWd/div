@@ -37,9 +37,9 @@ fun MonatsKalender(
     Card(
         modifier = modifier
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBg),
-        elevation = CardDefaults.cardElevation(2.dp)
+        shape = AppCardDefaults.largeShape,
+        colors = AppCardDefaults.colors(),
+        elevation = AppCardDefaults.defaultElevation()
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

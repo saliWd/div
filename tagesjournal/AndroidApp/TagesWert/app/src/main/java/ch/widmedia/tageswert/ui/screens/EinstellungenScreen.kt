@@ -288,7 +288,7 @@ fun EinstellungenScreen(
                             colors = CardDefaults.cardColors(
                                 containerColor = GoldAmber.copy(alpha = 0.12f)
                             ),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = AppCardDefaults.smallShape
                         ) {
                             Row(
                                 modifier = Modifier.padding(10.dp),
@@ -477,7 +477,7 @@ fun EinstellungenScreen(
                         Text(stringResource(R.string.cancel))
                     }
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = AppCardDefaults.shape,
                 containerColor = Chamois
             )
         }
@@ -512,9 +512,9 @@ fun EinstellungsKarte(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBg),
-        elevation = CardDefaults.cardElevation(2.dp)
+        shape = AppCardDefaults.largeShape,
+        colors = AppCardDefaults.colors(),
+        elevation = AppCardDefaults.defaultElevation()
     ) {
         Column(
             modifier = Modifier.padding(20.dp),

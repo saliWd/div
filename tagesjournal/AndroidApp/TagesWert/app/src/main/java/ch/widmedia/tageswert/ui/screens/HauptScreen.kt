@@ -96,7 +96,7 @@ fun HauptScreen(
                     Snackbar(
                         containerColor = SageGreen,
                         contentColor = Color.White,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = AppCardDefaults.smallShape,
                         modifier = Modifier.padding(16.dp),
                     ) {
                         Text(
@@ -168,9 +168,9 @@ fun HauptScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(24.dp),
-                            colors = CardDefaults.cardColors(containerColor = CardBg),
-                            elevation = CardDefaults.cardElevation(2.dp)
+                            shape = AppCardDefaults.largeShape,
+                            colors = AppCardDefaults.colors(),
+                            elevation = AppCardDefaults.defaultElevation()
                         ) {
                             Column(
                                 modifier = Modifier
@@ -189,7 +189,7 @@ fun HauptScreen(
                                         modifier = Modifier
                                             .padding(bottom = 16.dp)
                                             .fillMaxWidth(),
-                                        shape = RoundedCornerShape(16.dp),
+                                        shape = AppCardDefaults.shape,
                                         colors = CardDefaults.cardColors(
                                             containerColor = GoldAmber.copy(alpha = 0.1f)
                                         ),
@@ -255,7 +255,7 @@ fun HauptScreen(
                                 Button(
                                     onClick = onAlleEintraege,
                                     colors = ButtonDefaults.buttonColors(containerColor = SageGreen),
-                                    shape = RoundedCornerShape(12.dp),
+                                    shape = AppCardDefaults.smallShape,
                                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                                 ) {
                                     Icon(
@@ -372,9 +372,9 @@ fun StatistikSektion(statistiken: List<MonatsStatistik>, modifier: Modifier = Mo
     Card(
         modifier = modifier
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBg),
-        elevation = CardDefaults.cardElevation(2.dp)
+        shape = AppCardDefaults.largeShape,
+        colors = AppCardDefaults.colors(),
+        elevation = AppCardDefaults.defaultElevation()
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

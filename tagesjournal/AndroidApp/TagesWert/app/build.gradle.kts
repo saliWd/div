@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "ch.widmedia.tageswert_tst"
-        minSdk = 36
+        minSdk = 35
         targetSdk = 37
         versionCode = 16
         versionName = "2026.06.09"

@@ -92,7 +92,7 @@ fun SperrScreen(
 
             Surface(
                 color = Color.White.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(20.dp),
+                shape = AppCardDefaults.largeShape,
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
             ) {
                 Column(
@@ -186,7 +186,7 @@ fun SperrScreen(
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
                     .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppCardDefaults.shape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White.copy(alpha = 0.2f),
                     contentColor = Color.White

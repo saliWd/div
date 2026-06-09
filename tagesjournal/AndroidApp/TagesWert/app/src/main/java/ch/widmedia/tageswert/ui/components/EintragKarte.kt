@@ -33,9 +33,9 @@ fun EintragKarte(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = AppCardDefaults.smallShape,
+        colors = AppCardDefaults.colors(),
+        elevation = AppCardDefaults.defaultElevation()
     ) {
         Row(
             modifier = Modifier

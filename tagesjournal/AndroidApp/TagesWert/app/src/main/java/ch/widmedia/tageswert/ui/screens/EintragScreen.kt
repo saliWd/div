@@ -112,7 +112,7 @@ fun EintragScreen(
                 }
             },
             containerColor = Surface,
-            shape = RoundedCornerShape(20.dp)
+            shape = AppCardDefaults.largeShape
         )
     }
 
@@ -199,9 +199,9 @@ fun EintragScreen(
                     // Rating Card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = CardBg),
-                        elevation = CardDefaults.cardElevation(2.dp)
+                        shape = AppCardDefaults.largeShape,
+                        colors = AppCardDefaults.colors(),
+                        elevation = AppCardDefaults.defaultElevation()
                     ) {
                         Column(
                             modifier = Modifier.padding(20.dp)
@@ -221,9 +221,9 @@ fun EintragScreen(
                     // Notes Card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = CardBg),
-                        elevation = CardDefaults.cardElevation(2.dp)
+                        shape = AppCardDefaults.largeShape,
+                        colors = AppCardDefaults.colors(),
+                        elevation = AppCardDefaults.defaultElevation()
                     ) {
                         Column(
                             modifier = Modifier.padding(20.dp),
@@ -282,7 +282,7 @@ fun EintragScreen(
                                     viewModel.setTargetRect(coords.boundsInWindow())
                                 }
                             },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = AppCardDefaults.shape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
