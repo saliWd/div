@@ -12,8 +12,8 @@ android {
         applicationId = "ch.widmedia.tageswert_tst"
         minSdk = 35
         targetSdk = 37
-        versionCode = 16
-        versionName = "2026.06.09"
+        versionCode = 17
+        versionName = "2026.06.11"
     }
 
     buildTypes {
