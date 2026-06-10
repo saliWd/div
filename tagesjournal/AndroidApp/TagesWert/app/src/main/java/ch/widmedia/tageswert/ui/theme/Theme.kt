@@ -27,12 +27,19 @@ val Surface       = Color(0xFFFBF7EE)
 val CardBg        = Color(0xFFFFFFFF)
 val DividerColor  = Color(0xFFE0D8C8)
 
-// Rating colors (1=red, 5=yellow, 10=green)
-fun ratingColor(rating: Int): Color = when {
-    rating <= 3  -> Color(0xFFD95B3B)
-    rating <= 5  -> Color(0xFFE8A930)
-    rating <= 7  -> Color(0xFF8BBB5A)
-    else         -> Color(0xFF3A9B6F)
+// Rating colors (1=red, 10=green)
+fun ratingColor(rating: Int): Color = when (rating) {
+    1    -> Color(0xFFB53A2A) // deep red
+    2    -> Color(0xFFC94A32) // red-orange
+    3    -> Color(0xFFD95B3B) // warm orange
+    4    -> Color(0xFFE08235) // golden orange
+    5    -> Color(0xFFE8A930) // amber
+    6    -> Color(0xFFD2B53C) // yellow-gold
+    7    -> Color(0xFF8BBB5A) // sage green
+    8    -> Color(0xFF63AB62) // light moss
+    9    -> Color(0xFF3A9B6F) // forest green
+    10   -> Color(0xFF1A7A54) // deep forest
+    else -> SlateGray         // fallback
 }
 
 // ── Fonts ────────────────────────────────────────────────────────────────────
