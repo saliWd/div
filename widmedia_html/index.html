@@ -1,102 +1,615 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="de">
+<!DOCTYPE html>
+<html lang="de">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>widmedia.ch</title>
-<meta name="author" content="Daniel Widmer">
-<meta name="description" content="verschiedene widmedia.ch Projekte">    
-<meta name="keywords" content="startpage, links, linklist, widmedia, widmedia.ch, start, strommesser, schwimmmesser">
-<meta name="robots" content="index, follow">
-<meta name="revisit-after" content="20 days">
-<meta name="audience" content="all">
-<meta name="distribution" content="global">
-<meta name="content-language" content="de">
-<meta name="language" content="deutsch, de">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Daniel Widmer">
+  <meta name="description" content="verschiedene widmedia.ch Projekte">
+  <meta name="keywords" content="startpage, links, linklist, widmedia, widmedia.ch, start, strommesser, schwimmmesser, tageswert">
+  <meta name="robots" content="index, follow">
+  <title>widmedia.ch</title>
 
-<!-- Mobile Specific Metas -->
-<meta name="viewport" content="width=device-width, initial-scale=1">
-  
-<!-- Favicon -->
-<link rel="icon" type="image/png" sizes="96x96" href="start/images/favicon.png">
-<link rel="stylesheet" href="start/css/font.css" type="text/css" />
-<link rel="stylesheet" href="start/css/normalize.css" type="text/css" />
-<link rel="stylesheet" href="start/css/skeleton.css" type="text/css" />
-<style type="text/css">
-body {
-	background-color: #666;
-	margin-left: 20%;
-	margin-top: 15%;
-	margin-right: 20%;  
-	color: #F90;
-	text-align: center;  
-}
-a {
-  padding: 2px 4px 1px 1px;
-  color: #7d2a43;  
-  text-decoration: none;}
-a:hover {
-  color: #0FA0CE; 
-  text-decoration: none;}
-</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-deep:   #1C3A2B;
+      --green-mid:    #4A7C59;
+      --green-light:  #D4E6DA;
+      --gold:         #C8A96E;
+      --gold-hover:   #B5924E;
+      --bg:           #F7F4EE;
+      --text:         #2C2C2A;
+      --text-muted:   #6B6B68;
+      --card-bg:      #FFFFFF;
+      --radius:       12px;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--green-deep);
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      color: var(--green-light);
+      letter-spacing: 0.03em;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* ── HERO: TagesWert ── */
+    .hero {
+      background: var(--green-deep);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 0;
+      min-height: 420px;
+    }
+
+    /* left: text pane */
+    .hero-text {
+      padding: 4rem 3rem 4rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.9rem;
+    }
+    .hero-text h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 600;
+      line-height: 1.15;
+      margin-bottom: 1.1rem;
+      color: #fff;
+    }
+    .hero-text h1 em {
+      font-style: italic;
+      color: var(--green-light);
+    }
+    .hero-desc {
+      font-size: 0.97rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.80);
+      margin-bottom: 2rem;
+      line-height: 1.75;
+      max-width: 400px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.85rem;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--gold);
+      color: #1C2B1F;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 0.7rem 1.35rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: var(--gold-hover); transform: translateY(-1px); }
+    .btn-primary svg { flex-shrink: 0; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.5rem 0.9rem;
+      border-radius: 6px;
+      color: rgba(255,255,255,0.65);
+      font-size: 0.8rem;
+    }
+    .hero-badge span { color: var(--green-light); font-weight: 500; }
+
+    /* right: image pane */
+    .hero-image-pane {
+      position: relative;
+      height: 100%;
+      min-height: 420px;
+      overflow: hidden;
+    }
+    .hero-image-pane img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+    /* subtle left-edge fade so image blends into dark text side */
+    .hero-image-pane::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, var(--green-deep) 0%, transparent 18%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 4rem;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── PROJECT CARDS ── */
+    .projects { display: flex; flex-direction: column; gap: 2rem; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.10), 0 12px 32px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+    .card-body { padding: 2rem 2rem 1.5rem; }
+    .card-tag {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 0.6rem;
+    }
+    .card h2 {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--green-deep);
+      line-height: 1.25;
+    }
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--green-mid);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .card-link:hover { color: var(--green-deep); }
+    .card-link svg { transition: transform 0.2s; }
+    .card-link:hover svg { transform: translateX(3px); }
+
+    .card-image { width: 100%; display: block; border-top: 1px solid #f0ede6; }
+    .card-image img { width: 100%; height: auto; display: block; }
+
+    /* ── SLIDESHOW ── */
+    .slideshow {
+      border-top: 1px solid #f0ede6;
+      position: relative;
+      background: #f9f7f3;
+      overflow: hidden;
+      user-select: none;
+    }
+    .slideshow-track {
+      display: flex;
+      width: 100%;
+    }
+    .slideshow-track figure {
+      min-width: 100%;
+      flex-shrink: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .slideshow-track img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+    .slideshow-track figcaption {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      padding: 0.6rem 1rem;
+      text-align: center;
+    }
+    .slideshow-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem 0.75rem;
+    }
+    .slide-btn {
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .slide-btn:hover { border-color: var(--green-mid); color: var(--green-mid); }
+    .slide-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .slide-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ccc;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .slide-dot.active { background: var(--green-mid); transform: scale(1.3); }
+
+    hr.divider { border: none; border-top: 1px solid #E4E0D8; margin: 3rem 0; }
+
+    /* ── CONTACT ── */
+    .contact-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .contact-section h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--green-deep);
+      margin-bottom: 0.5rem;
+    }
+    .contact-section address {
+      font-style: normal;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+    .contact-section address a { color: var(--green-mid); text-decoration: none; }
+    .contact-section address a:hover { text-decoration: underline; }
+    .contact-brand {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--green-light);
+      letter-spacing: -0.02em;
+    }
+
+    footer {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      font-size: 0.78rem;
+      padding: 1.25rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      .hero-inner {
+        grid-template-columns: 1fr;
+      }
+      .hero-image-pane {
+        min-height: 200px;
+        order: -1;
+      }
+      .hero-image-pane::before {
+        background: linear-gradient(to bottom, transparent 60%, var(--green-deep) 100%);
+      }
+      .hero-text { padding: 2rem 1.25rem 2.5rem; }
+
+      .contact-brand { display: none; }
+      .card-body { padding: 1.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
 </head>
 <body>
 
-<h1 style="font-size: 150%">mein neustes Projekt: <a href="https://widmedia.ch/schwimmmesser">SchwimmMesser</a></h1>
-<p style="text-align:left;">Ein kleiner, leichter Bluetoothbeacon an der Schwimmbrille und ein Bluetoothempfänger am Beckenrand der die Signalstärke misst und die Anzahl der geschwommenen Längen zählt. Voilà, soweit die Idee...</p>
-<p style="text-align:left;"><a href="https://widmedia.ch/schwimmmesser">Mehr Infos dazu gibt es hier.</a></p>
-<p>&nbsp;</p>
-<hr>
-<h1 style="font-size: 150%">mein zweites aktuelles Projekt: <a href="https://strommesser.ch">StromMesser</a></h1>
-<div class="slideshow-container">
-  <a href="https://strommesser.ch" style="padding:0;"><img src="img/StromMesser-1024x370.png" alt="StromMesser.ch Titelbild smart meter " class="imgBorder" style="width:80%; vertical-align:middle;"></a>
-</div>
-<p>cut your energy consumption</p>
-<p>&nbsp;</p>
-<hr>
-<h2 style="font-size: 150%">andere Projekte: <a href="/start/index.php">widmedia.ch/start</a></h2>
-<div class="slideshow-container">
-  <div class="mySlides fade u-max-full-width"><img src="start/images/teaser/01.png" alt="your startpage with all the links" class="imgBorder" style="width:100%; vertical-align:middle;"><div class="captionText">Alle deine Links</div></div>
-  <div class="mySlides fade u-max-full-width"><img src="start/images/teaser/02.png" alt="click your external link" class="imgBorder" style="width:100%; vertical-align:middle;"><div class="captionText">Klick drauf</div></div>
-  <div class="mySlides fade u-max-full-width"><img src="start/images/teaser/03.png" alt="the link opens in a new tab" class="imgBorder" style="width:100%; vertical-align:middle;"><div class="captionText">Die Seite öffnet sich in einem neuen Tab</div></div>
-  <div class="mySlides fade u-max-full-width"><img src="start/images/teaser/04.png" alt="edit your links, add a new one" class="imgBorder" style="width:100%; vertical-align:middle;"><div class="captionText">Editier deine Links, füge einen neuen hinzu</div></div>
-  <div class="mySlides fade u-max-full-width"><img src="start/images/teaser/05.png" alt="there it is, your new link" class="imgBorder" style="width:100%; vertical-align:middle;"><div class="captionText">Et voilà, dein neuer Link</div></div>
-  <div class="mySlides fade u-max-full-width"><img src="start/images/teaser/06.png" alt="your new start page" class="imgBorder" style="width:100%; vertical-align:middle;"><div class="captionText">...und er funktioniert</div></div>
-</div>
-<br>
-<div style="text-align:center">
-  <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-</div>
-<script type="text/javascript">
-  var slideIndex = 0;
-  showSlides();
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-brand">widmedia.ch</a>
+    <ul class="nav-links">
+      <li><a href="#projekte">Projekte</a></li>
+      <li><a href="#kontakt">Kontakt</a></li>
+    </ul>
+  </nav>
 
-  function showSlides() {
-    var i;
-    var slides = document.getElementsByClassName("mySlides");
-    var dots = document.getElementsByClassName("dot");
-    for (i = 0; i < slides.length; i++) {
-      slides[i].style.display = "none";  
-    }
-    slideIndex++;
-    if (slideIndex > slides.length) {slideIndex = 1}    
-    for (i = 0; i < dots.length; i++) {
-      dots[i].className = dots[i].className.replace(" active", "");
-    }
-    slides[slideIndex-1].style.display = "block";  
-    dots[slideIndex-1].className += " active";
-    setTimeout(showSlides, 4000); 
-  }
-</script>
+  <!-- HERO: TagesWert -->
+  <section class="hero" aria-label="TagesWert App">
+    <div class="hero-inner">
 
-<p>&nbsp;</p>
-<hr>
-<h2 style="font-size: 150%; text-align:left;">Kontakt</h2>
-<p style="text-align:left;">
-Daniel Widmer<br>
-5415 Rieden AG<br>
-Schweiz<br>
-web at widmedia punkt ch
-</p>
+      <!-- Left: text -->
+      <div class="hero-text">
+        <p class="hero-eyebrow">Neustes Projekt &middot; Android App</p>
+        <h1>Wie war<br>dein Tag? &mdash;<br><em>TagesWert</em></h1>
+        <p class="hero-desc">
+          Halte jeden Tag fest &mdash; mit einer pers&ouml;nlichen Bewertung und deinen Notizen. Sicher auf deinem Ger&auml;t gespeichert, werbefrei und privat.
+        </p>
+        <div class="hero-actions">
+          <a href="https://play.google.com/store/apps/details?id=ch.widmedia.tageswert&hl=de"
+             target="_blank" rel="noopener noreferrer" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.851c.59.34.59 1.19 0 1.529l-1.8 1.04L13.793 12l2.105-2.105 1.8 1.04zM5.864 3.658L16.8 9.99l-2.302 2.302-8.635-8.635z"/>
+            </svg>
+            Im Play Store ansehen
+          </a>
+          <div class="hero-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="5" y="2" width="14" height="20" rx="2"/>
+            </svg>
+            Kostenlos &nbsp;&middot;&nbsp; <span>Android</span>
+          </div>
+        </div>
+      </div>
 
+      <!-- Right: feature graphic -->
+      <div class="hero-image-pane">
+        <img src="img/StoreIcon2.png"
+             alt="TagesWert App – Kalenderansicht und Tageseintr&auml;ge">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN -->
+  <main id="projekte">
+    <p class="section-label">Weitere Projekte</p>
+    <div class="projects">
+
+      <!-- SchwimmMesser -->
+      <article class="card">
+        <div class="card-body">
+          <p class="card-tag">Hardware &middot; Bluetooth</p>
+          <h2>SchwimmMesser</h2>
+          <p>
+            Ein kleiner, leichter Bluetooth-Beacon an der Schwimmbrille sendet Signale an einen Empf&auml;nger am Beckenrand &mdash; der misst die Signalst&auml;rke und z&auml;hlt automatisch die geschwommenen L&auml;ngen. Ein Projekt an der Schnittstelle von Sport und Embedded-Hardware.
+          </p>
+          <a href="schwimmmesser" class="card-link">
+            Mehr erfahren
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- StromMesser -->
+      <article class="card">
+        <div class="card-body">
+          <p class="card-tag">Energie &middot; Smart Home</p>
+          <h2>StromMesser</h2>
+          <p>
+            Verbrauch verstehen, bevor er zur Rechnung wird. StromMesser liest Smart-Meter-Daten aus und stellt sie &uuml;bersichtlich dar &mdash; damit du weisst, wo dein Strom wirklich hinfliesst.
+          </p>
+          <a href="https://strommesser.ch" class="card-link">
+            strommesser.ch
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </a>
+        </div>
+        <div class="card-image">
+          <img src="img/StromMesser-1024x370.png"
+               alt="StromMesser &ndash; Smart Meter Visualisierung"
+               loading="lazy">
+        </div>
+      </article>
+
+      <!-- Start -->
+      <article class="card">
+        <div class="card-body">
+          <p class="card-tag">Web &middot; Produktivit&auml;t</p>
+          <h2>widmedia Start</h2>
+          <p>
+            Deine pers&ouml;nliche Startseite mit allen Links an einem Ort. Klick &mdash; und der Link &ouml;ffnet sich in einem neuen Tab. Einfach Links hinzuf&uuml;gen, bearbeiten und loslegen.
+          </p>
+          <a href="start/index.php" class="card-link">
+            Zur Startseite
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </a>
+        </div>
+        <div class="slideshow" id="startSlideshow">
+          <div class="slideshow-track" id="startTrack">
+            <figure>
+              <img src="start/images/teaser/01.png" alt="Startseite mit allen Links">
+              <figcaption>Alle deine Links</figcaption>
+            </figure>
+            <figure>
+              <img src="start/images/teaser/02.png" alt="Link anklicken">
+              <figcaption>Klick drauf</figcaption>
+            </figure>
+            <figure>
+              <img src="start/images/teaser/03.png" alt="Link öffnet in neuem Tab">
+              <figcaption>Die Seite öffnet sich in einem neuen Tab</figcaption>
+            </figure>
+            <figure>
+              <img src="start/images/teaser/04.png" alt="Link bearbeiten">
+              <figcaption>Editier deine Links, füge einen neuen hinzu</figcaption>
+            </figure>
+            <figure>
+              <img src="start/images/teaser/05.png" alt="Neuer Link">
+              <figcaption>Et voilà, dein neuer Link</figcaption>
+            </figure>
+            <figure>
+              <img src="start/images/teaser/06.png" alt="Fertig">
+              <figcaption>...und er funktioniert</figcaption>
+            </figure>
+          </div>
+          <div class="slideshow-controls">
+            <button class="slide-btn" id="startPrev" aria-label="Vorheriges Bild">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div class="slide-dots" id="startDots"></div>
+            <button class="slide-btn" id="startNext" aria-label="Nächstes Bild">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <hr class="divider">
+
+    <div class="contact-section" id="kontakt">
+      <div>
+        <h3>Kontakt</h3>
+        <address>
+          Daniel Widmer<br>
+          5415 Rieden AG, Schweiz<br>
+          <a href="mailto:web@widmedia.ch">web@widmedia.ch</a>
+        </address>
+      </div>
+      <span class="contact-brand" aria-hidden="true">wm</span>
+    </div>
+  </main>
+
+  <footer>
+    &copy; <span id="yr"></span> widmedia.ch &middot; Daniel Widmer &middot; Rieden AG
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // ── Slideshow ──
+    (function() {
+      const track   = document.getElementById('startTrack');
+      const figures = Array.from(track.querySelectorAll('figure'));
+      const dotsEl  = document.getElementById('startDots');
+      const total   = figures.length;
+      let current   = 0;
+      let timer;
+
+      // Build dots
+      figures.forEach(function(_, i) {
+        const d = document.createElement('button');
+        d.className = 'slide-dot' + (i === 0 ? ' active' : '');
+        d.setAttribute('aria-label', 'Bild ' + (i + 1));
+        d.addEventListener('click', function() { goTo(i); restart(); });
+        dotsEl.appendChild(d);
+      });
+
+      function goTo(n) {
+        current = (n + total) % total;
+        track.style.transform = 'translateX(-' + (current * 100) + '%)';
+        dotsEl.querySelectorAll('.slide-dot').forEach(function(d, i) {
+          d.classList.toggle('active', i === current);
+        });
+      }
+
+      function next() { goTo(current + 1); }
+      function prev() { goTo(current - 1); }
+      function restart() { clearInterval(timer); timer = setInterval(next, 3000); }
+
+      document.getElementById('startNext').addEventListener('click', function() { next(); restart(); });
+      document.getElementById('startPrev').addEventListener('click', function() { prev(); restart(); });
+
+      // Pause on hover
+      const ss = document.getElementById('startSlideshow');
+      ss.addEventListener('mouseenter', function() { clearInterval(timer); });
+      ss.addEventListener('mouseleave', restart);
+
+      // Swipe support
+      let touchX = 0;
+      track.addEventListener('touchstart', function(e) { touchX = e.touches[0].clientX; }, {passive:true});
+      track.addEventListener('touchend', function(e) {
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); restart(); }
+      }, {passive:true});
+
+      restart();
+    })();
+  </script>
 </body>
 </html>
