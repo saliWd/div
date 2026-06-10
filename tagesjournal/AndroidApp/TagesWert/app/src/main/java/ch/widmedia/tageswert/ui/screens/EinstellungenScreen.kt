@@ -113,7 +113,7 @@ fun EinstellungenScreen(
 
     Scaffold(
         modifier = modifier,
-        containerColor = Chamois,
+        containerColor = Color.Transparent,
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
@@ -140,11 +140,6 @@ fun EinstellungenScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(DeepForest, SageGreen.copy(alpha = 0.8f))
-                        )
-                    )
                     .statusBarsPadding()
                     .padding(bottom = 20.dp, start = 8.dp, end = 16.dp)
             ) {
@@ -418,7 +413,7 @@ fun EinstellungenScreen(
                     }
                 },
                 shape = AppCardDefaults.shape,
-                containerColor = Chamois
+                containerColor = Surface
             )
         }
     }
@@ -431,12 +426,12 @@ fun SektionsKopf(text: String, icon: ImageVector) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
     ) {
-        Icon(icon, null, tint = SageGreen, modifier = Modifier.size(18.dp))
+        Icon(icon, null, tint = Color.White.copy(alpha = 0.9f), modifier = Modifier.size(18.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            color = SageGreen,
-            fontWeight = FontWeight.Normal
+            color = Color.White.copy(alpha = 0.9f),
+            fontWeight = FontWeight.Bold
         )
     }
 }

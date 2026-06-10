@@ -1,8 +1,13 @@
 package ch.widmedia.tageswert.ui.theme
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -152,6 +157,28 @@ val TagesWertColorScheme = lightColorScheme(
 )
 
 // ── Theme Composable ──────────────────────────────────────────────────────────
+@Composable
+fun AppBackground(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0.0f to DeepForest,
+                        0.6f to SageGreen.copy(alpha = 0.85f),
+                        1.0f to Color(0xFF2D6B4A)
+                    )
+                )
+            )
+    ) {
+        content()
+    }
+}
+
 @Composable
 fun TagesWertTheme(content: @Composable () -> Unit) {
     MaterialTheme(

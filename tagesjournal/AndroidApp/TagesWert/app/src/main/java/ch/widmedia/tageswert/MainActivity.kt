@@ -30,6 +30,7 @@ import ch.widmedia.tageswert.ui.TagesWertNavigation
 import ch.widmedia.tageswert.ui.MainViewModel
 import ch.widmedia.tageswert.ui.screens.AuthStatus
 import ch.widmedia.tageswert.ui.screens.SperrScreen
+import ch.widmedia.tageswert.ui.theme.AppBackground
 import ch.widmedia.tageswert.ui.theme.TagesWertTheme
 
 class MainActivity : FragmentActivity() {
@@ -61,10 +62,12 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             TagesWertTheme {
-                if (isInPipMode) {
-                    PipContent()
-                } else {
-                    AppContent()
+                AppBackground {
+                    if (isInPipMode) {
+                        PipContent()
+                    } else {
+                        AppContent()
+                    }
                 }
             }
         }

@@ -37,7 +37,7 @@ fun AlleEintraegeScreen(
                     Text(
                         text = stringResource(R.string.entries_title),
                         style = MaterialTheme.typography.titleLarge,
-                        color = DeepForest,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -46,16 +46,18 @@ fun AlleEintraegeScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
-                            tint = DeepForest
+                            tint = Color.White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Chamois
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         },
-        containerColor = Chamois,
+        containerColor = Color.Transparent,
         modifier = modifier.fillMaxSize()
     ) { paddingValues ->
         Box(

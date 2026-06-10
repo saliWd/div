@@ -113,7 +113,7 @@ fun HauptScreen(
                     }
                 }
             },
-            containerColor = Chamois
+            containerColor = Color.Transparent
         ) { paddingValues ->
             Column(
                 modifier = Modifier
@@ -383,11 +383,6 @@ fun AppHeader(onEinstellungen: () -> Unit, onLock: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(DeepForest, SageGreen.copy(alpha = 0.85f))
-                )
-            )
             .statusBarsPadding()
             .padding(start = 24.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)
     ) {
@@ -523,13 +518,13 @@ fun LeererZustand(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.no_entries),
             style = MaterialTheme.typography.titleMedium,
-            color = SlateGray
+            color = Color.White.copy(alpha = 0.9f)
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = stringResource(R.string.no_entries_hint),
             style = MaterialTheme.typography.bodyMedium,
-            color = SlateGray.copy(alpha = 0.7f),
+            color = Color.White.copy(alpha = 0.7f),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }

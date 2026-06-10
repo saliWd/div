@@ -118,17 +118,12 @@ fun EintragScreen(
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            containerColor = Chamois,
+            containerColor = Color.Transparent,
             topBar = {
                 // Custom top bar with gradient
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(DeepForest, SageGreen.copy(alpha = 0.8f))
-                            )
-                        )
                         .statusBarsPadding()
                         .padding(bottom = 20.dp, start = 8.dp, end = 16.dp)
                 ) {

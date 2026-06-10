@@ -59,17 +59,7 @@ fun SperrScreen(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colorStops = arrayOf(
-                        0.0f to DeepForest,
-                        0.6f to SageGreen.copy(alpha = 0.85f),
-                        1.0f to Color(0xFF2D6B4A)
-                    )
-                )
-            ),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(
