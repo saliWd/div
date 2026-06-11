@@ -1,3 +1,5 @@
 User-agent: *
 Disallow: /start/php/
 Disallow: /start/admin.php
+Disallow: /start/admin/
+Disallow: /start/test/
